@@ -5,7 +5,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   const login = document.getElementById('login').value;
   const password = document.getElementById('password').value;
 
-  const res = await fetch('https://attendancesrv.onrender.com', {
+  const res = await fetch('https://attendancesrv.onrender.com/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ login, password })
