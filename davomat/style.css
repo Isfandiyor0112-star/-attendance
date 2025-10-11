@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(120deg, #3498db, #e67e22, #e74c3c, #2ecc71, #f1c40f, #8e44ad, #1abc9c, #e84393 , #dfe6e9, #fd79a8);
+  background-size: 400% 400%;
+  animation: gradientFlow 15s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+.card {
+  border-radius: 16px;
+}
+

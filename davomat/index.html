@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход в систему</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+  <div id="videoIntro" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#000;display:flex;justify-content:center;align-items:center;">
+    <video src="intro.mp4" autoplay muted playsinline style="width:auto;height:auto;max-width:auto;max-height:auto;object-fit:cover;border-radius:0;"></video>
+  </div>
+  <div id="loginContainer" style="display:none;">
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+          <div class="card shadow">
+            <div class="card-body">
+              <h3 class="mb-4 text-center">Вход</h3>
+              <form id="loginForm">
+                <div class="mb-3">
+                  <label for="login" class="form-label">Логин</label>
+                  <input type="text" class="form-control" id="login" required>
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Пароль</label>
+                  <input type="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Войти</button>
+                <div id="loginError" class="text-danger mt-2" style="display:none;">Неверный логин или пароль</div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    setTimeout(() => {
+      document.getElementById('videoIntro').style.display = 'none';
+      document.getElementById('loginContainer').style.display = 'block';
+    }, 5000); // 5 секунд
+  </script>
+</body>
+</html>
