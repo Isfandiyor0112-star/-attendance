@@ -2,8 +2,6 @@ async function loadAbsents() {
   const res = await fetch('https://attendancesrv.onrender.com/api/absents');
   absents = await res.json();
 
-  let absents = JSON.parse(localStorage.getItem('absents')) || [];
-
   // Получаем уникальные даты
   const allDates = [...new Set(absents.map(item => item.date))];
 
@@ -165,9 +163,9 @@ async function loadAbsents() {
   if (selectedDate) renderByDate(selectedDate);
 
   // Кнопка очистки истории
-  document.getElementById('clearHistory').onclick = function() {
+  document.getElementById('clearHistory').onclick = async function() {
     if (confirm('Вы уверены, что хотите очистить всю историю отсутствующих?')) {
-      localStorage.removeItem('absents');
+      await fetch('https://attendancesrv.onrender.com/api/absents', { method: 'DELETE' });
       location.reload();
     }
   };
