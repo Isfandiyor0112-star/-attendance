@@ -13,28 +13,32 @@ function getMyAbsents() {
   return absents.filter(item => item.teacher === teacher.name);
 }
 
-form.addEventListener('submit', function(e) {
+form.addEventListener('submit', async function(e) {
   e.preventDefault();
   const className = document.getElementById('className').value;
   const date = document.getElementById('date').value;
   const count = document.getElementById('count').value;
   const studentNames = document.getElementById('studentName').value.split(',').map(s => s.trim());
   const reason = document.getElementById('reason').value;
-  studentNames.forEach(name => {
-    absents.push({
+
+  for (const name of studentNames) {
+    const absentData = {
       teacher: teacher.name,
       className,
       date,
       count,
       studentName: name,
       reason
+    };
+    await fetch('https://attendancesrv.onrender.com/api/absent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(absentData)
     });
-  });
-  localStorage.setItem('absents', JSON.stringify(absents));
-  updateList();
+  }
   form.reset();
-  // После сброса формы снова подставляем класс учителя
   document.getElementById('className').value = teacher.className;
+  // Можно добавить обновление списка, если нужно
 });
 
 function updateList() {
