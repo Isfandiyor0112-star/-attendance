@@ -23,3 +23,36 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     document.getElementById('loginError').style.display = 'block';
   }
 });
+
+const translations = {
+  ru: {
+    login_title: "Вход",
+    login_label: "Логин",
+    password_label: "Пароль",
+    login_btn: "Войти",
+    login_error: "Неверный логин или пароль"
+    // ...добавьте остальные тексты
+  },
+  uz: {
+    login_title: "Kirish",
+    login_label: "Login",
+    password_label: "Parol",
+    login_btn: "Kirish",
+    login_error: "Login yoki parol noto'g'ri"
+    // ...добавьте остальные тексты
+  }
+};
+
+function setLang(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  localStorage.setItem('lang', lang);
+}
+
+document.getElementById('lang-ru').onclick = () => setLang('ru');
+document.getElementById('lang-uz').onclick = () => setLang('uz');
+
+// При загрузке страницы
+setLang(localStorage.getItem('lang') || 'ru');
