@@ -1,27 +1,39 @@
 // НЕ храните users здесь!
 
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const login = document.getElementById('login').value;
-  const password = document.getElementById('password').value;
-
-  const res = await fetch('https://attendancesrv.onrender.com/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ login, password })
-  });
-  const data = await res.json();
-
-  if (data.status === "ok") {
-    localStorage.setItem('teacher', JSON.stringify(data.user));
-    if (data.user.login === "admin") {
+document.addEventListener('DOMContentLoaded', function() {
+  const teacher = JSON.parse(localStorage.getItem('teacher'));
+  if (teacher) {
+    if (teacher.login === "admin") {
       window.location.href = "admin.html";
     } else {
       window.location.href = "teacher.html";
     }
-  } else {
-    document.getElementById('loginError').style.display = 'block';
+    return; // чтобы не выполнялся код ниже
   }
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const login = document.getElementById('login').value;
+    const password = document.getElementById('password').value;
+
+    const res = await fetch('https://attendancesrv.onrender.com/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, password })
+    });
+    const data = await res.json();
+
+    if (data.status === "ok") {
+      localStorage.setItem('teacher', JSON.stringify(data.user));
+      if (data.user.login === "admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "teacher.html";
+      }
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  });
 });
 
 const translations = {
@@ -56,3 +68,8 @@ document.getElementById('lang-uz').onclick = () => setLang('uz');
 
 // При загрузке страницы
 setLang(localStorage.getItem('lang') || 'ru');
+
+document.getElementById('logoutBtn').onclick = function() {
+  localStorage.removeItem('teacher');
+  window.location.href = "index.html";
+};
