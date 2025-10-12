@@ -8,9 +8,21 @@ const form = document.getElementById('attendanceForm');
 const absentList = document.getElementById('absentList');
 let absents = JSON.parse(localStorage.getItem('absents')) || [];
 
-// Фильтруем только свои отметки
-function getMyAbsents() {
-  return absents.filter(item => item.teacher === teacher.name);
+async function getMyAbsents() {
+  const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+  const allAbsents = await res.json();
+  return allAbsents.filter(item => item.teacher === teacher.name);
+}
+
+async function updateList() {
+  absentList.innerHTML = '';
+  const myAbsents = await getMyAbsents();
+  myAbsents.forEach(item => {
+    const li = document.createElement('li');
+    li.className = "list-group-item";
+    li.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason})`;
+    absentList.appendChild(li);
+  });
 }
 
 form.addEventListener('submit', async function(e) {
@@ -38,18 +50,8 @@ form.addEventListener('submit', async function(e) {
   }
   form.reset();
   document.getElementById('className').value = teacher.className;
-  // Можно добавить обновление списка, если нужно
+  await updateList(); // обновить список после отправки!
 });
-
-function updateList() {
-  absentList.innerHTML = '';
-  getMyAbsents().forEach(item => {
-    const li = document.createElement('li');
-    li.className = "list-group-item";
-    li.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason})`;
-    absentList.appendChild(li);
-  });
-}
 
 // Показываем только свои отметки при загрузке
 updateList();
