@@ -43,13 +43,14 @@
   <div class="position-absolute top-0 end-0 p-3" style="z-index:10000;">
     <div class="btn-group">
       <button id="lang-ru" class="btn btn-light btn-sm">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg"  width="16" height="12" alt="RU"> Рус
+        <img src="https://flagcdn.com/16x12/ru.png" alt="RU"> Рус
       </button>
       <button id="lang-uz" class="btn btn-light btn-sm">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg"  width="16" height="12" alt="UZ"> Uzb
+        <img src="https://flagcdn.com/16x12/uz.png" alt="UZ"> Uzb
       </button>
     </div>
   </div>
+  <button id="logoutBtn" style="position:fixed;right:20px;bottom:20px;z-index:9999;" class="btn btn-danger">Выйти</button>
   <script src="teacher.js"></script>
   <script>
 const translations = {
@@ -89,5 +90,3 @@ setLang(localStorage.getItem('lang') || 'ru');
 </script>
 </body>
 </html>
-
-
