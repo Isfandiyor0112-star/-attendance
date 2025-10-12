@@ -1,16 +1,7 @@
 // НЕ храните users здесь!
 
 document.addEventListener('DOMContentLoaded', function() {
-  const teacher = JSON.parse(localStorage.getItem('teacher'));
-  if (teacher) {
-    if (teacher.login === "admin") {
-      window.location.href = "admin.html";
-    } else {
-      window.location.href = "teacher.html";
-    }
-    return; // чтобы не выполнялся код ниже
-  }
-
+ 
   document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const login = document.getElementById('login').value;
