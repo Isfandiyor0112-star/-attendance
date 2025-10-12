@@ -1,4 +1,7 @@
-document.addEventListener('DOMContentLoaded', function() {
+async function loadAbsents() {
+  const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+  absents = await res.json();
+
   let absents = JSON.parse(localStorage.getItem('absents')) || [];
 
   // Получаем уникальные даты
@@ -168,5 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
       location.reload();
     }
   };
-});
+}
+
+document.addEventListener('DOMContentLoaded', loadAbsents);
 
