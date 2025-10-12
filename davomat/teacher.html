@@ -10,10 +10,10 @@
   <div class="container mt-4">
     <div class="card shadow">
       <div class="card-body">
-        <h2 id="teacherName"></h2>
+        <h2 id="teacherName" data-i18n="teacher_panel"></h2>
         <form id="attendanceForm" class="row g-3 mt-3">
           <div class="col-md-3">
-            <input type="text" class="form-control" id="className" readonly>
+            <input type="text" class="form-control" id="className" readonly placeholder="Класс" data-i18n="class">
           </div>
           <div class="col-md-3">
             <input type="date" class="form-control" id="date" required>
@@ -28,18 +28,64 @@
             <input type="text" class="form-control" id="reason" placeholder="Причина отсутствия" required>
           </div>
           <div class="col-12">
-            <button type="submit" class="btn btn-success w-100">Отметить отсутствующих</button>
+            <button type="submit" class="btn btn-success w-100" data-i18n="mark_btn">Отметить отсутствующих</button>
           </div>
         </form>
       </div>
     </div>
     <div class="card mt-4">
       <div class="card-body">
-        <h5>Список отсутствующих</h5>
+        <h5 data-i18n="absent_list">Список отсутствующих</h5>
         <ul id="absentList" class="list-group"></ul>
       </div>
     </div>
   </div>
+  <div class="position-absolute top-0 end-0 p-3" style="z-index:10000;">
+    <div class="btn-group">
+      <button id="lang-ru" class="btn btn-light btn-sm">
+        <img src="https://flagcdn.com/16x12/ru.png" alt="RU"> Рус
+      </button>
+      <button id="lang-uz" class="btn btn-light btn-sm">
+        <img src="https://flagcdn.com/16x12/uz.png" alt="UZ"> Uzb
+      </button>
+    </div>
+  </div>
   <script src="teacher.js"></script>
+  <script>
+const translations = {
+  ru: {
+    teacher_panel: "Панель учителя",
+    class: "Класс",
+    date: "Дата",
+    count: "Кол-во",
+    students: "Имена учеников через запятую",
+    reason: "Причина отсутствия",
+    mark_btn: "Отметить отсутствующих",
+    absent_list: "Список отсутствующих"
+  },
+  uz: {
+    teacher_panel: "O'qituvchi paneli",
+    class: "Sinf",
+    date: "Sana",
+    count: "Soni",
+    students: "O'quvchilar ismlari vergul bilan",
+    reason: "Yo‘qlik sababi",
+    mark_btn: "Yo‘qlikni belgilash",
+    absent_list: "Yo‘qliklar ro‘yxati"
+  }
+};
+
+function setLang(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  localStorage.setItem('lang', lang);
+}
+
+document.getElementById('lang-ru').onclick = () => setLang('ru');
+document.getElementById('lang-uz').onclick = () => setLang('uz');
+setLang(localStorage.getItem('lang') || 'ru');
+</script>
 </body>
 </html>
