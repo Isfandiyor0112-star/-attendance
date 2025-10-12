@@ -60,7 +60,4 @@ document.getElementById('lang-uz').onclick = () => setLang('uz');
 // При загрузке страницы
 setLang(localStorage.getItem('lang') || 'ru');
 
-document.getElementById('logoutBtn').onclick = function() {
-  localStorage.removeItem('teacher');
-  window.location.href = "index.html";
-};
+
