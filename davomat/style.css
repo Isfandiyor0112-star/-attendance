@@ -2,7 +2,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background: linear-gradient(120deg, #3498db, #e67e22, #e74c3c, #2ecc71, #f1c40f, #8e44ad, #1abc9c, #e84393 , #dfe6e9, #fd79a8);
+  background: linear-gradient(120deg, #3498db, #e67e22, #e74c3c, #2ecc71, #f1c40f, #8e44ad, #1abc9c, #e84393 , #dfe6e9, #fd79a8,  #00b894, #6c5ce7, #fdcb6e);
   background-size: 400% 400%;
   animation: gradientFlow 15s ease infinite;
 }
@@ -15,5 +15,11 @@ body {
 
 .card {
   border-radius: 16px;
+}
+
+#classChartsContainer {
+  gap: 8px !important; /* уменьшает горизонтальный и вертикальный отступ между карточками */
+  display: flex;
+  flex-wrap: wrap;
 }
 
