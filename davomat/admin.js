@@ -1,175 +1,113 @@
+const translations = {
+  ru: {
+    admin_panel_title: "Админ-панель школы №22",
+    choose_date: "Выберите дату:",
+    total_absent: "Всего отсутствующих",
+    reason_stats: "Статистика причин отсутствия",
+    clear_history: "Очистить историю",
+    absent_list: "Список отсутствующих"
+  },
+  uz: {
+    admin_panel_title: "22-maktab admin paneli",
+    choose_date: "Sana tanlang:",
+    total_absent: "Yo‘qlarning jami",
+    reason_stats: "Yo‘qlik sabablari statistikasi",
+    clear_history: "Tarixni tozalash",
+    absent_list: "Yo‘qliklar ro‘yxati"
+  }
+};
+
+function setLang(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  localStorage.setItem('lang', lang);
+}
+
+document.getElementById('lang-ru').onclick = () => setLang('ru');
+document.getElementById('lang-uz').onclick = () => setLang('uz');
+setLang(localStorage.getItem('lang') || 'ru');
+
+let absents = [];
+
 async function loadAbsents() {
   const res = await fetch('https://attendancesrv.onrender.com/api/absents');
   absents = await res.json();
+  renderByDate();
+  fillDateFilter();
+}
 
-  // Получаем уникальные даты
-  const allDates = [...new Set(absents.map(item => item.date))];
-
-  // Заполняем выпадающий список дат
+function fillDateFilter() {
   const dateFilter = document.getElementById('dateFilter');
-  allDates.forEach(date => {
+  dateFilter.innerHTML = '';
+  const dates = [...new Set(absents.map(a => a.date))];
+  dates.forEach(date => {
     const option = document.createElement('option');
     option.value = date;
     option.textContent = date;
     dateFilter.appendChild(option);
   });
-
-  // По умолчанию показываем первую дату
-  let selectedDate = allDates[0] || '';
-  dateFilter.value = selectedDate;
-
-  // Обновление графиков и списков по выбранной дате
-  function renderByDate(date) {
-    document.getElementById('totalAbsent').textContent =
-      absents.filter(item => item.date === date).length;
-
-    // Очищаем контейнер для графиков
-    const oldCharts = document.querySelectorAll('.class-charts-row');
-    oldCharts.forEach(el => el.remove());
-
-    // Получаем классы за выбранную дату
-    const classes = [...new Set(absents.filter(item => item.date === date).map(item => item.className))];
-
-    // Контейнер для графиков и списков
-    const chartsContainer = document.createElement('div');
-    chartsContainer.className = "row class-charts-row";
-    document.querySelector('.container').appendChild(chartsContainer);
-
-    classes.forEach(className => {
-      const classAbsents = absents.filter(item => item.date === date && item.className === className);
-
-      // Группируем по причинам
-      const stats = {};
-      classAbsents.forEach(item => {
-        stats[item.reason] = (stats[item.reason] || 0) + 1;
-      });
-      const labels = Object.keys(stats);
-      const data = Object.values(stats);
-
-      // Элементы для графика и списка
-      const col = document.createElement('div');
-      col.className = "col-md-4 mb-4";
-      const card = document.createElement('div');
-      card.className = "card";
-      const cardBody = document.createElement('div');
-      cardBody.className = "card-body";
-      const title = document.createElement('h5');
-      title.textContent = `Класс: ${className}`;
-      const canvas = document.createElement('canvas');
-      canvas.height = 120;
-
-      // Список отсутствующих для этого класса
-      const ul = document.createElement('ul');
-      ul.className = "list-group mt-3";
-      classAbsents.forEach(item => {
-        const li = document.createElement('li');
-        li.className = "list-group-item";
-        li.textContent = `${item.studentName} (${item.reason})`;
-        ul.appendChild(li);
-      });
-
-      cardBody.appendChild(title);
-      cardBody.appendChild(canvas);
-      cardBody.appendChild(ul);
-      card.appendChild(cardBody);
-      col.appendChild(card);
-      chartsContainer.appendChild(col);
-
-      // Рисуем pie chart
-      new Chart(canvas.getContext('2d'), {
-        type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Причины',
-            data: data,
-            backgroundColor: [
-              '#0d6efd', '#e67e22', '#e74c3c', '#2ecc71', '#f1c40f', '#8e44ad'
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const reason = context.label;
-                  const count = context.parsed;
-                  return [
-                    `Причина: ${reason}`,
-                    `Всего: ${count}`
-                  ];
-                }
-              }
-            }
-          }
-        }
-      });
-    });
-
-    // Статистика по всем классам
-    const allStats = {};
-    absents.filter(item => item.date === date).forEach(item => {
-      allStats[item.reason] = (allStats[item.reason] || 0) + 1;
-    });
-    const allLabels = Object.keys(allStats);
-    const allData = Object.values(allStats);
-
-    // График причин отсутствия
-    const reasonChartCanvas = document.getElementById('reasonChart');
-    if (window.reasonChart) {
-      window.reasonChart.destroy();
-    }
-    window.reasonChart = new Chart(reasonChartCanvas.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: allLabels,
-        datasets: [{
-          label: 'Причины отсутствия',
-          data: allData,
-          backgroundColor: '#0d6efd'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const reason = context.label;
-                const count = context.parsed;
-                return [
-                  `Причина: ${reason}`,
-                  `Всего: ${count}`
-                ];
-              }
-            }
-          }
-        }
-      }
-    });
-  } // <-- вот эта скобка должна быть!
-
-  // Слушаем изменение даты
-  dateFilter.addEventListener('change', function() {
-    selectedDate = this.value;
-    renderByDate(selectedDate);
-  });
-
-  // Первый рендер
-  if (selectedDate) renderByDate(selectedDate);
-
-  // Кнопка очистки истории
-  document.getElementById('clearHistory').onclick = async function() {
-    if (confirm('Вы уверены, что хотите очистить всю историю отсутствующих?')) {
-      await fetch('https://attendancesrv.onrender.com/api/absents', { method: 'DELETE' });
-      location.reload();
-    }
-  };
+  dateFilter.onchange = () => renderByDate();
 }
 
+function renderByDate() {
+  const date = document.getElementById('dateFilter').value;
+  const filtered = date ? absents.filter(a => a.date === date) : absents;
+  document.getElementById('totalAbsent').textContent = filtered.length;
+  renderReasonBarChart(filtered);
+  renderAbsentList(filtered);
+}
+
+function renderReasonBarChart(data) {
+  const stats = {};
+  data.forEach(item => {
+    stats[item.reason] = (stats[item.reason] || 0) + 1;
+  });
+  const labels = Object.keys(stats);
+  const values = Object.values(stats);
+
+  if (window.reasonChart && typeof window.reasonChart.destroy === 'function') {
+    window.reasonChart.destroy();
+  }
+
+  const ctx = document.getElementById('reasonChart').getContext('2d');
+  window.reasonChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Причины',
+        data: values,
+        backgroundColor: '#0d6efd'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+function renderAbsentList(data) {
+  const list = document.getElementById('adminAbsentList');
+  list.innerHTML = '';
+  data.forEach(item => {
+    const li = document.createElement('li');
+    li.className = "list-group-item";
+    li.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason})`;
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('clearHistory').onclick = async function() {
+  if (confirm('Вы уверены, что хотите очистить всю историю отсутствующих?')) {
+    await fetch('https://attendancesrv.onrender.com/api/absents', { method: 'DELETE' });
+    location.reload();
+  }
+};
+
 document.addEventListener('DOMContentLoaded', loadAbsents);
+
 
