@@ -79,9 +79,8 @@ function setLang(lang) {
   localStorage.setItem('lang', lang);
 }
 
-document.getElementById('lang-ru').onclick = () => setLang('ru');
-document.getElementById('lang-uz').onclick = () => setLang('uz');
-setLang(localStorage.getItem('lang') || 'ru');
-</script>
+const lang = localStorage.getItem('lang') || 'ru';
+setLang(lang);
+  </script>
 </body>
 </html>
