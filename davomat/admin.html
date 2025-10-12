@@ -222,9 +222,9 @@ dateFilter.addEventListener('change', function() {
 if (selectedDate) renderByDate(selectedDate);
 
 // Кнопка очистки истории
-document.getElementById('clearHistory').onclick = function() {
+document.getElementById('clearHistory').onclick = async function() {
   if (confirm('Вы уверены, что хотите очистить всю историю отсутствующих?')) {
-    localStorage.removeItem('absents');
+    await fetch('https://attendancesrv.onrender.com/api/absents', { method: 'DELETE' });
     location.reload();
   }
 };
