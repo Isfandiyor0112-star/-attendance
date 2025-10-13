@@ -246,4 +246,16 @@ document.getElementById('clearHistory').onclick = async function() {
   }
 };
 
-document.addEventListener('DOMContentLoaded', loadAbsents);
+document.addEventListener('DOMContentLoaded', () => {
+  // Проверка роли учителя
+  if (!localStorage.getItem('teacher')) {
+    window.location.href = 'index.html';
+  } else {
+    const teacher = JSON.parse(localStorage.getItem('teacher'));
+    if (!teacher || teacher.login !== 'admin') {
+      window.location.href = 'index.html';
+    }
+  }
+
+  loadAbsents();
+});
