@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (data.status === "ok") {
       localStorage.setItem('teacher', JSON.stringify(data.user));
-      if (data.user.login === "admin") {
+      if (data.user.login === "admin" , "shaxnoza", "furkat" , "matlyuba") {
         window.location.href = "admin.html";
       } else {
         window.location.href = "teacher.html";
@@ -59,4 +59,5 @@ document.getElementById('lang-uz').onclick = () => setLang('uz');
 
 // При загрузке страницы
 setLang(localStorage.getItem('lang') || 'ru');
+
 
