@@ -252,10 +252,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'index.html';
   } else {
     const teacher = JSON.parse(localStorage.getItem('teacher'));
-    if (!teacher || teacher.login !== 'admin') {
+   const allowedAdmins = ["admin", "shaxnoza", "furkat", "matlyuba"];
+if (!teacher || !allowedAdmins.includes(teacher.login)) {
+
       window.location.href = 'index.html';
     }
   }
 
   loadAbsents();
 });
+
