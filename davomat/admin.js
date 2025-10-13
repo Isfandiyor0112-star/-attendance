@@ -262,3 +262,48 @@ if (!teacher || !allowedAdmins.includes(teacher.login)) {
   loadAbsents();
 });
 
+document.getElementById('exportExcel').addEventListener('click', async () => {
+  try {
+    const selectedDate = document.getElementById('dateFilter').value;
+
+    const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+    const data = await res.json();
+
+    // 🔍 Фильтруем по выбранной дате
+    const filtered = selectedDate ? data.filter(a => a.date === selectedDate) : [];
+
+    if (filtered.length === 0) {
+      alert("Нет данных за выбранную дату.");
+      return;
+    }
+
+    // 📁 Группируем по классам
+    const classMap = {};
+    filtered.forEach(item => {
+      if (!classMap[item.className]) classMap[item.className] = [];
+      classMap[item.className].push({
+        Дата: item.date,
+        Учитель: item.teacher,
+        Ученик: item.studentName,
+        Причина: item.reason,
+        Количество: item.count
+      });
+    });
+
+    // 📊 Создаём Excel-книгу
+    const workbook = XLSX.utils.book_new();
+    Object.keys(classMap).sort().forEach(className => {
+      const sheet = XLSX.utils.json_to_sheet(classMap[className]);
+      XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
+    });
+
+    // 📥 Скачиваем файл с датой в названии
+    XLSX.writeFile(workbook, `DAVOMAT_${selectedDate}.xlsx`);
+  } catch (error) {
+    console.error("Ошибка при экспорте:", error);
+    alert("Не удалось создать отчёт. Попробуйте позже.");
+  }
+});
+
+
+
