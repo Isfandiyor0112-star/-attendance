@@ -294,6 +294,14 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     const workbook = XLSX.utils.book_new();
     Object.keys(classMap).sort().forEach(className => {
       const sheet = XLSX.utils.json_to_sheet(classMap[className]);
+      // 👉 Устанавливаем ширину колонок
+sheet['!cols'] = [
+  { wch: 12 }, // Дата
+  { wch: 20 }, // Учитель — увеличим!
+  { wch: 20 }, // Ученик
+  { wch: 18 }, // Причина
+  { wch: 10 }  // Количество
+];
       XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
     });
 
@@ -304,6 +312,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
