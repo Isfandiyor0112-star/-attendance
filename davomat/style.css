@@ -1,16 +1,11 @@
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  background: linear-gradient(120deg, #3498db, #e67e22, #e74c3c, #2ecc71, #f1c40f, #8e44ad, #1abc9c, #e84393 , #dfe6e9, #fd79a8,  #00b894, #6c5ce7, #fdcb6e);
-  background-size: 400% 400%;
-  animation: gradientFlow 15s ease infinite;
-}
-
-@keyframes gradientFlow {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
+  background-image: url('/logo3.png'); /* путь к твоему фону */
+  background-size: cover;                 /* заполняет экран, не растягивая */
+  background-position: center center;     /* центрирует */
+  background-repeat: no-repeat;           /* не повторяет */
+  background-attachment: fixed;           /* остаётся на месте при скролле */
 }
 
 .card {
@@ -22,4 +17,5 @@ body {
   display: flex;
   flex-wrap: wrap;
 }
+
 
