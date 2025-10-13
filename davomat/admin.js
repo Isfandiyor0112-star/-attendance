@@ -285,8 +285,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
         Дата: item.date,
         Учитель: item.teacher,
         Ученик: item.studentName,
-        Причина: item.reason,
-        Количество: item.count
+        Причина: item.reason       
       });
     });
 
@@ -300,7 +299,6 @@ sheet['!cols'] = [
   { wch: 20 }, // Учитель — увеличим!
   { wch: 20 }, // Ученик
   { wch: 18 }, // Причина
-  { wch: 10 }  // Количество
 ];
       XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
     });
@@ -312,6 +310,7 @@ sheet['!cols'] = [
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
