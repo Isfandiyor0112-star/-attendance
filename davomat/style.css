@@ -18,4 +18,14 @@ body {
   flex-wrap: wrap;
 }
 
+h2[data-i18n="admin_panel_title"] {
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+
 
