@@ -53,18 +53,12 @@ function fillDateFilter() {
 
 // Цвета для разных причин (можно расширить)
 const reasonColors = [
-  '#4B0082', // Фиолетовый
-  '#FF4500', // Оранжево-красный
-  '#FFD700', // Золотой
-  '#90EE90', // Светло-зеленый
-  '#4682B4', // Стальной синий
-  '#8A2BE2', // Синий-фиолетовый
-  '#FF69B4', // Розовый
-  '#20B2AA', // Бирюзовый
-];
+  '#09ff00ff', // Зелёный
+  '#ff0000ff', // Красные        
+ ];
 
 // --- Общая диаграмма и легенда ---
-function renderReasonPieChart(data) {
+function renderReasonPieChart(data) {  
   const stats = {};
   data.forEach(item => {
     stats[item.reason] = (stats[item.reason] || 0) + 1;
@@ -183,7 +177,8 @@ function renderClassPieCharts(data) {
     list.style.fontSize = '0.92em';
     classData.forEach((item, i) => {
       const p = document.createElement('div');
-      p.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason})`;
+      const total = item.allstudents ? `из ${item.allstudents}` : '';
+      p.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason}) ${total}`;
       list.appendChild(p);
       // Добавляем полоску, кроме последнего элемента
       if (i < classData.length - 1) {
@@ -252,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'index.html';
   } else {
     const teacher = JSON.parse(localStorage.getItem('teacher'));
-   const allowedAdmins = ["admin", "shaxnoza", "furkat", "matlyuba", "shahnoza"];
+   const allowedAdmins = ["admin", "shaxnoza", "furkat", "matlyuba"];
 if (!teacher || !allowedAdmins.includes(teacher.login)) {
 
       window.location.href = 'index.html';
@@ -280,26 +275,36 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     // 📁 Группируем по классам
     const classMap = {};
     filtered.forEach(item => {
-      if (!classMap[item.className]) classMap[item.className] = [];
-      classMap[item.className].push({
-        Дата: item.date,
-        Учитель: item.teacher,
-        Ученик: item.studentName,
-        Причина: item.reason       
-      });
-    });
+    const total = parseInt(item.allstudents);
+    const percent = total && item.count ? `${Math.round((parseInt(item.count) / total) * 100)}%` : '';
+
+     if (!classMap[item.className]) classMap[item.className] = [];
+    classMap[item.className].push({
+    Дата: item.date,
+    Учитель: item.teacher,
+    Ученик: item.studentName,
+    Причина: item.reason,
+    Всего: total || '',
+    Болеют: item.count || '',
+    Процент: percent
+  });
+});
 
     // 📊 Создаём Excel-книгу
     const workbook = XLSX.utils.book_new();
     Object.keys(classMap).sort().forEach(className => {
       const sheet = XLSX.utils.json_to_sheet(classMap[className]);
       // 👉 Устанавливаем ширину колонок
-sheet['!cols'] = [
-  { wch: 12 }, // Дата
-  { wch: 20 }, // Учитель — увеличим!
-  { wch: 20 }, // Ученик
-  { wch: 18 }, // Причина
-];
+      sheet['!cols'] = [
+      { wch: 12 }, // Дата
+      { wch: 20 }, // Учитель
+      { wch: 20 }, // Ученик
+      { wch: 18 }, // Причина
+      { wch: 10 }, // Всего
+      { wch: 10 }, // Болеют
+      { wch: 10 }  // Процент
+    ];
+
       XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
     });
 
@@ -310,8 +315,6 @@ sheet['!cols'] = [
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
-
-
 
 
 
