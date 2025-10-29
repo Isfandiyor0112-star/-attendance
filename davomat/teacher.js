@@ -4,9 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Подставляем класс учителя
   document.getElementById('className').value = teacher.className;
+  
 
   const form = document.getElementById('attendanceForm');
   const absentList = document.getElementById('absentList');
+  
+
 
   async function getMyAbsents() {
     const res = await fetch('https://attendancesrv.onrender.com/api/absents');
@@ -32,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const count = document.getElementById('count').value;
     const studentNames = document.getElementById('studentName').value.split(',').map(s => s.trim());
     const reason = document.getElementById('reason').value;
+    const allstudents = document.getElementById('allstudents').value;
 
     for (const name of studentNames) {
       const absentData = {
@@ -40,7 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
         date,
         count,
         studentName: name,
-        reason
+        reason,
+        allstudents 
       };
       await fetch('https://attendancesrv.onrender.com/api/absent', {
         method: 'POST',
