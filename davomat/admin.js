@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'index.html';
   } else {
     const teacher = JSON.parse(localStorage.getItem('teacher'));
-   const allowedAdmins = ["admin", "shaxnoza", "furkat", "matlyuba"];
+   const allowedAdmins = ["admin", "shaxnoza", "furkat", "matlyuba", "shahnoza"];
 if (!teacher || !allowedAdmins.includes(teacher.login)) {
 
       window.location.href = 'index.html';
@@ -310,6 +310,7 @@ sheet['!cols'] = [
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
