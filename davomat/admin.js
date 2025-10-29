@@ -275,17 +275,23 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     // 📁 Группируем по классам
     const classMap = {};
     filtered.forEach(item => {
-    const total = parseInt(item.allstudents);
-    const percent = total && item.count ? `${Math.round((parseInt(item.count) / total) * 100)}%` : '';
+  const total = parseFloat(item.allstudents); // всего учеников
+  const sick = parseFloat(item.count);        // болеющих
+  const present = total - sick;               // пришедших
 
-     if (!classMap[item.className]) classMap[item.className] = [];
-    classMap[item.className].push({
+  const percent = (total && sick)
+    ? `${((present / total) * 100).toFixed(1)}%`
+    : '';
+
+  if (!classMap[item.className]) classMap[item.className] = [];
+  classMap[item.className].push({
     Дата: item.date,
     Учитель: item.teacher,
     Ученик: item.studentName,
     Причина: item.reason,
     Всего: total || '',
-    Болеют: item.count || '',
+    Болеют: sick || '',
+    Пришли: present || '',
     Процент: percent
   });
 });
@@ -295,15 +301,17 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     Object.keys(classMap).sort().forEach(className => {
       const sheet = XLSX.utils.json_to_sheet(classMap[className]);
       // 👉 Устанавливаем ширину колонок
-      sheet['!cols'] = [
-      { wch: 12 }, // Дата
-      { wch: 20 }, // Учитель
-      { wch: 20 }, // Ученик
-      { wch: 18 }, // Причина
-      { wch: 10 }, // Всего
-      { wch: 10 }, // Болеют
-      { wch: 10 }  // Процент
-    ];
+     sheet['!cols'] = [
+  { wch: 12 }, // Дата
+  { wch: 20 }, // Учитель
+  { wch: 20 }, // Ученик
+  { wch: 18 }, // Причина
+  { wch: 10 }, // Всего
+  { wch: 10 }, // Болеют
+  { wch: 10 }, // Пришли
+  { wch: 10 }  // Процент
+];
+
 
       XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
     });
@@ -315,6 +323,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
