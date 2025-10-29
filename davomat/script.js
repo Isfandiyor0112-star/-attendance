@@ -64,4 +64,3 @@ document.getElementById('lang-uz').onclick = () => setLang('uz');
 setLang(localStorage.getItem('lang') || 'ru');
 
 
-
