@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (data.status === "ok") {
       localStorage.setItem('teacher', JSON.stringify(data.user));
-     const adminLogins = ["admin", "shaxnoza", "furkat", "matlyuba"];
+     const adminLogins = ["admin", "shaxnoza", "furkat", "matlyuba", "bayjanova"];
 
      if (adminLogins.includes(data.user.login)) {
      window.location.href = "admin.html";
@@ -62,5 +62,6 @@ document.getElementById('lang-uz').onclick = () => setLang('uz');
 
 // При загрузке страницы
 setLang(localStorage.getItem('lang') || 'ru');
+
 
 
