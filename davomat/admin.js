@@ -333,7 +333,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     // 📄 Добавляем лист umumiy первым
     const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
     umumiySheet['!cols'] = [
-      { wch: 12 }, { wch: 20 }, { wch: 10 }, { wch: 10 }
+      { wch: 12 }, { wch: 40 }, { wch: 10 }, { wch: 10 }
     ];
     XLSX.utils.book_append_sheet(workbook, umumiySheet, 'umumiy');
 
@@ -354,6 +354,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
