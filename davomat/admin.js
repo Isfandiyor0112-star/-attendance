@@ -328,7 +328,10 @@ const workbook = new ExcelJS.Workbook();
 
 for (const className of Object.keys(absentsByClass)) {
   const sheet = workbook.addWorksheet(className);
-  sheet.columns = [...];
+  sheet.columns = [ { header: 'дата', key: 'date', width: 15 },
+  { header: 'ученик', key: 'studentName', width: 25 },
+  { header: 'причина', key: 'reason', width: 20 },
+  { header: 'учитель', key: 'teacher', width: 25 }];
   absentsByClass[className].forEach(row => sheet.addRow(row));
 }
 
@@ -407,6 +410,7 @@ umumiySheet.eachRow((row, rowNumber) => {
     cell.font = { bold: true };
   }
 });
+
 
 
 
