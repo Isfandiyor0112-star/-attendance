@@ -353,13 +353,15 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     ];
 
     // 📊 Собираем summaryRows на основе allTeachers
-    const summaryRows = allTeachers.map(teacher => {
-  const matches = filtered.filter(item => normalize(item.teacher) === normalize(teacher));
+  const summaryRows = allTeachers.map(teacher => {
+  const short = shortenName(teacher);
+
+  const matches = filtered.filter(item => normalize(item.teacher) === normalize(short));
 
   if (matches.length === 0) {
     return {
       дата: selectedDate,
-      учитель: shortenName(teacher),
+      учитель: short,
       класс: '-',
       процент: '0%'
     };
@@ -372,7 +374,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
 
   return {
     дата: selectedDate,
-    учитель: shortenName(teacher),
+    учитель: short,
     класс: matches[0].className || '-',
     процент: `${percent}%`
   };
@@ -409,6 +411,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
