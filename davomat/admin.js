@@ -296,21 +296,20 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
       const rows = classMap[className];
       if (rows.length === 0) return;
 
-const { Дата, Учитель } = rows[0];
-const total = parseFloat(rows[0].Всего);
-const sick = parseFloat(rows[0].Болеют);
-const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
+      const total = parseFloat(rows[0].Всего);
+      const sick = rows.length;
+      const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
 
-summaryRows.push({
-  дата: Дата,
-  учитель: Учитель,
-  класс: className,
-  процент: `${percent}%`
-});
-
+      summaryRows.push({
+        дата: rows[0].Дата,
+        учитель: rows[0].Учитель,
+        класс: className,
+        процент: `${percent}%`
+      });
+    });
 
     // 📥 Добавляем тех, кто не сдал
-    const allTeachers = [ "Dadabayeva Iroda Dilmurodovna", "Cherimitsina Anjilika Kazakovna", "Ermakova Dilfuza Yuldashevna", "Nurmatova Nurjaxon Raimovna", "Musamatova Gulnara Maxmudovna", "Toshmatova Yulduz Zokirjon qizi", "Movlonova Umida Usmankulovna", "Ubaydullayeva Matluba Misratilla qizi", "Ismoilova Nasiba Eshko’ziyevna", "Izalxan Lyubov Ilzatovna", "Matkarimova Nargiza Batirovna", "Qarshibayeva Nilufar Abdinamatovna", "Djamalova Fotima Abdulqosim qizi", "Kambarova Kimmat Maxmudovana", "Polyakova Vera Aleksandrovna", "Normuratova Dilfuza Xidirovna", "Madaminova SevaraYusubayevna", "Sheranova Dilafruz Toliboyevna", "Zokirxonova Gulnara Bilyalovna", "Abdumavlonova Xilola Mirzakulovna", "Ermatova Xilola Abdulamitovna", "Mamatqulova Orzigul Saxobidinovna", "Raximov Rustam Rasuljanovich", "Ismoilov Avazjon Kuldashovich", "Yettiyeva Dilafruz Muxitdinovna", "Malikova Barno Amanjanovna", "Normatova Gozal Davlataliyevna", "Nefyodova Natasha Aleksandrovna", "Xakimova Dilfuza Abdumo’minovna", "Fozilov Inomjon Obidovich", "Buligina Viktoriya Yuryevna", "Yardamova Matluba Muxtarovna", "Mandiyev Orif Alimjonovich", "Pardayeva Nigora Mirzadjonova", "Aripov Alisher Isakovich", "Mamajanova Muslima Alixanovna", "Xodjahanov Asom Osimovich", "Ismoilova Mehriniso Abduraximovna", "Xasanova Olesya Gennadevna", "Satimova Dilafruz Fayzullayevna", "Ruzmatova Shahodat Mavlyanovna", "Baltabayeva Marguba Tulqinbayevna", "Ryabinina Svetlana Yuryevna", "Abdullayeva Maftuna Rahmonberdiyevna", "Aliyeva Nilufar Marufjanovna" ];
+    const allTeachers = [ "Dadabayeva Iroda Dilmurodovna", "Cherimitsina Anjilika Kazakovna", "Ermakova Dilfuza Yuldashevna", "Nurmatova Nurjaxon Raimovna", "Musamatova Gulnara Maxmudovna", "Toshmatova Yulduz Zokirjon qizi", "Movlonova Umida Usmankulovna", "Ubaydullayeva Matluba Misratilla qizi", "Ismoilova Nasiba Eshko’ziyevna", "Izalxan Lyubov Ilzatovna", "Matkarimova Nargiza Batirovna", "Qarshibayeva Nilufar Abdinamatovna", "Djamalova Fotima Abdulqosim qizi", "Kambarova Kimmat Maxmudovana", "Polyakova Vera Aleksandrovna", "Normuratova Dilfuza Xidirovna", "Madaminova SevaraYusubayevna", "Sheranova Dilafruz Toliboyevna", "Zokirxonova Gulnara Bilyalovna", "Abdumavlonova Xilola Mirzakulovna", "Ermatova Xilola Abdulamitovna", "Mamatqulova Orzigul Saxobidinovna", "Raximov Rustam Rasuljanovich", "Ismoilov Avazjon Kuldashovich", "Yettiyeva Dilafruz Muxitdinovna", "Malikova Barno Amanjanovna", "Normatova Gozal Davlataliyevna", "Nefyodova Natasha Aleksandrovna", "Xakimova Dilfuza Abdumo’minovna", "Fozilov Inomjon Obidovich", "Buligina Viktoriya Yuryevna", "Yardamova Matluba Muxtarovna", "Mandiyev Orif Alimjonovich", "Pardayeva Nigora Mirzadjonova", "Aripov Alisher Isakovich", "Mamajanova Muslima Alixanovna", "Xodjahanov Asom Osimovich", "Ismoilova Mehriniso Abduraximovna", "Xasanova Olesya Gennadevna", "Satimova Dilafruz Fayzullayevna", "Ruzmatova Shahodat Mavlyanovna", "Baltabayeva Marguba Tulqinbayevna", "Ryabinina Svetlana Yuryevna", "Abdullayeva Maftuna Rahmonberdiyevna", "Aliyeva Nilufar Marufjanovna"];
     const submitted = summaryRows.map(r => r.учитель);
     const missing = allTeachers.filter(t => !submitted.includes(t));
     const currentDate = selectedDate;
@@ -354,11 +353,6 @@ summaryRows.push({
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
-
-
-
-
-
 
 
 
