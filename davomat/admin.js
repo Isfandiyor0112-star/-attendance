@@ -324,6 +324,90 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
   }
 });
 
+const workbook = new ExcelJS.Workbook();
+
+for (const className of Object.keys(absentsByClass)) {
+  const sheet = workbook.addWorksheet(className);
+  sheet.columns = [...];
+  absentsByClass[className].forEach(row => sheet.addRow(row));
+}
+
+
+
+// 📊 Добавляем лист umumiy
+const umumiySheet = workbook.addWorksheet('umumiy');
+umumiySheet.columns = [
+  { header: 'дата', key: 'date', width: 15 },
+  { header: 'имя учителя', key: 'teacher', width: 25 },
+  { header: 'класс', key: 'className', width: 10 },
+  { header: 'процент', key: 'percent', width: 10 }
+];
+
+// ✅ Собираем summaryRows
+const summaryRows = [];
+
+for (const className of Object.keys(absentsByClass)) {
+  const rows = absentsByClass[className];
+  if (rows.length === 0) continue;
+
+  const { date, teacher } = rows[0];
+  const total = rows.length;
+  const sick = rows.filter(r => r.reason).length;
+  const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
+
+  summaryRows.push({
+    date,
+    teacher,
+    className,
+    percent: `${percent}%`
+  });
+}
+
+// ✅ Добавляем тех, кто не сдал
+const allTeachers = [...]; // твой список
+const submitted = summaryRows.map(r => r.teacher);
+const missing = allTeachers.filter(t => !submitted.includes(t));
+const currentDate = new Date().toISOString().slice(0, 10);
+
+missing.forEach(teacher => {
+  summaryRows.push({
+    date: currentDate,
+    teacher,
+    className: '-',
+    percent: '0%'
+  });
+});
+
+// ✅ Сортировка
+summaryRows.sort((a, b) => parseFloat(b.percent) - parseFloat(a.percent));
+
+// ✅ Добавление строк
+summaryRows.forEach(row => umumiySheet.addRow(row));
+
+// ✅ Раскраска
+umumiySheet.eachRow((row, rowNumber) => {
+  if (rowNumber === 1) return;
+  const cell = row.getCell(4);
+  const value = parseFloat(cell.value);
+  let color = 'FFFFFF';
+  if (value === 100) color = '00FF00';
+  else if (value >= 75) color = '99FF00';
+  else if (value >= 50) color = 'FFFF00';
+  else if (value >= 25) color = 'FF9900';
+  else if (value > 0)   color = 'FF0000';
+  else                 color = 'CCCCCC';
+
+  cell.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: color }
+  };
+
+  if (value === 100) {
+    cell.font = { bold: true };
+  }
+});
+
 
 
 
