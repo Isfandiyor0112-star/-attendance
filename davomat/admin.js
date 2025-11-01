@@ -298,8 +298,10 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
 
       const { Дата, Учитель } = rows[0];
       const total = rows.length;
-      const sick = rows.filter(r => r.Причина).length;
+      const sick = rows.filter(r => r.Причина || r.reason).length;
       const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
+      console.log({ className, total, sick, percent });
+
 
       summaryRows.push({
         дата: Дата,
@@ -354,6 +356,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
