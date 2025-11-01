@@ -297,10 +297,10 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
       if (rows.length === 0) return;
 
       const { Дата, Учитель } = rows[0];
-      const total = rows.length;
-      const sick = rows.filter(r => r.Причина || r.reason).length;
-      const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
-      console.log({ className, total, sick, percent });
+    const total = rows.length;
+const sick = rows.filter(r => r.Причина && r.Причина.trim() !== "").length;
+const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
+
 
 
       summaryRows.push({
@@ -356,6 +356,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
