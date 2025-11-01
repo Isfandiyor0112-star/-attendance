@@ -260,13 +260,10 @@ if (!teacher || !allowedAdmins.includes(teacher.login)) {
 document.getElementById('exportExcel').addEventListener('click', async () => {
   try {
     const selectedDate = document.getElementById('dateFilter').value;
-
     const res = await fetch('https://attendancesrv.onrender.com/api/absents');
     const data = await res.json();
 
-    // 🔍 Фильтруем по выбранной дате
     const filtered = selectedDate ? data.filter(a => a.date === selectedDate) : [];
-
     if (filtered.length === 0) {
       alert("Нет данных за выбранную дату.");
       return;
@@ -275,48 +272,82 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     // 📁 Группируем по классам
     const classMap = {};
     filtered.forEach(item => {
-  const total = parseFloat(item.allstudents); // всего учеников
-  const sick = parseFloat(item.count);        // болеющих
-  const present = total - sick;               // пришедших
+      const total = parseFloat(item.allstudents);
+      const sick = parseFloat(item.count);
+      const present = total - sick;
+      const percent = (total && sick) ? `${((present / total) * 100).toFixed(1)}%` : '';
 
-  const percent = (total && sick)
-    ? `${((present / total) * 100).toFixed(1)}%`
-    : '';
+      if (!classMap[item.className]) classMap[item.className] = [];
+      classMap[item.className].push({
+        Дата: item.date,
+        Учитель: item.teacher,
+        Ученик: item.studentName,
+        Причина: item.reason,
+        Всего: total || '',
+        Болеют: sick || '',
+        Пришли: present || '',
+        Процент: percent
+      });
+    });
 
-  if (!classMap[item.className]) classMap[item.className] = [];
-  classMap[item.className].push({
-    Дата: item.date,
-    Учитель: item.teacher,
-    Ученик: item.studentName,
-    Причина: item.reason,
-    Всего: total || '',
-    Болеют: sick || '',
-    Пришли: present || '',
-    Процент: percent
-  });
-});
+    // 📊 Собираем summaryRows
+    const summaryRows = [];
+    Object.keys(classMap).forEach(className => {
+      const rows = classMap[className];
+      if (rows.length === 0) return;
 
-    // 📊 Создаём Excel-книгу
+      const { Дата, Учитель } = rows[0];
+      const total = rows.length;
+      const sick = rows.filter(r => r.Причина).length;
+      const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
+
+      summaryRows.push({
+        дата: Дата,
+        учитель: Учитель,
+        класс: className,
+        процент: `${percent}%`
+      });
+    });
+
+    // 📥 Добавляем тех, кто не сдал
+    const allTeachers = [ "Dadabayeva Iroda Dilmurodovna", "Cherimitsina Anjilika Kazakovna", "Ermakova Dilfuza Yuldashevna", "Nurmatova Nurjaxon Raimovna", "Musamatova Gulnara Maxmudovna", "Toshmatova Yulduz Zokirjon qizi", "Movlonova Umida Usmankulovna", "Ubaydullayeva Matluba Misratilla qizi", "Ismoilova Nasiba Eshko’ziyevna", "Izalxan Lyubov Ilzatovna", "Matkarimova Nargiza Batirovna", "Qarshibayeva Nilufar Abdinamatovna", "Djamalova Fotima Abdulqosim qizi", "Kambarova Kimmat Maxmudovana", "Polyakova Vera Aleksandrovna", "Normuratova Dilfuza Xidirovna", "Madaminova SevaraYusubayevna", "Sheranova Dilafruz Toliboyevna", "Zokirxonova Gulnara Bilyalovna", "Abdumavlonova Xilola Mirzakulovna", "Ermatova Xilola Abdulamitovna", "Mamatqulova Orzigul Saxobidinovna", "Raximov Rustam Rasuljanovich", "Ismoilov Avazjon Kuldashovich", "Yettiyeva Dilafruz Muxitdinovna", "Malikova Barno Amanjanovna", "Normatova Gozal Davlataliyevna", "Nefyodova Natasha Aleksandrovna", "Xakimova Dilfuza Abdumo’minovna", "Fozilov Inomjon Obidovich", "Buligina Viktoriya Yuryevna", "Yardamova Matluba Muxtarovna", "Mandiyev Orif Alimjonovich", "Pardayeva Nigora Mirzadjonova", "Aripov Alisher Isakovich", "Mamajanova Muslima Alixanovna", "Xodjahanov Asom Osimovich", "Ismoilova Mehriniso Abduraximovna", "Xasanova Olesya Gennadevna", "Satimova Dilafruz Fayzullayevna", "Ruzmatova Shahodat Mavlyanovna", "Baltabayeva Marguba Tulqinbayevna", "Ryabinina Svetlana Yuryevna", "Abdullayeva Maftuna Rahmonberdiyevna", "Aliyeva Nilufar Marufjanovna" ];
+    const submitted = summaryRows.map(r => r.учитель);
+    const missing = allTeachers.filter(t => !submitted.includes(t));
+    const currentDate = selectedDate;
+
+    missing.forEach(teacher => {
+      summaryRows.push({
+        дата: currentDate,
+        учитель: teacher,
+        класс: '-',
+        процент: '0%'
+      });
+    });
+
+    // 📊 Сортировка
+    summaryRows.sort((a, b) => parseFloat(b.процент) - parseFloat(a.процент));
+
+    // 📁 Создаём Excel-книгу
     const workbook = XLSX.utils.book_new();
+
+    // 📄 Добавляем лист umumiy первым
+    const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
+    umumiySheet['!cols'] = [
+      { wch: 12 }, { wch: 20 }, { wch: 10 }, { wch: 10 }
+    ];
+    XLSX.utils.book_append_sheet(workbook, umumiySheet, 'umumiy');
+
+    // 📄 Добавляем листы по классам
     Object.keys(classMap).sort().forEach(className => {
       const sheet = XLSX.utils.json_to_sheet(classMap[className]);
-      // 👉 Устанавливаем ширину колонок
-     sheet['!cols'] = [
-  { wch: 12 }, // Дата
-  { wch: 20 }, // Учитель
-  { wch: 20 }, // Ученик
-  { wch: 18 }, // Причина
-  { wch: 10 }, // Всего
-  { wch: 10 }, // Болеют
-  { wch: 10 }, // Пришли
-  { wch: 10 }  // Процент
-];
-
-
+      sheet['!cols'] = [
+        { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 18 },
+        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }
+      ];
       XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
     });
 
-    // 📥 Скачиваем файл с датой в названии
+    // 📥 Скачиваем файл
     XLSX.writeFile(workbook, `DAVOMAT_${selectedDate}.xlsx`);
   } catch (error) {
     console.error("Ошибка при экспорте:", error);
@@ -324,102 +355,6 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
   }
 });
 
-
-// 📊 Добавляем лист umumiy
-const summaryRows = [];
-
-// Собираем данные по каждому классу
-Object.keys(classMap).forEach(className => {
-  const rows = classMap[className];
-  if (rows.length === 0) return;
-
-  const { Дата, Учитель } = rows[0];
-  const total = rows.length;
-  const sick = rows.filter(r => r.Причина).length;
-  const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
-
-  summaryRows.push({
-    дата: Дата,
-    учитель: Учитель,
-    класс: className,
-    процент: `${percent}%`
-  });
-});
-
-// 📥 Добавляем тех, кто не сдал
-const allTeachers = [
-  "Dadabayeva Iroda Dilmurodovna",
-  "Cherimitsina Anjilika Kazakovna",
-  "Ermakova Dilfuza Yuldashevna",
-  "Nurmatova Nurjaxon Raimovna",
-  "Musamatova Gulnara Maxmudovna",
-  "Toshmatova Yulduz Zokirjon qizi",
-  "Movlonova Umida Usmankulovna",
-  "Ubaydullayeva Matluba Misratilla qizi",
-  "Ismoilova Nasiba Eshko’ziyevna",
-  "Izalxan Lyubov Ilzatovna",
-  "Matkarimova Nargiza Batirovna",
-  "Qarshibayeva Nilufar Abdinamatovna",
-  "Djamalova Fotima Abdulqosim qizi",
-  "Kambarova Kimmat Maxmudovana",
-  "Polyakova Vera Aleksandrovna",
-  "Normuratova Dilfuza Xidirovna",
-  "Madaminova SevaraYusubayevna",
-  "Sheranova Dilafruz Toliboyevna",
-  "Zokirxonova Gulnara Bilyalovna",
-  "Abdumavlonova Xilola Mirzakulovna",
-  "Ermatova Xilola Abdulamitovna",
-  "Mamatqulova Orzigul Saxobidinovna",
-  "Raximov Rustam Rasuljanovich",
-  "Ismoilov Avazjon Kuldashovich",
-  "Yettiyeva Dilafruz Muxitdinovna",
-  "Malikova Barno Amanjanovna",
-  "Normatova Gozal Davlataliyevna",
-  "Nefyodova Natasha Aleksandrovna",
-  "Xakimova Dilfuza Abdumo’minovna",
-  "Fozilov Inomjon Obidovich",
-  "Buligina Viktoriya Yuryevna",
-  "Yardamova Matluba Muxtarovna",
-  "Mandiyev Orif Alimjonovich",
-  "Pardayeva Nigora Mirzadjonova",
-  "Aripov Alisher Isakovich",
-  "Mamajanova Muslima Alixanovna",
-  "Xodjahanov Asom Osimovich",
-  "Ismoilova Mehriniso Abduraximovna",
-  "Xasanova Olesya Gennadevna",
-  "Satimova Dilafruz Fayzullayevna",
-  "Ruzmatova Shahodat Mavlyanovna",
-  "Baltabayeva Marguba Tulqinbayevna",
-  "Ryabinina Svetlana Yuryevna",
-  "Abdullayeva Maftuna Rahmonberdiyevna",
-  "Aliyeva Nilufar Marufjanovna"
-];
-
-const submitted = summaryRows.map(r => r.учитель);
-const missing = allTeachers.filter(t => !submitted.includes(t));
-const currentDate = selectedDate;
-
-missing.forEach(teacher => {
-  summaryRows.push({
-    дата: currentDate,
-    учитель: teacher,
-    класс: '-',
-    процент: '0%'
-  });
-});
-
-// 📊 Сортировка по убыванию процента
-summaryRows.sort((a, b) => parseFloat(b.процент) - parseFloat(a.процент));
-
-// 📄 Преобразуем в лист и добавляем
-const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
-umumiySheet['!cols'] = [
-  { wch: 12 }, // дата
-  { wch: 20 }, // учитель
-  { wch: 10 }, // класс
-  { wch: 10 }  // процент
-];
-XLSX.utils.book_append_sheet(workbook, umumiySheet, 'umumiy');
 
 
 
