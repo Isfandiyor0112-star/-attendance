@@ -260,14 +260,14 @@ if (!teacher || !allowedAdmins.includes(teacher.login)) {
 document.getElementById('exportExcel').addEventListener('click', async () => {
   try {
     const selectedDate = document.getElementById('dateFilter').value;
-    const res = await fetch('https://attendancesrv.onrender.com/api/absents');
-    const data = await res.json();
-
-    const filtered = selectedDate ? data.filter(a => a.date === selectedDate) : [];
-    if (filtered.length === 0) {
-      alert("Нет данных за выбранную дату.");
+    if (!selectedDate) {
+      alert("Выберите дату перед экспортом.");
       return;
     }
+
+    const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+    const data = await res.json();
+    const filtered = data.filter(a => a.date === selectedDate);
 
     // 📁 Группируем по классам
     const classMap = {};
@@ -309,16 +309,65 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     });
 
     // 📥 Добавляем тех, кто не сдал
-   const submitted = new Set(summaryRows.map(r => r.учитель));
-const missing = allTeachers.filter(t => !submitted.has(t));
-missing.forEach(teacher => {
-  summaryRows.push({
-    дата: currentDate,
-    учитель: teacher,
-    класс: '-',
-    процент: '0%'
-  });
-});
+const allTeachers = [
+  "Dadabayeva Iroda Dilmurodovna",
+  "Cherimitsina Anjilika Kazakovna",
+  "Ermakova Dilfuza Yuldashevna",
+  "Nurmatova Nurjaxon Raimovna",
+  "Musamatova Gulnara Maxmudovna",
+  "Toshmatova Yulduz Zokirjon qizi",
+  "Movlonova Umida Usmankulovna",
+  "Ubaydullayeva Matluba Misratilla qizi",
+  "Ismoilova Nasiba Eshko’ziyevna",
+  "Izalxan Lyubov Ilzatovna",
+  "Matkarimova Nargiza Batirovna",
+  "Qarshibayeva Nilufar Abdinamatovna",
+  "Djamalova Fotima Abdulqosim qizi",
+  "Kambarova Kimmat Maxmudovana",
+  "Polyakova Vera Aleksandrovna",
+  "Normuratova Dilfuza Xidirovna",
+  "Madaminova SevaraYusubayevna",
+  "Sheranova Dilafruz Toliboyevna",
+  "Zokirxonova Gulnara Bilyalovna",
+  "Abdumavlonova Xilola Mirzakulovna",
+  "Ermatova Xilola Abdulamitovna",
+  "Mamatqulova Orzigul Saxobidinovna",
+  "Raximov Rustam Rasuljanovich",
+  "Ismoilov Avazjon Kuldashovich",
+  "Yettiyeva Dilafruz Muxitdinovna",
+  "Malikova Barno Amanjanovna",
+  "Normatova Gozal Davlataliyevna",
+  "Nefyodova Natasha Aleksandrovna",
+  "Xakimova Dilfuza Abdumo’minovna",
+  "Fozilov Inomjon Obidovich",
+  "Buligina Viktoriya Yuryevna",
+  "Yardamova Matluba Muxtarovna",
+  "Mandiyev Orif Alimjonovich",
+  "Pardayeva Nigora Mirzadjonova",
+  "Aripov Alisher Isakovich",
+  "Mamajanova Muslima Alixanovna",
+  "Xodjahanov Asom Osimovich",
+  "Ismoilova Mehriniso Abduraximovna",
+  "Xasanova Olesya Gennadevna",
+  "Satimova Dilafruz Fayzullayevna",
+  "Ruzmatova Shahodat Mavlyanovna",
+  "Baltabayeva Marguba Tulqinbayevna",
+  "Ryabinina Svetlana Yuryevna",
+  "Abdullayeva Maftuna Rahmonberdiyevna",
+  "Aliyeva Nilufar Marufjanovna"
+];
+
+    const submitted = new Set(summaryRows.map(r => r.учитель));
+    const missing = allTeachers.filter(t => !submitted.has(t));
+
+    missing.forEach(teacher => {
+      summaryRows.push({
+        дата: selectedDate,
+        учитель: teacher,
+        класс: '-',
+        процент: '0%'
+      });
+    });
 
     // 📊 Сортировка
     summaryRows.sort((a, b) => parseFloat(b.процент) - parseFloat(a.процент));
@@ -350,6 +399,8 @@ missing.forEach(teacher => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
+
 
 
 
