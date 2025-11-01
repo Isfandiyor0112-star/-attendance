@@ -364,7 +364,7 @@ for (const className of Object.keys(absentsByClass)) {
 }
 
 // ✅ Добавляем тех, кто не сдал
-const allTeachers = [...]; // твой список
+const allTeachers = ["Buligina.V.Y" ]; // твой список
 const submitted = summaryRows.map(r => r.teacher);
 const missing = allTeachers.filter(t => !submitted.includes(t));
 const currentDate = new Date().toISOString().slice(0, 10);
@@ -407,6 +407,7 @@ umumiySheet.eachRow((row, rowNumber) => {
     cell.font = { bold: true };
   }
 });
+
 
 
 
