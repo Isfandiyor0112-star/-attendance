@@ -354,29 +354,30 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
 
     // 📊 Собираем summaryRows на основе allTeachers
     const summaryRows = allTeachers.map(teacher => {
-      const matches = filtered.filter(item => normalize(item.teacher) === normalize(teacher));
+  const matches = filtered.filter(item => normalize(item.teacher) === normalize(teacher));
 
-      if (matches.length === 0) {
-        return {
-          дата: selectedDate,
-          учитель: shortenName(teacher),
-          класс: '-',
-          процент: '0%'
-        };
-      }
+  if (matches.length === 0) {
+    return {
+      дата: selectedDate,
+      учитель: shortenName(teacher),
+      класс: '-',
+      процент: '0%'
+    };
+  }
 
-      const total = parseFloat(matches[0].allstudents);
-      const sick = matches.length;
-      const present = total - sick;
-      const percent = total ? ((present / total) * 100).toFixed(1) : '0';
+  const sick = parseFloat(matches[0].count);
+  const total = parseFloat(matches[0].allstudents);
+  const present = total - sick;
+  const percent = total ? ((present / total) * 100).toFixed(1) : '0';
 
-      return {
-        дата: selectedDate,
-        учитель: shortenName(teacher),
-        класс: matches[0].className || '-',
-        процент: `${percent}%`
-      };
-    });
+  return {
+    дата: selectedDate,
+    учитель: shortenName(teacher),
+    класс: matches[0].className || '-',
+    процент: `${percent}%`
+  };
+});
+
 
     // 📊 Сортировка
     summaryRows.sort((a, b) => parseFloat(b.процент) - parseFloat(a.процент));
@@ -408,6 +409,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
