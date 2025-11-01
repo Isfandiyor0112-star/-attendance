@@ -303,25 +303,6 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
       return name.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
     }
 
-    // 📊 Собираем summaryRows
-    const summaryRows = [];
-    Object.keys(classMap).forEach(className => {
-      const rows = classMap[className];
-      if (rows.length === 0) return;
-
-      const total = parseFloat(rows[0].Всего);
-      const sick = rows.length;
-      const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
-
-      summaryRows.push({
-        дата: rows[0].Дата,
-        учитель: shortenName(rows[0].Учитель),
-        учитель_оригинал: rows[0].Учитель,
-        класс: className,
-        процент: `${percent}%`
-      });
-    });
-
     // 📥 Список всех учителей
     const allTeachers = [
       "Dadabayeva Iroda Dilmurodovna",
@@ -371,17 +352,30 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
       "Aliyeva Nilufar Marufjanovna"
     ];
 
-    const submitted = new Set(summaryRows.map(r => normalize(r.учитель_оригинал || r.учитель)));
-    const missing = allTeachers.filter(t => !submitted.has(normalize(t)));
+    // 📊 Собираем summaryRows на основе allTeachers
+    const summaryRows = allTeachers.map(teacher => {
+      const matches = filtered.filter(item => normalize(item.teacher) === normalize(teacher));
 
-    missing.forEach(teacher => {
-      summaryRows.push({
+      if (matches.length === 0) {
+        return {
+          дата: selectedDate,
+          учитель: shortenName(teacher),
+          класс: '-',
+          процент: '0%'
+        };
+      }
+
+      const total = parseFloat(matches[0].allstudents);
+      const sick = matches.length;
+      const present = total - sick;
+      const percent = total ? ((present / total) * 100).toFixed(1) : '0';
+
+      return {
         дата: selectedDate,
         учитель: shortenName(teacher),
-        учитель_оригинал: teacher,
-        класс: '-',
-        процент: '0%'
-      });
+        класс: matches[0].className || '-',
+        процент: `${percent}%`
+      };
     });
 
     // 📊 Сортировка
@@ -391,9 +385,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     const workbook = XLSX.utils.book_new();
 
     // 📄 Добавляем лист umumiy первым
-    const umumiySheet = XLSX.utils.json_to_sheet(
-      summaryRows.map(({ дата, учитель, класс, процент }) => ({ дата, учитель, класс, процент }))
-    );
+    const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
     umumiySheet['!cols'] = [
       { wch: 12 }, { wch: 40 }, { wch: 10 }, { wch: 10 }
     ];
@@ -416,10 +408,6 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
-
-
-
-
 
 
 
