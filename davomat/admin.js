@@ -290,6 +290,19 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
       });
     });
 
+    // 📊 Сокращение и нормализация
+    function shortenName(fullName) {
+      const parts = fullName.trim().split(/\s+/);
+      if (parts.length < 2) return fullName;
+      const surname = parts[0];
+      const initials = parts.slice(1).map(p => p[0].toUpperCase()).join('.');
+      return `${surname}.${initials}.`;
+    }
+
+    function normalize(name) {
+      return name.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+    }
+
     // 📊 Собираем summaryRows
     const summaryRows = [];
     Object.keys(classMap).forEach(className => {
@@ -302,17 +315,14 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
 
       summaryRows.push({
         дата: rows[0].Дата,
-        учитель: rows[0].Учитель,
+        учитель: shortenName(rows[0].Учитель),
+        учитель_оригинал: rows[0].Учитель,
         класс: className,
         процент: `${percent}%`
       });
     });
 
-    // 📥 Добавляем тех, кто не сдал
-    function normalize(name) {
-      return name.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
-    }
-
+    // 📥 Список всех учителей
     const allTeachers = [
       "Dadabayeva Iroda Dilmurodovna",
       "Cherimitsina Anjilika Kazakovna",
@@ -361,13 +371,14 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
       "Aliyeva Nilufar Marufjanovna"
     ];
 
-    const submitted = new Set(summaryRows.map(r => normalize(r.учитель)));
+    const submitted = new Set(summaryRows.map(r => normalize(r.учитель_оригинал || r.учитель)));
     const missing = allTeachers.filter(t => !submitted.has(normalize(t)));
 
     missing.forEach(teacher => {
       summaryRows.push({
         дата: selectedDate,
-        учитель: teacher,
+        учитель: shortenName(teacher),
+        учитель_оригинал: teacher,
         класс: '-',
         процент: '0%'
       });
@@ -380,7 +391,9 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     const workbook = XLSX.utils.book_new();
 
     // 📄 Добавляем лист umumiy первым
-    const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
+    const umumiySheet = XLSX.utils.json_to_sheet(
+      summaryRows.map(({ дата, учитель, класс, процент }) => ({ дата, учитель, класс, процент }))
+    );
     umumiySheet['!cols'] = [
       { wch: 12 }, { wch: 40 }, { wch: 10 }, { wch: 10 }
     ];
@@ -403,6 +416,8 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
+
 
 
 
