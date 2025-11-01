@@ -324,94 +324,102 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
   }
 });
 
-const workbook = new ExcelJS.Workbook();
-
-for (const className of Object.keys(absentsByClass)) {
-  const sheet = workbook.addWorksheet(className);
-  sheet.columns = [ { header: 'дата', key: 'date', width: 15 },
-  { header: 'ученик', key: 'studentName', width: 25 },
-  { header: 'причина', key: 'reason', width: 20 },
-  { header: 'учитель', key: 'teacher', width: 25 }];
-  absentsByClass[className].forEach(row => sheet.addRow(row));
-}
-
-
 
 // 📊 Добавляем лист umumiy
-const umumiySheet = workbook.addWorksheet('umumiy');
-umumiySheet.columns = [
-  { header: 'дата', key: 'date', width: 15 },
-  { header: 'имя учителя', key: 'teacher', width: 25 },
-  { header: 'класс', key: 'className', width: 10 },
-  { header: 'процент', key: 'percent', width: 10 }
-];
-
-// ✅ Собираем summaryRows
 const summaryRows = [];
 
-for (const className of Object.keys(absentsByClass)) {
-  const rows = absentsByClass[className];
-  if (rows.length === 0) continue;
+// Собираем данные по каждому классу
+Object.keys(classMap).forEach(className => {
+  const rows = classMap[className];
+  if (rows.length === 0) return;
 
-  const { date, teacher } = rows[0];
+  const { Дата, Учитель } = rows[0];
   const total = rows.length;
-  const sick = rows.filter(r => r.reason).length;
+  const sick = rows.filter(r => r.Причина).length;
   const percent = total ? ((total - sick) / total * 100).toFixed(1) : '0';
 
   summaryRows.push({
-    date,
-    teacher,
-    className,
-    percent: `${percent}%`
+    дата: Дата,
+    учитель: Учитель,
+    класс: className,
+    процент: `${percent}%`
   });
-}
+});
 
-// ✅ Добавляем тех, кто не сдал
-const allTeachers = ["Buligina.V.Y" ]; // твой список
-const submitted = summaryRows.map(r => r.teacher);
+// 📥 Добавляем тех, кто не сдал
+const allTeachers = [
+  "Dadabayeva Iroda Dilmurodovna",
+  "Cherimitsina Anjilika Kazakovna",
+  "Ermakova Dilfuza Yuldashevna",
+  "Nurmatova Nurjaxon Raimovna",
+  "Musamatova Gulnara Maxmudovna",
+  "Toshmatova Yulduz Zokirjon qizi",
+  "Movlonova Umida Usmankulovna",
+  "Ubaydullayeva Matluba Misratilla qizi",
+  "Ismoilova Nasiba Eshko’ziyevna",
+  "Izalxan Lyubov Ilzatovna",
+  "Matkarimova Nargiza Batirovna",
+  "Qarshibayeva Nilufar Abdinamatovna",
+  "Djamalova Fotima Abdulqosim qizi",
+  "Kambarova Kimmat Maxmudovana",
+  "Polyakova Vera Aleksandrovna",
+  "Normuratova Dilfuza Xidirovna",
+  "Madaminova SevaraYusubayevna",
+  "Sheranova Dilafruz Toliboyevna",
+  "Zokirxonova Gulnara Bilyalovna",
+  "Abdumavlonova Xilola Mirzakulovna",
+  "Ermatova Xilola Abdulamitovna",
+  "Mamatqulova Orzigul Saxobidinovna",
+  "Raximov Rustam Rasuljanovich",
+  "Ismoilov Avazjon Kuldashovich",
+  "Yettiyeva Dilafruz Muxitdinovna",
+  "Malikova Barno Amanjanovna",
+  "Normatova Gozal Davlataliyevna",
+  "Nefyodova Natasha Aleksandrovna",
+  "Xakimova Dilfuza Abdumo’minovna",
+  "Fozilov Inomjon Obidovich",
+  "Buligina Viktoriya Yuryevna",
+  "Yardamova Matluba Muxtarovna",
+  "Mandiyev Orif Alimjonovich",
+  "Pardayeva Nigora Mirzadjonova",
+  "Aripov Alisher Isakovich",
+  "Mamajanova Muslima Alixanovna",
+  "Xodjahanov Asom Osimovich",
+  "Ismoilova Mehriniso Abduraximovna",
+  "Xasanova Olesya Gennadevna",
+  "Satimova Dilafruz Fayzullayevna",
+  "Ruzmatova Shahodat Mavlyanovna",
+  "Baltabayeva Marguba Tulqinbayevna",
+  "Ryabinina Svetlana Yuryevna",
+  "Abdullayeva Maftuna Rahmonberdiyevna",
+  "Aliyeva Nilufar Marufjanovna"
+];
+
+const submitted = summaryRows.map(r => r.учитель);
 const missing = allTeachers.filter(t => !submitted.includes(t));
-const currentDate = new Date().toISOString().slice(0, 10);
+const currentDate = selectedDate;
 
 missing.forEach(teacher => {
   summaryRows.push({
-    date: currentDate,
-    teacher,
-    className: '-',
-    percent: '0%'
+    дата: currentDate,
+    учитель: teacher,
+    класс: '-',
+    процент: '0%'
   });
 });
 
-// ✅ Сортировка
-summaryRows.sort((a, b) => parseFloat(b.percent) - parseFloat(a.percent));
+// 📊 Сортировка по убыванию процента
+summaryRows.sort((a, b) => parseFloat(b.процент) - parseFloat(a.процент));
 
-// ✅ Добавление строк
-summaryRows.forEach(row => umumiySheet.addRow(row));
-
-// ✅ Раскраска
-umumiySheet.eachRow((row, rowNumber) => {
-  if (rowNumber === 1) return;
-  const cell = row.getCell(4);
-  const value = parseFloat(cell.value);
-  let color = 'FFFFFF';
-  if (value === 100) color = '00FF00';
-  else if (value >= 75) color = '99FF00';
-  else if (value >= 50) color = 'FFFF00';
-  else if (value >= 25) color = 'FF9900';
-  else if (value > 0)   color = 'FF0000';
-  else                 color = 'CCCCCC';
-
-  cell.fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: color }
-  };
-
-  if (value === 100) {
-    cell.font = { bold: true };
-  }
-});
-
-
+// 📄 Преобразуем в лист и добавляем
+const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
+umumiySheet['!cols'] = [
+  { wch: 12 }, // дата
+  { wch: 20 }, // учитель
+  { wch: 10 }, // класс
+  { wch: 10 }  // процент
+];
+XLSX.utils.book_append_sheet(workbook, umumiySheet, 'umumiy');
 
 
 
