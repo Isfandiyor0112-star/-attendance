@@ -413,6 +413,44 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
 });
 
 
+const classList = [
+  "1A","1B","1V","1G","2A","2B","2V","2G","2D",
+  "3A","3B","3V","3D","4A","4B","4V","4G","4D",
+  "5A","5B","5V","5G","6A","6B","6V","6G","6D",
+  "7A","7B","7V","8A","8B","8V","9A","9B","9V","9G","9D",
+  "10A","10B","10V","11A","11B","11V","11G"
+];
+
+const container = document.getElementById('classChartsContainer');
+
+classList.forEach(className => {
+  const block = document.createElement('div');
+  block.className = 'class-block card mb-3';
+  block.innerHTML = `
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Класс ${className}</h5>
+      <button class="toggle-btn btn btn-sm btn-outline-secondary">
+        <span class="icon">&#9650;</span>
+      </button>
+    </div>
+    <div class="chart-content collapsed px-3 py-2">
+      <canvas id="chart-${className}"></canvas>
+    </div>
+  `;
+  container.appendChild(block);
+});
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.toggle-btn')) {
+    const btn = e.target.closest('.toggle-btn');
+    const chartBlock = btn.closest('.class-block').querySelector('.chart-content');
+    const icon = btn.querySelector('.icon');
+
+    chartBlock.classList.toggle('collapsed');
+    icon.innerHTML = chartBlock.classList.contains('collapsed') ? '&#9650;' : '&#9660;';
+  }
+});
+
 
 
 
