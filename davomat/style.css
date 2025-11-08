@@ -27,16 +27,5 @@ h2[data-i18n="admin_panel_title"] {
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
 
-.chart-content {
-  transition: opacity 0.3s ease;
-  opacity: 1;
-  display: block;
-}
-
-.chart-content.collapsed {
-  opacity: 0;
-  display: none;
-}
-
 
 
