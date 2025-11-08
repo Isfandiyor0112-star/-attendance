@@ -27,5 +27,19 @@ h2[data-i18n="admin_panel_title"] {
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
 
+.chart-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.chart-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
 
 
