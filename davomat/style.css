@@ -28,17 +28,14 @@ h2[data-i18n="admin_panel_title"] {
 }
 
 .chart-content {
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-  max-height: 1000px;
+  transition: opacity 0.3s ease;
   opacity: 1;
+  display: block;
 }
 
 .chart-content.collapsed {
-  max-height: 0;
   opacity: 0;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  display: none;
 }
 
 
