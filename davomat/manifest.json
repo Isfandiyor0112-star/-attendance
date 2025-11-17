@@ -1,6 +1,6 @@
 {
   "name": "Школьная посещаемость",
-  "short_name": "Школа",
+  "short_name": "Посещаемость школы",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
