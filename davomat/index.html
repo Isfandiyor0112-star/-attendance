@@ -96,44 +96,33 @@ let deferredPrompt;
 
 // Проверяем, запущено ли приложение уже как PWA
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-if (isStandalone) {
-
-}
 
 // Ловим событие установки
 window.addEventListener('beforeinstallprompt', (e) => {
-  // Блокируем стандартное всплывающее окно
   e.preventDefault();
   deferredPrompt = e;
 
-  // Если приложение ещё не установлено — показываем кнопку
+  // Если приложение ещё не установлено — показываем баннер
   if (!isStandalone) {
     const installBanner = document.createElement('div');
     installBanner.className = "alert alert-info text-center mt-3";
     installBanner.innerHTML = `
-      <p>📲 Установите приложение  для быстрого доступа & Davomat dasturini yuklab oling</p>
+      <p>📲 Установите приложение для быстрого доступа<br>
+      Davomat dasturini yuklab oling</p>
       <button id="installBtn" class="btn btn-success">Установить</button>
     `;
     document.body.appendChild(installBanner);
 
     document.getElementById('installBtn').addEventListener('click', () => {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          
-        } else {
-          
-        }
+      deferredPrompt.userChoice.then(() => {
         deferredPrompt = null;
-        installBanner.remove(); // убираем баннер
+        installBanner.remove(); // убираем баннер после выбора
       });
     });
   }
 });
 </script>
-
-
-
 
 
 
