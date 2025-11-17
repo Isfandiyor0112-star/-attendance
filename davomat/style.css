@@ -27,5 +27,29 @@ h2[data-i18n="admin_panel_title"] {
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
 
+/* Поля ввода */
+input[type="text"],
+input[type="password"] {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="text"]:focus,
+input[type="password"]:focus {
+  box-shadow: 0 0 8px rgba(13, 110, 253, 0.6); /* голубая подсветка */
+  transform: scale(1.02); /* лёгкое увеличение */
+}
+
+/* Кнопка входа */
+button[type="submit"] {
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  transform: scale(1.05); /* увеличение при наведении */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* лёгкая тень */
+}
+
 
 
