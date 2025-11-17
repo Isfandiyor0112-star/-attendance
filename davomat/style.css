@@ -47,9 +47,10 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-  transform: scale(1.05); /* увеличение при наведении */
+  transform: scale(1.01); /* увеличение при наведении */
   box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* лёгкая тень */
 }
+
 
 
 
