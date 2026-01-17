@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
   async function getMyAbsents() {
-    const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+    const res = await fetch('https://attendancesrv.vercel.app/api/absents');
     const allAbsents = await res.json();
     return allAbsents.filter(item => item.teacher === teacher.name);
   }
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         reason,
         allstudents 
       };
-      await fetch('https://attendancesrv.onrender.com/api/absent', {
+      await fetch('https://attendancesrv.vercel.app/api/absent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(absentData)
@@ -73,3 +73,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
