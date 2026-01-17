@@ -219,23 +219,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Экспорт в Excel (исправленный)
 document.getElementById('exportExcel').addEventListener('click', async () => {
+  try {
     const selectedDate = document.getElementById('dateFilter').value;
-    if (!selectedDate) return alert("Выберите дату!");
+    if (!selectedDate) {
+      alert("Выберите дату перед экспортом.");
+      return;
+    }
 
-    const filtered = absents.filter(a => a.date === selectedDate);
+    const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+    const data = await res.json();
+    const filtered = data.filter(a => a.date === selectedDate);
+
+    // Вспомогательные функции для поиска
+    function normalize(name) {
+      return name.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+    }
+    function shortenName(fullName) {
+      const parts = fullName.trim().split(/\s+/);
+      if (parts.length < 2) return fullName;
+      const surname = parts[0];
+      const initials = parts.slice(1).map(p => p[0].toUpperCase()).join('.');
+      return `${surname}.${initials}.`;
+    }
+
+    // 1. Формируем лист "umumiy" (Рейтинг учителей)
+    const summaryRows = allTeachers.map(teacherFullName => {
+      const short = shortenName(teacherFullName);
+      // Ищем данные учителя за эту дату
+      const match = filtered.find(item => normalize(item.teacher) === normalize(short));
+
+      if (!match) {
+        return {
+          "Учитель": teacherFullName,
+          "Класс": "-",
+          "Пришли (%)": 0,
+          "Всего": 0,
+          "Болеют": 0
+        };
+      }
+
+      const total = parseFloat(match.allstudents) || 0;
+      const sick = parseFloat(match.count) || 0;
+      const present = total - sick;
+      
+      // Расчет: сколько ПРИШЛО из общего количества
+      const percentValue = total > 0 ? (present / total) * 100 : 0;
+
+      return {
+        "Учитель": teacherFullName,
+        "Класс": match.className || "-",
+        "Пришли (%)": parseFloat(percentValue.toFixed(1)), // Число для правильной сортировки
+        "Всего": total,
+        "Болеют": sick
+      };
+    });
+
+    // 🔥 Сортировка: у кого 100% — тот первый, у кого 0% — тот последний
+    summaryRows.sort((a, b) => b["Пришли (%)"] - a["Пришли (%)"]);
+
+    // 2. Группируем подробные листы по классам
+    const classMap = {};
+    filtered.forEach(item => {
+      const total = parseFloat(item.allstudents) || 0;
+      const sick = parseFloat(item.count) || 0;
+      const present = total - sick;
+      const percent = total > 0 ? `${((present / total) * 100).toFixed(1)}%` : '0%';
+
+      if (!classMap[item.className]) classMap[item.className] = [];
+      classMap[item.className].push({
+        "Дата": item.date,
+        "Ученик": item.studentName,
+        "Причина": item.reason,
+        "Всего в классе": total,
+        "Болеют": sick,
+        "Пришли": present,
+        "Процент": percent
+      });
+    });
+
+    // 3. Создаем книгу Excel
     const workbook = XLSX.utils.book_new();
 
-    // Лист по классам
-    const classRows = filtered.map(item => ({
-        Дата: item.date,
-        Класс: item.className,
-        Учитель: item.teacher,
-        Ученик: item.studentName,
-        Причина: item.reason,
-        Всего: item.allstudents || ''
-    }));
+    // Добавляем главный лист "umumiy"
+    const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
+    XLSX.utils.book_append_sheet(workbook, umumiySheet, 'umumiy');
 
-    const sheet = XLSX.utils.json_to_sheet(classRows);
-    XLSX.utils.book_append_sheet(workbook, sheet, "Отчет по ученикам");
+    // Добавляем листы по классам
+    Object.keys(classMap).sort().forEach(className => {
+      const sheet = XLSX.utils.json_to_sheet(classMap[className]);
+      XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
+    });
+
     XLSX.writeFile(workbook, `DAVOMAT_${selectedDate}.xlsx`);
+  } catch (error) {
+    console.error("Ошибка при экспорте:", error);
+    alert("Ошибка при создании отчета.");
+  }
 });
