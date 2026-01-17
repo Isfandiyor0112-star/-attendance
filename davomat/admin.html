@@ -14,9 +14,21 @@
 <body>
 
 <div class="container py-5">
-    <h2 data-i18n="admin_panel_title" class="main-title">Админ-панель школы №22</h2>
+    <div class="language-picker mb-4">
+        <div class="glass-btn-group" id="langGroup">
+            <div class="lang-slider"></div> 
+            <button id="lang-ru" class="btn-lang active">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> Рус
+            </button>
+            <button id="lang-uz" class="btn-lang">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" alt="UZ"> Uzb
+            </button>
+        </div>
+    </div>
 
-    <div class="control-panel mb-5">
+    <h2 data-i18n="admin_panel_title" class="main-title text-center">Админ-панель школы №22</h2>
+
+    <div class="control-panel mb-5 mt-4">
         <div class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label for="dateFilter" class="form-label text-white fw-medium" data-i18n="choose_date">Выберите дату:</label>
@@ -31,21 +43,6 @@
         </div>
     </div>
 
- 
-<div class="language-picker">
-    <div class="glass-btn-group" id="langGroup">
-        <div class="lang-slider"></div> 
-        <button id="lang-ru" class="btn-lang active">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> Рус
-        </button>
-        <button id="lang-uz" class="btn-lang">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" alt="UZ"> Uzb
-        </button>
-    </div>
-</div>
-
-
-    
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="card stat-card main-stat h-100">
@@ -71,24 +68,10 @@
         </div>
     </div>
 
-    <div id="classChartsContainer" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-2">
-        </div>
-</div>
-
-<div class="language-picker">
-    <div class="glass-btn-group">
-        <button id="lang-ru" class="btn-lang active">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> Рус
-        </button>
-        <button id="lang-uz" class="btn-lang">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" alt="UZ"> Uzb
-        </button>
-    </div>
+    <div id="classChartsContainer" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-2"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>
-
-
