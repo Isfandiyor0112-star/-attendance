@@ -14,16 +14,16 @@
  <meta name="theme-color" content="#0d6efd">
  </head>
 <body class="bg-light">
-  <div class="position-absolute top-0 end-0 p-3" style="z-index:10000;">
-    <div class="btn-group">
-      <button id="lang-ru" class="btn btn-light btn-sm">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" width="16" height="12" alt="RU"> Рус
-      </button>
-      <button id="lang-uz" class="btn btn-light btn-sm">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" width="16" height="12" alt="UZ"> Uzb
-      </button>
-    </div>
+<div class="language-picker">
+  <div class="glass-btn-group">
+    <button id="lang-ru" class="btn-lang active">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> <span>Рус</span>
+    </button>
+    <button id="lang-uz" class="btn-lang">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" alt="UZ"> <span>Uzb</span>
+    </button>
   </div>
+</div>
   <div id="videoIntro" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#000;display:flex;justify-content:center;align-items:center;">
     <video src="intro.mp4" autoplay muted playsinline style="width:auto;height:auto;max-width:auto;max-height:auto;object-fit:cover;border-radius:0;"></video>
   </div>
@@ -123,6 +123,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   }
 });
 </script>
+
 
 
 
