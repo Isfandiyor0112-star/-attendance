@@ -1,4 +1,4 @@
-// 1. БАЗА ДАННЫХ УЧИТЕЛЕЙ
+// 1. БАЗА ДАННЫХ УЧИТЕЛЕЙ (Твои пользователи)
 const users = [
     { name: "Dadabayeva.I.D.", className: "1A" },
     { name: "Cherimitsina.A.K.", className: "1B" },
@@ -49,7 +49,7 @@ const users = [
 
 const API_URL = 'https://attendancesrv.vercel.app/api/absents';
 
-// --- ЛОГИКА ЭКСПОРТА EXCEL ---
+// --- ЭКСПОРТ В EXCEL ---
 document.getElementById('exportExcel').onclick = async () => {
     const selectedDate = document.getElementById('dateFilter').value;
     if (!selectedDate) return alert("Выберите дату!");
@@ -60,7 +60,7 @@ document.getElementById('exportExcel').onclick = async () => {
         const filtered = allData.filter(a => a.date === selectedDate);
         const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
 
-        // 1. Лист "Umumiy" (Рейтинг)
+        // 1. ЛИСТ "Umumiy" - Чистый рейтинг
         const summaryRows = users.map(u => {
             const match = filtered.find(i => norm(i.teacher) === norm(u.name));
             const total = match ? parseFloat(match.allstudents) || 0 : 0;
@@ -73,18 +73,18 @@ document.getElementById('exportExcel').onclick = async () => {
                 "Ф.И.О. Учителя": u.name,
                 "Класс": u.className,
                 "Посещаемость (%)": parseFloat(perc.toFixed(1)),
-                "Статус": match ? "✅" : "❌"
+                "Заполнено": match ? "✅" : "❌"
             };
         }).sort((a, b) => b["Посещаемость (%)"] - a["Посещаемость (%)"]);
 
         const wb = XLSX.utils.book_new();
         const wsUmumiy = XLSX.utils.json_to_sheet(summaryRows);
-
-        // Авто-ширина колонок для Umumiy
-        wsUmumiy['!cols'] = [{wch:12}, {wch:25}, {wch:10}, {wch:15}, {wch:10}, {wch:10}, {wch:18}, {wch:10}];
+        
+        // Ширина колонок для Umumiy (Учитель - 30, остальное по 12)
+        wsUmumiy['!cols'] = [{wch:12}, {wch:30}, {wch:10}, {wch:18}, {wch:12}];
         XLSX.utils.book_append_sheet(wb, wsUmumiy, 'Umumiy');
 
-        // 2. Листы по классам (Подробно)
+        // 2. ПОДРОБНЫЕ ЛИСТЫ ПО КЛАССАМ
         const classGroups = {};
         filtered.forEach(i => {
             if(!classGroups[i.className]) classGroups[i.className] = [];
@@ -96,10 +96,10 @@ document.getElementById('exportExcel').onclick = async () => {
 
             classGroups[i.className].push({
                 "Дата": i.date,
-                "Ученик": i.studentName,
-                "Причина": i.reason,
+                "Ф.И.О. Ученика": i.studentName,
+                "Причина отсутствия": i.reason,
                 "Всего в классе": total,
-                "Болеют (кол-во)": sick,
+                "Болеют": sick,
                 "Пришли": present,
                 "Процент посещ.": perc
             });
@@ -107,20 +107,22 @@ document.getElementById('exportExcel').onclick = async () => {
 
         Object.keys(classGroups).sort().forEach(cls => {
             const wsClass = XLSX.utils.json_to_sheet(classGroups[cls]);
-            wsClass['!cols'] = [{wch:12}, {wch:20}, {wch:15}, {wch:15}, {wch:15}, {wch:10}, {wch:15}];
+            // Ширина колонок для классов (Ученик - 30)
+            wsClass['!cols'] = [{wch:12}, {wch:30}, {wch:20}, {wch:15}, {wch:10}, {wch:10}, {wch:15}];
             XLSX.utils.book_append_sheet(wb, wsClass, `Класс ${cls}`);
         });
 
-        XLSX.writeFile(wb, `DAVOMAT_22_MAKTAB_${selectedDate}.xlsx`);
+        XLSX.writeFile(wb, `OTCHET_22_SKOLA_${selectedDate}.xlsx`);
     } catch (e) {
-        alert("Ошибка при создании Excel");
+        alert("Ошибка экспорта");
     }
 };
 
-// --- ОСТАЛЬНОЙ ФУНКЦИОНАЛ (ЯЗЫК, ГРАФИКИ, ОЧИСТКА) ---
+// --- ФУНКЦИИ ИНТЕРФЕЙСА (ОСТАВЬ КАК ЕСТЬ) ---
+let absents = [];
 const translations = {
-    ru: { admin_panel_title: "Админ-панель №22", choose_date: "Дата:", total_absent: "Отсутствуют", reason_stats: "Статистика", clear_history: "Очистить историю", export_btn: "Скачать Excel" },
-    uz: { admin_panel_title: "22-maktab admin", choose_date: "Sana:", total_absent: "Yo'qlar", reason_stats: "Statistika", clear_history: "Tozalash", export_btn: "Excel yuklash" }
+    ru: { admin_panel_title: "Админ-панель №22", choose_date: "Дата:", total_absent: "Отсутствуют", reason_stats: "Статистика", clear_history: "Очистить историю", export_btn: "Excel" },
+    uz: { admin_panel_title: "22-maktab admin paneli", choose_date: "Sana:", total_absent: "Yo'qlar", reason_stats: "Statistika", clear_history: "Tozalash", export_btn: "Excel" }
 };
 
 function setLang(lang) {
@@ -130,9 +132,6 @@ function setLang(lang) {
     });
     localStorage.setItem('lang', lang);
 }
-
-document.getElementById('lang-ru').onclick = () => setLang('ru');
-document.getElementById('lang-uz').onclick = () => setLang('uz');
 
 async function loadAbsents() {
     try {
@@ -188,4 +187,3 @@ function renderClassPieCharts(data) {
 document.getElementById('clearHistory').onclick = async () => { if (confirm('Очистить ВСЮ базу?')) { await fetch(API_URL, { method: 'DELETE' }); location.reload(); } };
 
 document.addEventListener('DOMContentLoaded', () => { loadAbsents(); setLang(localStorage.getItem('lang') || 'ru'); });
-
