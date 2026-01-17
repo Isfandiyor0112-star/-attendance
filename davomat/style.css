@@ -7,44 +7,18 @@
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background-image: url('/logo3.png');
+    background: #1a1a1a url('/logo3.png') no-repeat fixed center;
     background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     color: #1a1a1a;
-    min-height: 100vh;
 }
 
-/* 1. ГЛАВНЫЙ ФИКС РАСТЯГИВАНИЯ */
-.row {
-    align-items: flex-start !important; /* Чтобы карточки не тянулись вниз */
+/* ФИКС ГИГАНТСКИХ КАРТИНОК - Это самое важное */
+img {
+    max-width: 100%;
+    height: auto;
 }
 
-.card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-    height: auto !important;
-    margin-bottom: 1rem;
-}
-
-/* 2. ФИКС ГИГАНТСКИХ ФЛАГОВ (Критично!) */
-.btn-lang img {
-    width: 20px !important;
-    height: 14px !important;
-    min-width: 20px;
-    max-width: 20px;
-    object-fit: contain !important; /* Чтобы флаг не искажался */
-    border-radius: 2px;
-    display: block; /* Убирает лишние отступы */
-}
-
-/* 3. КНОПКИ ЯЗЫКА (КАПСУЛА) */
+/* Кнопки языка (Капсула) */
 .language-picker {
     position: fixed;
     top: 20px;
@@ -53,13 +27,11 @@ body {
 }
 
 .glass-btn-group {
-    background: rgba(0, 0, 0, 0.6) !important; /* Сделал темнее для читаемости */
+    background: rgba(0, 0, 0, 0.5) !important;
     backdrop-filter: blur(10px);
     padding: 4px;
     border-radius: 50px;
     display: flex;
-    align-items: center;
-    gap: 4px;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -73,9 +45,15 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 14px;
-    font-weight: 500;
     cursor: pointer;
-    transition: 0.2s;
+}
+
+/* Строгий фикс размера флага внутри кнопки */
+.btn-lang img {
+    width: 20px !important;
+    height: 14px !important;
+    object-fit: cover !important;
+    border-radius: 2px;
 }
 
 .btn-lang.active {
@@ -83,40 +61,38 @@ body {
     color: black !important;
 }
 
-/* 4. СТИЛИ ГРАФИКОВ (Легенда сбоку) */
+/* Карточки и сетка */
+.row {
+    align-items: flex-start !important;
+}
+
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 20px;
+    overflow: hidden; /* Чтобы график не вылезал */
+}
+
+/* Центрирование и размер графиков */
 .chart-wrapper {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    gap: 20px;
-    flex-wrap: nowrap;
+    padding: 20px;
+    width: 100%;
 }
 
 .canvas-container {
-    width: 130px !important;
-    height: 130px !important;
-    flex-shrink: 0;
+    width: 200px !important; /* Фиксируем размер круга */
+    height: 200px !important;
+    position: relative;
 }
 
-.custom-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.legend-marker {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    flex-shrink: 0;
+canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .stat-number {
@@ -125,6 +101,5 @@ body {
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    line-height: 1;
-    margin: 10px 0;
+    text-align: center;
 }
