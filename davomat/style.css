@@ -15,149 +15,69 @@ body {
     color: #1a1a1a;
 }
 
-/* Главный заголовок */
+/* 1. Уменьшаем заголовок */
 .main-title {
     color: #ffffff;
-    font-size: 2.8rem;
+    font-size: 2.2rem; /* Было 2.8rem */
     font-weight: 800;
     text-align: center;
     letter-spacing: -0.04em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin: 20px 0;
 }
 
-/* Карточки в стиле Glassmorphism */
+/* 2. Делаем карточки компактнее */
 .card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    border-radius: 20px; /* Было 24px */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     transition: transform 0.3s ease;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-}
-
-/* Стили для статистики */
-.stat-card .card-subtitle {
-    color: #6c757d;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-}
-
+/* 3. Ограничиваем высоту больших цифр */
 .stat-number {
-    font-size: 4rem;
+    font-size: 3rem; /* Было 4rem */
     font-weight: 800;
     margin: 0;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1.2;
 }
 
-/* Контейнер для графиков */
+/* 4. ЖЕСТКИЙ ФИКС ДЛЯ ГРАФИКОВ (убираем огромность) */
 .chart-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
+    justify-content: center;
+    padding: 10px;
+    height: 160px !important; /* Было неограниченно */
 }
 
 .canvas-container {
-    max-width: 180px;
+    width: 130px !important; /* Было 180px */
+    height: 130px !important;
     position: relative;
+    margin: 0 auto;
 }
 
-/* Кнопки */
-.btn-action {
-    border-radius: 14px;
-    padding: 12px 24px;
-    font-weight: 600;
-    border: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* 5. Уменьшаем карточки классов в контейнере */
+#classChartsContainer .card {
+    min-height: 250px; /* Ограничиваем высоту, чтобы не тянулись вниз */
 }
 
-.btn-primary-custom {
-    background: var(--primary-gradient);
-    color: white;
-    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
-}
-
-.btn-primary-custom:hover {
-    box-shadow: 0 12px 25px rgba(13, 110, 253, 0.5);
-    filter: brightness(1.1);
-}
-
-.btn-danger-custom {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-    border: 1.5px solid #dc3545;
-}
-
-.btn-danger-custom:hover {
-    background: #dc3545;
-    color: white;
-}
-
-/* Выбор языка */
-.language-picker {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.glass-btn-group {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    padding: 5px;
-    border-radius: 15px;
-    display: flex;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-lang {
-    background: transparent;
-    border: none;
-    color: white;
-    padding: 6px 15px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.3s;
-}
-
-.btn-lang img {
-    width: 20px;
-    border-radius: 3px;
-}
-
-.btn-lang:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.btn-lang.active {
-    background: white;
-    color: black;
-}
-
-/* Поля ввода */
+/* Поля ввода и кнопки */
 .custom-select {
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    cursor: pointer;
+    border-radius: 12px;
+    padding: 8px 12px; /* Было 12px */
+    font-size: 0.9rem;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-    .main-title { font-size: 1.8rem; }
-    .stat-number { font-size: 3rem; }
+.btn-action {
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
 }
