@@ -1,96 +1,89 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Панель учителя</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Панель учителя | School №22</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="container mt-4">
-    <div class="card shadow">
-      <div class="card-body">
-        <h2 id="teacherName" data-i18n="teacher_panel"></h2>
-        <form id="attendanceForm" class="row g-3 mt-3">
-          <div class="col-md-3">
-            <input type="text" class="form-control" id="className" readonly placeholder="Класс" data-i18n="class">
-          </div>
-          <div class="col-md-3">
-            <input type="date" class="form-control" id="date" required>
-          </div>                 
-          <div class="col-md-2">
-            <input type="number" class="form-control" id="allstudents" placeholder="Кол-во по списку" min="1" required>
-          </div>
-          <div class="col-md-2">
-            <input type="number" class="form-control" id="count" placeholder="Кол-во болеющих" min="0" required>
-          </div>
-          <div class="col-md-4">
-            <input type="text" class="form-control" id="studentName" placeholder="Имена учеников через запятую" required>
-          </div>
-          <div class="col-md-4">
-            <input type="text" class="form-control" id="reason" placeholder="Причина отсутствия" required>
-          </div>
-          <div class="col-12">
-            <button type="submit" class="btn btn-success w-100" data-i18n="mark_btn">Отметить отсутствующих</button>
-          </div>
-        </form>
-      </div>
-    </div>
-    <div class="card mt-4">
-      <div class="card-body">
-        <h5 data-i18n="absent_list">Список отсутствующих</h5>
-        <ul id="absentList" class="list-group"></ul>
-      </div>
-    </div>
-  </div>
-  <div class="position-absolute top-0 end-0 p-3" style="z-index:10000;">
-    <div class="btn-group">
-      <button id="lang-ru" class="btn btn-light btn-sm">
-        <img src= "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" width="16" height="12" alt="RU"> Рус
-      </button>
-      <button id="lang-uz" class="btn btn-light btn-sm">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" width="16" height="12" alt="UZ"> Uzb
-      </button>
-    </div>
-  </div>
-  <script src="teacher.js"></script>
-  <script>
-const translations = {
-  ru: {
-    teacher_panel: "Панель учителя",
-    class: "Класс",
-    date: "Дата",
-    count: "Кол-во",
-    students: "Имена учеников через запятую",
-    reason: "Причина отсутствия",
-    mark_btn: "Отметить отсутствующих",
-    absent_list: "Список отсутствующих"
-  },
-  uz: {
-    teacher_panel: "O'qituvchi paneli",
-    class: "Sinf",
-    date: "Sana",
-    count: "Soni",
-    students: "O'quvchilar ismlari vergul bilan",
-    reason: "Yo‘qlik sababi",
-    mark_btn: "Yo‘qlikni belgilash",
-    absent_list: "Yo‘qliklar ro‘yxati"
-  }
-};
+<body class="teacher-page">
 
-function setLang(lang) {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (translations[lang][key]) el.textContent = translations[lang][key];
-  });
-  localStorage.setItem('lang', lang);
-}
+<div class="container py-5">
+    <div class="header-section text-center mb-5">
+        <h2 id="teacherName" data-i18n="teacher_panel" class="main-title text-white">Панель учителя</h2>
+        <p class="text-white-50">Управление посещаемостью класса</p>
+    </div>
 
-document.getElementById('lang-ru').onclick = () => setLang('ru');
-document.getElementById('lang-uz').onclick = () => setLang('uz');
-const lang = localStorage.getItem('lang') || 'ru';
-setLang(lang);
-</script>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card stat-card mb-4">
+                <div class="card-body p-4">
+                    <form id="attendanceForm" class="row g-4">
+                        
+                        <div class="col-12"><h6 class="text-primary fw-bold text-uppercase small">Общая информация</h6></div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Класс</label>
+                            <input type="text" class="form-control custom-input" id="className" readonly placeholder="Класс">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Дата</label>
+                            <input type="date" class="form-control custom-input" id="date" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Всего по списку</label>
+                            <input type="number" class="form-control custom-input" id="allstudents" placeholder="0" min="1" required>
+                        </div>
+
+                        <div class="col-12 mt-4"><h6 class="text-primary fw-bold text-uppercase small">Данные об отсутствии</h6></div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Кол-во болеющих</label>
+                            <input type="number" class="form-control custom-input highlighted" id="count" placeholder="0" min="0" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Имена (через запятую)</label>
+                            <textarea class="form-control custom-input" id="studentName" rows="1" placeholder="Иван И., Анна М." required></textarea>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold">Причина</label>
+                            <input type="text" class="form-control custom-input" id="reason" placeholder="Напр: По болезни" required>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary-custom w-100 py-3 fw-bold" data-i18n="mark_btn">
+                                🚀 Отправить отчет в базу
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card stat-card shadow-lg">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0" data-i18n="absent_list">Список отсутствующих</h5>
+                        <span class="badge bg-primary rounded-pill" id="badgeCount">Сегодня</span>
+                    </div>
+                    <ul id="absentList" class="list-group list-group-flush">
+                        </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="language-picker">
+    <div class="glass-btn-group">
+        <button id="lang-ru" class="btn-lang active">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> Рус
+        </button>
+        <button id="lang-uz" class="btn-lang">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" alt="UZ"> Uzb
+        </button>
+    </div>
+</div>
+
+<script src="teacher.js"></script>
 </body>
 </html>
-
