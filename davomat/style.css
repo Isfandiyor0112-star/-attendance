@@ -1,7 +1,7 @@
+/* 1. ПЕРЕМЕННЫЕ И СБРОС */
 :root {
-    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.4);
+    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0052cc 100%);
+    --glass-bg: rgba(255, 255, 255, 0.8);
 }
 
 * {
@@ -11,197 +11,145 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-image: url('/logo3.png');
     background-size: cover;
-    background-position: center;
+    background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    color: #1a1a1a;
+    color: #2D3436;
+    min-height: 100vh;
     width: 100%;
     overflow-x: hidden;
 }
 
-/* Контейнер для адаптивности */
-.container {
-    width: 100%;
-    max-width: 1200px;
-    padding: 15px;
-    margin: 0 auto;
-}
-
-/* Главный заголовок */
-.main-title {
+/* 2. ГЛАВНЫЙ ЗАГОЛОВОК (НЕО-ЭФФЕКТ) */
+h2[data-i18n="admin_panel_title"], .main-title {
     color: #ffffff;
-    font-size: 2.8rem;
     font-weight: 800;
     text-align: center;
-    letter-spacing: -0.04em;
-    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    margin-top: 60px; /* Отступ под кнопки языка */
+    letter-spacing: -0.03em;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin: 60px 0 20px;
 }
 
-/* Карточки Glassmorphism */
+/* 3. КАРТОЧКИ (МАТОВОЕ СТЕКЛО) */
 .card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     margin-bottom: 20px;
 }
 
-.card:hover {
-    transform: translateY(-5px);
+/* 4. ИНПУТЫ И КНОПКИ (ТВОЙ СТИЛЬ) */
+input[type="text"], input[type="password"], select {
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 16px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Статистика */
-.stat-number {
-    font-size: 3.5rem;
-    font-weight: 800;
-    margin: 0;
+input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+}
+
+button[type="submit"], .btn-action {
     background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
 }
 
-/* ИСПРАВЛЕННЫЙ Выбор языка */
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+}
+
+/* 5. ВЫБОР ЯЗЫКА (ФИКС) */
 .language-picker {
     position: fixed;
     top: 15px;
     right: 15px;
     z-index: 1100;
 }
-
 .glass-btn-group {
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(10px);
     padding: 4px;
     border-radius: 12px;
     display: flex;
-    gap: 4px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
-
 .btn-lang {
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.9);
-    padding: 8px 14px;
+    color: white;
+    padding: 8px 12px;
     border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
     cursor: pointer;
 }
-
-.btn-lang img {
-    width: 20px;
-    height: 14px;
-    object-fit: cover;
-    border-radius: 2px;
-}
-
-.btn-lang:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
 .btn-lang.active {
-    background: white !important;
-    color: #000 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background: white;
+    color: black;
 }
 
-/* Поля ввода и кнопки */
-.custom-input, .custom-select {
-    background: rgba(255, 255, 255, 0.7) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 12px !important;
-    padding: 12px 15px;
-    width: 100%;
-    margin-bottom: 15px;
+/* ============================================= */
+/* 6. АДАПТИВНОСТЬ (РАЗДЕЛЕНИЕ ПК И ТЕЛЕФОНА)  */
+/* ============================================= */
+
+/* --- ДЛЯ КОМПЬЮТЕРОВ --- */
+@media (min-width: 769px) {
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px;
+    }
+    h2 { font-size: 2.5rem; }
 }
 
-.btn-action {
-    border-radius: 14px;
-    padding: 14px 24px;
-    font-weight: 600;
-    width: 100%;
-    border: none;
-    transition: all 0.3s ease;
-}
-
-.btn-primary-custom {
-    background: var(--primary-gradient);
-    color: white;
-    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
-}
-
-/* Список отсутствующих с кнопками управления */
-.list-group-item {
-    background: rgba(255, 255, 255, 0.4) !important;
-    margin-bottom: 8px;
-    border-radius: 12px !important;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-}
-
-.item-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-edit, .btn-delete {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.btn-edit { background: #e3f2fd; color: #0d6efd; }
-.btn-delete { background: #ffebee; color: #dc3545; }
-
-/* Адаптивность для мобильных устройств */
+/* --- ДЛЯ ТЕЛЕФОНОВ --- */
 @media (max-width: 768px) {
-    .main-title { 
-        font-size: 1.8rem; 
-        margin-top: 70px;
+    .container {
+        padding: 15px;
     }
     
-    .stat-number { font-size: 2.8rem; }
+    h2[data-i18n="admin_panel_title"], .main-title {
+        font-size: 1.8rem;
+        margin-top: 80px; /* Чтобы не перекрывалось кнопками языка */
+    }
 
+    /* На телефоне всё на всю ширину */
+    input, select, button[type="submit"], .btn-action {
+        width: 100% !important;
+        height: 55px; /* Большая область нажатия */
+        font-size: 18px !important;
+    }
+
+    .card {
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+
+    /* Кнопки языка на мобилке компактнее */
+    .btn-lang span { display: none; } /* Только флаги */
+    
+    /* Список с кнопками ✏️🗑️ */
     .list-group-item {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .item-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    .btn-lang span {
-        display: none; /* Оставляем только флаги на мобилках */
-    }
-    
-    .glass-btn-group {
-        padding: 2px;
+        align-items: flex-start !important;
+        gap: 10px;
     }
 }
