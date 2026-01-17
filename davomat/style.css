@@ -1,213 +1,100 @@
-/* =========================================
-   1. ОСНОВА И ШРИФТЫ
-   ========================================= */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 :root {
+    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
     --glass-bg: rgba(255, 255, 255, 0.9);
     --glass-border: rgba(255, 255, 255, 0.4);
-    --primary-grad: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-    --danger-grad: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-    --shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-    --text-dark: #1e293b;
-}
-
-* {
-    font-family: 'Inter', sans-serif !important;
-    box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    min-height: 100vh;
-    background: #0f172a url('/logo3.png') no-repeat center fixed;
-    background-size: cover;
-    color: var(--text-dark);
+    font-family: 'Inter', sans-serif;
+    background: #121212 url('/logo3.png') no-repeat center center fixed;
+    background-size: 500px; /* Фиксируем размер логотипа, чтобы он не был гигантским */
+    color: #1a1a1a;
 }
 
-/* Затемняющий слой для читаемости на любом фоне */
+/* Затемняем фон, чтобы логотип не мешал читать */
 body::before {
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.45);
+    background: rgba(0, 0, 0, 0.7);
     z-index: -1;
 }
 
-/* =========================================
-   2. КАРТОЧКИ (Glassmorphism)
-   ========================================= */
-.card, .stat-card {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border) !important;
-    border-radius: 26px !important;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    overflow: hidden;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
-}
-
-/* =========================================
-   3. ЗАГОЛОВКИ
-   ========================================= */
+/* Главный заголовок */
 .main-title {
-    color: #ffffff !important;
+    color: #ffffff;
+    font-size: 2rem; /* Уменьшил размер */
     font-weight: 800;
-    font-size: 2.5rem;
-    letter-spacing: -0.04em;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    text-align: center;
+    margin-bottom: 30px;
 }
 
-.text-white-50 {
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-/* =========================================
-   4. ФОРМЫ (Teacher & Login)
-   ========================================= */
-.custom-input, .form-control, .form-select {
-    background: rgba(255, 255, 255, 0.8) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-radius: 14px !important;
-    padding: 12px 16px !important;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.custom-input:focus, .form-control:focus {
-    background: #ffffff !important;
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15) !important;
-    border-color: #0d6efd !important;
-    outline: none;
-}
-
-/* Подсветка для поля "Кол-во болеющих" */
-.highlighted {
-    border: 1.5px solid rgba(13, 110, 253, 0.3) !important;
-    background: rgba(13, 110, 253, 0.05) !important;
-}
-
-/* =========================================
-   5. КНОПКИ
-   ========================================= */
-.btn-primary-custom, .btn-primary {
-    background: var(--primary-grad) !important;
-    border: none !important;
-    border-radius: 16px !important;
-    color: white !important;
-    font-weight: 700 !important;
-    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
-    transition: 0.3s ease;
-}
-
-.btn-danger-custom {
-    background: var(--danger-grad) !important;
-    border: none !important;
-    border-radius: 16px !important;
-    color: white !important;
-    font-weight: 600;
-}
-
-.btn:hover {
-    transform: scale(1.02);
-    filter: brightness(1.1);
-}
-
-/* =========================================
-   6. СПИСКИ (Absent List)
-   ========================================= */
-.list-group-item {
-    background: transparent !important;
-    border-color: rgba(0, 0, 0, 0.05) !important;
-    padding: 15px 0;
-    font-weight: 500;
-}
-
-.badge {
-    padding: 8px 16px !important;
-    font-weight: 600 !important;
-}
-
-/* =========================================
-   7. ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА
-   ========================================= */
-.language-picker {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-}
-
-.glass-btn-group {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
-    border-radius: 50px;
-    padding: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    display: flex;
-}
-
-.btn-lang {
-    background: transparent;
-    border: none;
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.3s;
-}
-
-.btn-lang img {
-    width: 20px;
-    height: 14px;
-    object-fit: cover;
-    border-radius: 2px;
-}
-
-.btn-lang.active {
-    background: #fff !important;
-    color: #000 !important;
-}
-
-/* =========================================
-   8. АДМИНКА: ФИКС СЕТКИ
-   ========================================= */
+/* Ограничиваем ширину контейнера для карточек классов */
 #classChartsContainer {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 20px !important;
     justify-content: center !important;
+    gap: 20px !important;
 }
 
+/* ФИКС: Карточки в админке больше не тянутся */
+#classChartsContainer > .col, 
 #classChartsContainer > div {
-    flex: 0 1 360px !important;
-    width: 360px !important;
+    flex: 0 0 320px !important; /* Строгая ширина 320px */
+    max-width: 320px !important;
+}
+
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    height: 100%; /* Чтобы в ряду были одной высоты */
+}
+
+/* Компактные графики */
+.canvas-container {
+    width: 140px !important; /* Уменьшил размер кругов */
+    height: 140px !important;
+    margin: 0 auto;
 }
 
 .stat-number {
-    font-size: 4rem !important;
+    font-size: 3rem; /* Чуть меньше гигантских цифр */
     font-weight: 800;
-    background: var(--primary-grad);
+    background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* =========================================
-   9. АДАПТИВНОСТЬ
-   ========================================= */
-@media (max-width: 768px) {
-    .main-title { font-size: 1.8rem; }
-    .container { padding-top: 20px !important; }
-    .language-picker { top: 10px; right: 10px; }
-    #classChartsContainer > div { width: 100% !important; max-width: 100% !important; }
+/* Кнопки и селекты */
+.custom-select {
+    max-width: 300px;
+    border-radius: 12px;
+}
+
+.btn-action {
+    border-radius: 12px;
+    padding: 10px 20px;
+}
+
+/* Шапка с кнопками */
+.control-panel {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+}
+
+/* Выбор языка */
+.language-picker {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.glass-btn-group {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
 }
