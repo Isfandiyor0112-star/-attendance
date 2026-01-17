@@ -1,136 +1,163 @@
-/* ОБЩИЕ СБРОСЫ */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+:root {
+    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.4);
 }
 
 body {
+    margin: 0;
     font-family: 'Inter', sans-serif;
-    background: #f4f7f6; /* Светлый спокойный фон вместо черного */
-    color: #333;
-    line-height: 1.6;
+    background-image: url('/logo3.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #1a1a1a;
 }
 
-/* ФОНОВАЯ КАРТИНКА (ТЕПЕРЬ ОНА НЕ БУДЕТ МЕШАТЬ) */
-.bg-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* Ставим твой логотип маленьким и в углу или по центру, но прозрачным */
-    background: url('/logo3.png') no-repeat center center;
-    background-size: 300px; 
-    opacity: 0.05; /* Делаем почти невидимым, чтобы не мешал тексту */
-    z-index: -1;
-}
-
-/* ЗАГОЛОВКИ */
+/* Главный заголовок */
 .main-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 20px 0;
+    color: #ffffff;
+    font-size: 2.8rem;
+    font-weight: 800;
     text-align: center;
-    color: #2c3e50;
+    letter-spacing: -0.04em;
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* АДМИН-ПАНЕЛЬ: СЕТКА (Чтобы карточки не тянулись) */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 15px;
-}
-
-/* Сетка для графиков классов */
-#classChartsContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
-}
-
-/* КАРТОЧКИ (Аккуратные и компактные) */
+/* Карточки в стиле Glassmorphism */
 .card {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    padding: 20px;
-    height: auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
 
-/* ГРАФИКИ (Ограничиваем размер кругов) */
-.canvas-container {
-    width: 150px !important;
-    height: 150px !important;
-    margin: 0 auto 15px;
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Стили для статистики */
+.stat-card .card-subtitle {
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
 }
 
 .stat-number {
-    font-size: 2.5rem;
+    font-size: 4rem;
     font-weight: 800;
-    color: #0d6efd;
-    text-align: center;
+    margin: 0;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* ПАНЕЛЬ УПРАВЛЕНИЯ (Дата и кнопки) */
-.control-panel {
-    background: #fff;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
+/* Контейнер для графиков */
+.chart-wrapper {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-around;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 20px;
 }
 
-/* СТРАНИЦА ВХОДА */
-#loginContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+.canvas-container {
+    max-width: 180px;
+    position: relative;
 }
 
-.login-card {
-    width: 100%;
-    max-width: 350px;
-    padding: 30px;
+/* Кнопки */
+.btn-action {
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* КНОПКИ ЯЗЫКА (Убираем гигантские флаги) */
+.btn-primary-custom {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+}
+
+.btn-primary-custom:hover {
+    box-shadow: 0 12px 25px rgba(13, 110, 253, 0.5);
+    filter: brightness(1.1);
+}
+
+.btn-danger-custom {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1.5px solid #dc3545;
+}
+
+.btn-danger-custom:hover {
+    background: #dc3545;
+    color: white;
+}
+
+/* Выбор языка */
 .language-picker {
-    position: absolute;
-    top: 15px;
-    right: 15px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.glass-btn-group {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 5px;
+    border-radius: 15px;
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-lang {
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 5px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.btn-lang.active {
-    background: #0d6efd;
-    color: #fff;
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 6px 15px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
 }
 
 .btn-lang img {
-    width: 18px;
-    vertical-align: middle;
-    margin-right: 5px;
+    width: 20px;
+    border-radius: 3px;
 }
 
-/* ТАБЛИЦЫ И СПИСКИ (Для панели учителя) */
-.list-group-item {
-    border: none;
-    border-bottom: 1px solid #eee;
-    padding: 10px 0;
+.btn-lang:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-lang.active {
+    background: white;
+    color: black;
+}
+
+/* Поля ввода */
+.custom-select {
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    cursor: pointer;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .main-title { font-size: 1.8rem; }
+    .stat-number { font-size: 3rem; }
 }
