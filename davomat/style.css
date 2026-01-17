@@ -3,7 +3,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Inter', sans-serif;
-    /* Твой фирменный фон: лого на темно-синем */
+    /* Логотип зафиксирован, синий цвет темный и глубокий */
     background: #0f172a url('logo3.png') no-repeat center center fixed;
     background-size: contain; 
     min-height: 100vh;
@@ -12,7 +12,7 @@ body {
     color: #fff;
 }
 
-/* --- 2. ИНТРО (ОРИГИНАЛЬНЫЙ ВИД) --- */
+/* --- 2. ИНТРО (ВИДЕО ПРИ ЗАГРУЗКЕ) --- */
 .video-overlay, #videoIntro {
     position: fixed;
     top: 0; left: 0;
@@ -26,30 +26,47 @@ body {
     object-fit: contain;
 }
 
-.login-card {
+/* --- 3. ГЛАССМОРФИЗМ (СТЕКЛО) ДЛЯ ВСЕХ КАРТОЧЕК --- */
+/* Этот блок лечит "белую" учительскую и админку */
+.login-card, .card, .stat-card, .control-panel {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 25px !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    
-    /* ВОТ ЭТИ СТРОКИ ИСПРАВЯТ "ХУДОБУ" */
-    width: 100%;
-    max-width: 400px; /* Оптимальная ширина для мобилок и ПК */
-    padding: 40px 30px !important; /* Больше внутреннего пространства */
-    margin: 20px;
-}
-
-
-/* Заголовки */
-.main-title, h2, h3, h5, .card-title {
     color: #fff !important;
-    font-weight: 800 !important;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    margin-bottom: 20px;
 }
 
-/* Поля ввода (Прозрачные) */
+/* Исправляем ширину формы входа (чтобы не была худой) */
+.login-card {
+    width: 100%;
+    max-width: 420px; 
+    padding: 40px 30px !important;
+    margin: auto; /* Центрирует на странице входа */
+}
+
+/* --- 4. КНОПКИ (СИНИЙ ЦВЕТ И ШИРИНА) --- */
+.btn-primary-custom, .btn-primary {
+    background: #0d6efd !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    padding: 15px !important;
+    width: 100%; /* Кнопка во всю ширину */
+    display: block;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary-custom:hover {
+    background: #0b5ed7 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+}
+
+/* --- 5. ПОЛЯ ВВОДА (ПРОЗРАЧНЫЕ) --- */
 .form-control, .form-select, .custom-input {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -58,41 +75,24 @@ body {
     padding: 12px !important;
 }
 
-.form-control:focus {
+.form-control:focus, .form-select:focus {
     background: rgba(255, 255, 255, 0.1) !important;
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.3) !important;
-}
-
-/* --- 4. КНОПКИ (СИНИЙ ОРИГИНАЛ) --- */
-.btn-primary-custom {
-    background: #0d6efd !important;
-    border: none !important;
     color: #fff !important;
-    border-radius: 12px !important;
-    font-weight: 800 !important;
-    transition: all 0.3s ease;
-
-    /* ВОТ ЭТО СДЕЛАЕТ КНОПКУ КРАСИВОЙ */
-    width: 100%; /* Растянуть на всю ширину формы */
-    padding: 15px !important; /* Сделать её массивнее */
-    margin-top: 10px;
-    display: block;
 }
 
-.btn-primary-custom:hover {
-    background: #0b5ed7 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
+/* Чтобы текст в выпадающих списках был виден */
+option {
+    background: #1e293b;
+    color: #fff;
 }
 
-
-/* --- 5. СЛАЙДЕР ЯЗЫКА (ПЛАВНЫЙ) --- */
+/* --- 6. СЛАЙДЕР ВЫБОРА ЯЗЫКА --- */
 .language-picker {
     position: fixed;
     top: 20px; right: 20px;
     z-index: 11000;
 }
-
 .glass-btn-group {
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
@@ -103,7 +103,6 @@ body {
     width: 140px; height: 38px;
     position: relative;
 }
-
 .lang-slider {
     position: absolute;
     top: 3px; left: 3px;
@@ -113,49 +112,37 @@ body {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
 }
-
-/* Позиция УЗБ */
-.glass-btn-group[data-active="uz"] .lang-slider {
-    transform: translateX(67px);
-}
-
+.glass-btn-group[data-active="uz"] .lang-slider { transform: translateX(67px); }
 .btn-lang {
     flex: 1; background: none !important; border: none !important;
     color: #fff !important; z-index: 2; cursor: pointer;
     font-size: 12px; font-weight: 800;
     display: flex; align-items: center; justify-content: center; gap: 5px;
 }
+.btn-lang.active { color: #000 !important; }
+.btn-lang img { width: 18px; height: 12px; object-fit: cover; border-radius: 2px; }
 
-.btn-lang.active {
-    color: #000 !important; /* Текст на белом фоне становится черным */
+/* --- 7. ТЕКСТ И СПИСКИ --- */
+.main-title, h2, h3, h5, .card-title {
+    color: #fff !important;
+    font-weight: 800 !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
-/* Флаги */
-.btn-lang img {
-    width: 18px !important; height: 12px !important;
-    object-fit: cover !important; border-radius: 2px;
-}
-
-/* --- 6. СПИСКИ (СПИСОК ОТСУТСТВУЮЩИХ) --- */
 .list-group-item {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 8px !important;
     border-radius: 15px !important;
     color: #fff !important;
-    transition: 0.2s;
 }
 
-.list-group-item:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-}
+.text-primary { color: #3b82f6 !important; }
+.text-white-50 { color: rgba(255, 255, 255, 0.6) !important; }
 
-.btn-outline-light, .btn-outline-danger {
-    border-radius: 8px;
+/* --- 8. СТАТИСТИКА (АДМИНКА) --- */
+.stat-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #0d6efd;
 }
-
-/* Текст «Учитель: Имя» */
-#teacherName {
-    text-transform: capitalize;
-}
-
