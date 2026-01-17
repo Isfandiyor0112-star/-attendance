@@ -12,8 +12,8 @@
 
 <div class="container py-5">
     <div class="header-section text-center mb-5">
-        <h2 id="teacherName" data-i18n="teacher_panel" class="main-title text-white">Панель учителя</h2>
-        <p class="text-white-50">Управление посещаемостью класса</p>
+        <h2 id="teacherName" class="main-title text-white"></h2>
+        <p class="text-white-50" data-i18n="management_desc">Управление посещаемостью класса</p>
     </div>
 
     <div class="row justify-content-center">
@@ -21,32 +21,35 @@
             <div class="card stat-card mb-4">
                 <div class="card-body p-4">
                     <form id="attendanceForm" class="row g-4">
-                        
-                        <div class="col-12"><h6 class="text-primary fw-bold text-uppercase small">Общая информация</h6></div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">Класс</label>
-                            <input type="text" class="form-control custom-input" id="className" readonly placeholder="Класс">
+                        <div class="col-12">
+                            <h6 class="text-primary fw-bold text-uppercase small" data-i18n="general_info">Общая информация</h6>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">Дата</label>
+                            <label class="form-label small fw-bold" data-i18n="label_class">Класс</label>
+                            <input type="text" class="form-control custom-input" id="className" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold" data-i18n="label_date">Дата</label>
                             <input type="date" class="form-control custom-input" id="date" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">Всего по списку</label>
-                            <input type="number" class="form-control custom-input" id="allstudents" placeholder="0" min="1" required>
+                            <label class="form-label small fw-bold" data-i18n="label_total">Всего по списку</label>
+                            <input type="number" class="form-control custom-input" id="allstudents" placeholder="0" required>
                         </div>
 
-                        <div class="col-12 mt-4"><h6 class="text-primary fw-bold text-uppercase small">Данные об отсутствии</h6></div>
+                        <div class="col-12 mt-4">
+                            <h6 class="text-primary fw-bold text-uppercase small" data-i18n="absence_data">Данные об отсутствии</h6>
+                        </div>
                         <div class="col-md-3">
-                            <label class="form-label small fw-bold">Кол-во болеющих</label>
-                            <input type="number" class="form-control custom-input highlighted" id="count" placeholder="0" min="0" required>
+                            <label class="form-label small fw-bold" data-i18n="label_sick">Кол-во болеющих</label>
+                            <input type="number" class="form-control custom-input highlighted" id="count" placeholder="0" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">Имена (через запятую)</label>
+                            <label class="form-label small fw-bold" data-i18n="label_names">Имена (через запятую)</label>
                             <textarea class="form-control custom-input" id="studentName" rows="1" placeholder="Иван И., Анна М." required></textarea>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-bold">Причина</label>
+                            <label class="form-label small fw-bold" data-i18n="label_reason">Причина</label>
                             <input type="text" class="form-control custom-input" id="reason" placeholder="Напр: По болезни" required>
                         </div>
 
@@ -63,10 +66,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold mb-0" data-i18n="absent_list">Список отсутствующих</h5>
-                        <span class="badge bg-primary rounded-pill" id="badgeCount">Сегодня</span>
+                        <span class="badge bg-primary rounded-pill" id="badgeCount" data-i18n="today">Сегодня</span>
                     </div>
-                    <ul id="absentList" class="list-group list-group-flush">
-                    </ul>
+                    <ul id="absentList" class="list-group list-group-flush"></ul>
                 </div>
             </div>
         </div>
@@ -75,7 +77,8 @@
 
 <div class="language-picker">
     <div class="glass-btn-group" id="langGroup" data-active="ru">
-        <div class="lang-slider"></div> <button id="lang-ru" class="btn-lang active" onclick="setLang('ru')">
+        <div class="lang-slider"></div>
+        <button id="lang-ru" class="btn-lang active" onclick="setLang('ru')">
             <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> Рус
         </button>
         <button id="lang-uz" class="btn-lang" onclick="setLang('uz')">
