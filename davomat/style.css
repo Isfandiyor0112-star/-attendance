@@ -1,165 +1,144 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
-:root {
-    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.4);
-}
-
+/* Современный сброс и шрифты */
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif !important;
-    background: #1a1a1a url('/logo3.png') no-repeat fixed center;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background-image: url('/logo3.png');
     background-size: cover;
-    color: #1a1a1a;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #2D3436;
     min-height: 100vh;
 }
 
-/* 1. КНОПКИ ЯЗЫКА (КАПСУЛА) - Исправляем гигантские флаги */
+/* Фикс гигантских флагов и кнопок языка */
 .language-picker {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 9999;
+    z-index: 1000;
 }
 
 .glass-btn-group {
-    background: rgba(0, 0, 0, 0.6) !important;
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
     padding: 4px;
-    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     display: flex;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    gap: 2px;
+    gap: 4px;
 }
 
-.btn-lang {
-    background: transparent !important;
-    border: none !important;
-    color: white !important;
-    padding: 6px 14px !important;
-    border-radius: 50px !important;
+.btn-glass {
+    border: none;
+    color: white;
+    background: transparent;
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: background 0.3s;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
     cursor: pointer;
-    transition: 0.2s;
 }
 
-.btn-lang.active {
-    background: white !important;
-    color: black !important;
+.btn-glass.active {
+    background: rgba(255, 255, 255, 0.4);
 }
 
-/* ФИКС: Принудительный размер флага */
-.btn-lang img {
+.btn-glass img {
     width: 20px !important;
     height: 14px !important;
     min-width: 20px !important;
-    max-width: 20px !important;
     object-fit: cover !important;
     border-radius: 2px !important;
-    display: inline-block !important;
 }
 
-/* 2. КНОПКИ EXCEL И ОЧИСТКИ - Делаем их яркими как на скриншоте */
-.btn-action {
-    border-radius: 12px !important;
-    padding: 10px 24px !important;
-    font-weight: 600 !important;
-    color: white !important;
-    display: inline-flex;
+/* Эффект матового стекла для карточек */
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden !important; /* Чтобы графики не вылезали */
+    margin-bottom: 20px;
+}
+
+/* ЖЕСТКИЙ ФИКС ДЛЯ ГРАФИКОВ */
+.chart-wrapper {
+    position: relative;
+    height: 200px !important;
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    border: none !important;
-    transition: 0.3s;
+    padding: 15px;
+}
+
+.canvas-container {
+    position: relative;
+    width: 160px !important;
+    height: 160px !important;
+}
+
+canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Заголовок */
+h2[data-i18n="admin_panel_title"] {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 40px 0 20px;
+    letter-spacing: -0.03em;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Число отсутствующих */
+#totalAbsent {
+    font-size: 4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+    text-align: center;
+}
+
+/* Кнопки Excel и Очистка */
+.btn-action-group {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-bottom: 20px;
 }
 
 .btn-primary-custom {
-    background: #0d6efd !important;
-    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+    background: linear-gradient(135deg, #0d6efd 0%, #0052cc 100%) !important;
+    color: white !important;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    cursor: pointer;
 }
 
 .btn-danger-custom {
-    background: #dc3545 !important;
-    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    background: linear-gradient(135deg, #dc3545 0%, #a71d2a 100%) !important;
+    color: white !important;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    cursor: pointer;
 }
-
-.btn-action:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-
-/* 3. ГРАФИКИ - Исправляем обрезанный круг */
-.row {
-    align-items: flex-start !important; /* Отменяем растягивание */
-}
-
-/* ЖЕСТКИЙ ФИКС ДЛЯ КАРТОЧЕК */
-.card {
-    background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(12px);
-    border-radius: 24px !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    overflow: hidden !important; /* ГЛАВНОЕ: обрезает всё, что вылезает */
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-/* ОГРАНИЧИТЕЛЬ ДЛЯ ГРАФИКА */
-.chart-wrapper {
-    position: relative;
-    width: 100%;
-    height: 250px; /* Фиксируем высоту, чтобы круг не рос до бесконечности */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-}
-
-.canvas-container {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    max-width: 200px; /* Максимальная ширина круга */
-    max-height: 200px;
-}
-
-/* ФИКС ТЕКСТА (чтобы не уезжал) */
-.card-body {
-    padding: 1.5rem !important;
-    z-index: 2;
-}
-
-.chart-wrapper {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    min-height: 200px; /* Даем место графику */
-}
-
-.canvas-container {
-    width: 160px !important; 
-    height: 160px !important;
-    position: relative;
-}
-
-/* 4. ТЕКСТ И СТАТИСТИКА */
-.stat-number {
-    font-size: 4rem;
-    font-weight: 800;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1;
-}
-
-.main-title {
-    color: #ffffff;
-    font-weight: 800;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
