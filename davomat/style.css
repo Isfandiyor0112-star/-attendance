@@ -146,3 +146,29 @@ option {
     font-weight: 800;
     color: #0d6efd;
 }
+
+/* --- ЭФФЕКТ ДЛЯ КНОПКИ ОЧИСТКИ (DANGER) --- */
+.btn-danger-custom {
+    background: rgba(220, 53, 69, 0.2) !important; /* Прозрачный красный */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(220, 53, 69, 0.4) !important;
+    color: #ff4d4d !important; /* Ярко-красный текст */
+    border-radius: 12px !important;
+    padding: 10px 20px !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: 100%; /* Если хочешь на всю ширину, как другие кнопки */
+    margin-top: 10px;
+}
+
+.btn-danger-custom:hover {
+    background: rgba(220, 53, 69, 0.4) !important;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px);
+    color: #fff !important; /* При наведении текст становится белым */
+}
+
+.btn-danger-custom:active {
+    transform: translateY(0);
+}
