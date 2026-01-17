@@ -6,7 +6,7 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif; /* Твой шрифт Inter */
+    font-family: 'Inter', sans-serif;
     background-image: url('/logo3.png');
     background-size: cover;
     background-position: center;
@@ -15,7 +15,7 @@ body {
     color: #1a1a1a;
 }
 
-/* Главный заголовок — возвращаем твой размер */
+/* Главный заголовок */
 .main-title {
     color: #ffffff;
     font-size: 2.8rem;
@@ -23,10 +23,9 @@ body {
     text-align: center;
     letter-spacing: -0.04em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    margin: 30px 0;
 }
 
-/* Твои стеклянные карточки */
+/* Карточки в стиле Glassmorphism */
 .card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -35,10 +34,22 @@ body {
     border-radius: 24px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* Добавил отступ снизу */
 }
 
-/* Статистика: возвращаем 4rem */
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Стили для статистики */
+.stat-card .card-subtitle {
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
 .stat-number {
     font-size: 4rem;
     font-weight: 800;
@@ -46,37 +57,27 @@ body {
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-align: center;
 }
 
-/* ФИКС ДЛЯ КАРТОЧЕК КЛАССОВ (Чтобы они были нормальной ширины) */
-#classChartsContainer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-
-#classChartsContainer .card {
-    flex: 0 1 350px; /* Фиксируем ширину карточки класса, чтобы не сжималась */
-    min-width: 300px;
-}
-
-/* Контейнер для графиков — делаем его адекватным */
+/* Контейнер для графиков */
 .chart-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
     min-height: 200px; /* Чтобы не сплющивало как на скрине */
 }
 
 .canvas-container {
-    width: 180px !important; /* Твой оригинальный размер */
-    height: 180px !important;
+    max-width: 180px;
+    width: 100%;
     position: relative;
+    display: flex;
+    justify-content: center;
 }
 
-/* Кнопки — возвращаем твой дизайн */
+/* Кнопки */
 .btn-action {
     border-radius: 14px;
     padding: 12px 24px;
@@ -88,6 +89,7 @@ body {
 .btn-primary-custom {
     background: var(--primary-gradient);
     color: white;
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
 }
 
 .btn-danger-custom {
@@ -96,10 +98,61 @@ body {
     border: 1.5px solid #dc3545;
 }
 
-/* Флаги — теперь они будут маленькими, как на твоем удачном скрине */
+/* Выбор языка */
+.language-picker {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.glass-btn-group {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 5px;
+    border-radius: 15px;
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-lang {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 6px 15px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
 .btn-lang img {
-    width: 20px !important;
-    height: 14px !important;
+    width: 20px !important; /* Жестко ограничил */
+    height: 14px !important; /* Чтобы не было как на скрине с флагами */
+    object-fit: cover;
     border-radius: 3px;
-    display: inline-block;
+}
+
+/* Сетка для карточек классов (чтобы не были в одну узкую полоску) */
+#classChartsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Поля ввода */
+.custom-select {
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    cursor: pointer;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .main-title { font-size: 1.8rem; }
+    .stat-number { font-size: 3rem; }
 }
