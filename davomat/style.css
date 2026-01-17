@@ -1,26 +1,24 @@
-/* 1. БАЗА И ФИРМЕННЫЙ ФОН */
-* {
+/* 1. ТОТ САМЫЙ ФОН С ЛОГОТИПОМ */
+body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    /* Твой логотип: без синевы, четко по центру */
-    background: #0f172a url('logo3.png') no-repeat center center fixed;
-    background-size: 600px; 
+    font-family: 'Inter', sans-serif;
+    /* Убираем синеву, ставим логотип на весь экран */
+    background: url('logo3.png') no-repeat center center fixed;
+    background-size: contain; /* Логотип будет максимально большим, но впишется в экран */
+    background-color: #121212; /* Только для того, чтобы края не были белыми */
     min-height: 100vh;
-    color: #fff;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-/* 2. ИНТРО (НЕ ТРОГАЕМ МАСШТАБ) */
+/* 2. ИНТРО (БЕЗ ИСКАЖЕНИЙ) */
 #videoIntro {
     position: fixed;
     top: 0; left: 0;
-    width: 100vw; height: 100vh;
+    width: 100%; height: 100%;
     z-index: 10000;
     background: #000;
 }
@@ -29,36 +27,32 @@ body {
     object-fit: contain;
 }
 
-/* 3. ГЛАССМОРФИЗМ (ДЛЯ ВСЕХ КАРТОЧЕК) */
-.card, .login-card, .stat-card, .list-container {
-    background: rgba(255, 255, 255, 0.1) !important; /* Прозрачность */
-    backdrop-filter: blur(15px) saturate(150%);
-    -webkit-backdrop-filter: blur(15px);
+/* 3. НАСТОЯЩИЙ GLASSMORPHISM (ДЛЯ ВСЕХ СТРАНИЦ) */
+.card, .login-card, .stat-card, .list-container, .list-group-item {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 25px !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-    color: #fff !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    color: #ffffff !important;
 }
 
 /* Поля ввода (тоже стекло) */
 .form-control, .custom-input {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
     border-radius: 12px !important;
+    padding: 12px !important;
 }
 
-.form-control:focus {
-    background: rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4) !important;
-}
-
-/* 4. ИСПРАВЛЕННЫЙ СЛАЙДЕР ЯЗЫКА */
+/* 4. СЛАЙДЕР ЯЗЫКА (ИСПРАВЛЕННЫЙ) */
 .language-picker {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 11000; /* Выше интро на всякий случай */
+    z-index: 1100;
 }
 
 .glass-btn-group {
@@ -68,24 +62,22 @@ body {
     padding: 3px;
     display: flex;
     width: 150px;
-    height: 40px;
+    height: 42px;
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .lang-slider {
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 72px; /* Ровно половина */
-    height: 32px;
-    background: #fff;
+    top: 3px; left: 3px;
+    width: 72px; height: 36px;
+    background: #ffffff;
     border-radius: 50px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
 }
 
-/* Логика движения слайдера */
+/* Позиция ползунка */
 .glass-btn-group[data-active="uz"] .lang-slider {
     transform: translateX(72px);
 }
@@ -103,38 +95,25 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: color 0.3s;
 }
 
-/* Текст на белом фоне становится черным */
 .btn-lang.active {
-    color: #000 !important;
+    color: #000 !important; /* Текст на белом фоне — черный */
 }
 
-/* ЖЕСТКИЙ ФИКС ФЛАГОВ */
+/* ФИКС ФЛАГОВ */
 .btn-lang img {
-    width: 20px !important;
-    height: 14px !important;
-    min-width: 20px !important;
+    width: 18px !important;
+    height: 12px !important;
+    min-width: 18px !important;
     object-fit: cover !important;
-    border-radius: 2px;
 }
 
-/* 5. СПИСКИ (TEACHER / ADMIN) */
-.list-group-item {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #fff !important;
-    border-radius: 15px !important;
-    margin-bottom: 10px !important;
-    backdrop-filter: blur(5px);
-}
-
-.btn-primary {
+/* 5. КНОПКИ (СИНИЙ ОРИГИНАЛ) */
+.btn-primary, .btn-primary-custom {
     background: #0d6efd !important;
     border: none !important;
     border-radius: 12px !important;
-    padding: 12px !important;
+    padding: 14px !important;
     font-weight: 700 !important;
 }
-
