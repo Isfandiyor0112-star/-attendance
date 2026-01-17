@@ -58,52 +58,7 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* Контейнер для графиков */
-.chart-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.canvas-container {
-    max-width: 180px;
-    position: relative;
-}
-
-/* Кнопки */
-.btn-action {
-    border-radius: 14px;
-    padding: 12px 24px;
-    font-weight: 600;
-    border: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-primary-custom {
-    background: var(--primary-gradient);
-    color: white;
-    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
-}
-
-.btn-primary-custom:hover {
-    box-shadow: 0 12px 25px rgba(13, 110, 253, 0.5);
-    filter: brightness(1.1);
-}
-
-.btn-danger-custom {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-    border: 1.5px solid #dc3545;
-}
-
-.btn-danger-custom:hover {
-    background: #dc3545;
-    color: white;
-}
-
-/* Выбор языка */
+/* Выбор языка с ползунком */
 .language-picker {
     position: fixed;
     top: 20px;
@@ -118,19 +73,45 @@ body {
     border-radius: 15px;
     display: flex;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative; /* Для позиционирования ползунка */
+    width: 180px; /* Фиксированная ширина для стабильности */
+}
+
+/* Эффект ползунка */
+.lang-slider {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    height: calc(100% - 10px);
+    width: calc(50% - 5px);
+    background: white;
+    border-radius: 11px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Сдвиг ползунка при активации UZ */
+.glass-btn-group[data-active="uz"] .lang-slider {
+    transform: translateX(100%);
 }
 
 .btn-lang {
-    background: transparent;
+    background: transparent !important;
     border: none;
     color: white;
-    padding: 6px 15px;
-    border-radius: 10px;
+    padding: 6px 0;
     font-size: 0.9rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    transition: 0.3s;
+    transition: color 0.3s;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
 }
 
 .btn-lang img {
@@ -138,25 +119,51 @@ body {
     border-radius: 3px;
 }
 
-.btn-lang:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
+/* Цвет текста активной кнопки */
 .btn-lang.active {
-    background: white;
-    color: black;
+    color: black !important;
 }
 
-/* Поля ввода */
+/* Остальные стили (кнопки, графики и т.д.) */
+.chart-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.canvas-container {
+    max-width: 180px;
+    position: relative;
+}
+
+.btn-action {
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary-custom {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.btn-danger-custom {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1.5px solid #dc3545;
+}
+
 .custom-select {
     border-radius: 14px;
     padding: 12px;
     border: 1px solid var(--glass-border);
     background: var(--glass-bg);
-    cursor: pointer;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
     .main-title { font-size: 1.8rem; }
     .stat-number { font-size: 3rem; }
