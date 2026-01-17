@@ -1,164 +1,59 @@
-/* 1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ И ШРИФТЫ */
+/* Обновляем цвета для читаемости */
 :root {
-    --primary-color: #0d6efd;
-    --primary-hover: #0b5ed7;
-    --glass-bg: rgba(255, 255, 255, 0.95); /* Плотный белый фон для читаемости */
-    --text-dark: #1a1a1a;   /* Глубокий темный цвет для текста */
-    --text-muted: #64748b;
-    --border-color: rgba(0, 0, 0, 0.1);
+    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95); /* Сделали фон плотнее */
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --text-main: #1a1a1a; /* Темный цвет для основного текста */
 }
 
-* {
-    box-sizing: border-box;
-}
-
+/* Исправляем фон страницы, чтобы флаги не вылезали */
 body {
     margin: 0;
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: #0f172a url('logo3.png') no-repeat center center fixed; /* Фон как на скриншотах */
+    font-family: 'Inter', sans-serif;
+    background-color: #0f172a; /* Темный глубокий фон под картинкой */
+    background-image: url('/logo3.png');
     background-size: cover;
-    color: var(--text-dark);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--text-main);
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
-/* 2. КАРТОЧКИ И КОНТЕЙНЕРЫ (ИСПРАВЛЕНИЕ ВИДИМОСТИ) */
-.card, .stat-card {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border-color) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    color: var(--text-dark) !important;
+/* Карточки теперь с темным текстом */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    color: #1a1a1a !important; /* Принудительно темный текст */
 }
 
-.card-body h3, .card-body h5, .card-body h6, .form-label {
-    color: var(--text-dark) !important;
-    font-weight: 700 !important;
-}
-
-/* 3. ПОЛЯ ВВОДА (INPUTS) */
-.custom-input, .form-control {
-    background: rgba(0, 0, 0, 0.05) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 12px !important;
-    color: var(--text-dark) !important;
-    padding: 12px 15px !important;
-    transition: all 0.3s;
-}
-
-.custom-input:focus {
-    background: white !important;
-    border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
-}
-
-/* 4. КНОПКИ */
-.btn-primary-custom, .btn-primary {
-    background: var(--primary-color);
-    border: none;
-    border-radius: 12px;
-    padding: 14px;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-.btn-primary:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-/* 5. ПОЛЗУНОК ВЫБОРА ЯЗЫКА (SLIDER) */
-.language-picker {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10001;
-}
-
-.glass-btn-group {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    padding: 4px;
-    border-radius: 50px;
-    display: flex;
-    position: relative;
-    width: 150px; /* Ширина всего переключателя */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.lang-slider {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    height: calc(100% - 8px);
-    width: calc(50% - 4px); /* Ровно половина */
-    background: white;
-    border-radius: 50px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-
-/* Движение ползунка */
-.glass-btn-group[data-active="uz"] .lang-slider {
-    transform: translateX(100%);
-}
-
-.btn-lang {
-    background: transparent !important;
-    border: none !important;
-    color: white !important;
-    font-size: 13px;
-    font-weight: 700;
-    flex: 1;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    padding: 8px 0;
-    transition: color 0.3s;
-}
-
-/* Текст на активной кнопке становится черным, т.к. под ним белый ползунок */
-.btn-lang.active {
-    color: #000 !important;
-}
-
-/* ИСПРАВЛЕНИЕ ОГРОМНЫХ ФЛАГОВ */
-.btn-lang img {
-    width: 18px !important; 
-    height: 14px !important;
-    object-fit: cover;
-    border-radius: 2px;
-}
-
-/* 6. СПИСОК ОТСУТСТВУЮЩИХ (ДЛЯ ТЕACHER/ADMIN) */
+/* Список отсутствующих — исправляем "невидимый" текст */
 .list-group-item {
     background: transparent !important;
-    color: var(--text-dark) !important;
-    border-bottom: 1px solid rgba(0,0,0,0.05) !important;
-    padding: 15px 10px !important;
+    color: #1a1a1a !important; /* Текст теперь черный/темный */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    font-weight: 500;
 }
 
 .list-group-item span {
-    color: var(--text-dark) !important;
-    font-size: 0.95rem;
+    color: #1a1a1a !important;
 }
 
-/* 7. ВИДЕО ИНТРО */
-#videoIntro video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+/* Заголовки внутри карточек */
+.card-body h5, .card-body h6, .form-label {
+    color: #1a1a1a !important;
 }
 
-/* 8. АДАПТИВНОСТЬ ДЛЯ МОБИЛОК */
-@media (max-width: 576px) {
-    .container { padding: 15px; }
-    .header-section h2 { font-size: 1.5rem; }
-    .language-picker { top: 10px; right: 10px; }
+/* Поля ввода сделаем чуть контрастнее */
+.custom-input {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #1a1a1a !important;
+}
+
+.custom-input::placeholder {
+    color: #6c757d !important;
 }
