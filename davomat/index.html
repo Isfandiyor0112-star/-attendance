@@ -1,129 +1,53 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Вход в систему</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
- <link rel="icon" type="image/png" sizes="32x32" href="web191.png">
- <link rel="apple-touch-icon" href="web191.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
- <meta name="apple-mobile-web-app-status-bar-style" content="default">
- <meta name="theme-color" content="#0d6efd">
- </head>
-<body class="bg-light">
-<div class="language-picker">
-  <div class="glass-btn-group">
-    <button id="lang-ru" class="btn-lang active">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> <span>Рус</span>
-    </button>
-    <button id="lang-uz" class="btn-lang">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" alt="UZ"> <span>Uzb</span>
-    </button>
-  </div>
-</div>
-  <div id="videoIntro" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#000;display:flex;justify-content:center;align-items:center;">
-    <video src="intro.mp4" autoplay muted playsinline style="width:auto;height:auto;max-width:auto;max-height:auto;object-fit:cover;border-radius:0;"></video>
-  </div>
-  <div id="loginContainer" style="display:none;">
-    <div class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-          <div class="card shadow">
-            <div class="card-body">
-              <h3 class="mb-4 text-center" data-i18n="login_title">Вход</h3>
-              <form id="loginForm">
-                <div class="mb-3">
-                  <label for="login" class="form-label" data-i18n="login_label">Логин</label>
-                  <input type="text" class="form-control" id="login" required>
-                </div>
-                <div class="mb-3">
-                  <label for="password" class="form-label" data-i18n="password_label">Пароль</label>
-                  <input type="password" class="form-control" id="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100" data-i18n="login_btn">Войти</button>
-                <div id="loginError" class="text-danger mt-2" style="display:none;" data-i18n="login_error">Неверный логин или пароль</div>
-              
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script src="script.js"></script>
-  <script>
-    setTimeout(() => {
-      document.getElementById('videoIntro').style.display = 'none';
-      document.getElementById('loginContainer').style.display = 'block';
-    }, 5000); // 5 секунд
-  </script>
-  <script>
-const translations = {
-  ru: {
-    login_title: "Вход",
-    login_label: "Логин",
-    password_label: "Пароль",
-    login_btn: "Войти",
-    login_error: "Неверный логин или пароль"
-  },
-  uz: {
-    login_title: "Kirish",
-    login_label: "Login",
-    password_label: "Parol",
-    login_btn: "Kirish",
-    login_error: "Login yoki parol noto'g'ri"
-  }
-};
+  <meta charset="UTF-8">
+  <title>Вход в систему</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="web191.png">
+  <meta name="theme-color" content="#0d6efd">
+</head>
+<body>
 
-function setLang(lang) {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (translations[lang][key]) el.textContent = translations[lang][key];
-  });
-  localStorage.setItem('lang', lang);
-}
+  <div class="language-picker">
+    <div class="glass-btn-group" id="langGroup" data-active="ru">
+      <div class="lang-slider"></div>
+      <button id="lang-ru" class="btn-lang active" onclick="changeLang('ru')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> <span>Рус</span>
+      </button>
+      <button id="lang-uz" class="btn-lang" onclick="changeLang('uz')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" alt="UZ"> <span>Uzb</span>
+      </button>
+    </div>
+  </div>
 
-const lang = localStorage.getItem('lang') || 'ru';
-setLang(lang);
-  </script>
+  <div id="videoIntro" class="video-overlay">
+    <video src="intro.mp4" autoplay muted playsinline></video>
+  </div>
+
+  <div id="loginContainer" style="display:none;">
+    <div class="container d-flex align-items-center justify-content-center min-vh-100">
+      <div class="login-card">
+        <h3 class="mb-4 text-center" data-i18n="login_title">Вход</h3>
+        <form id="loginForm">
+          <div class="mb-3">
+            <label class="form-label" data-i18n="login_label">Логин</label>
+            <input type="text" class="form-control" id="login" placeholder="Введите логин" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" data-i18n="password_label">Пароль</label>
+            <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn-primary-custom" data-i18n="login_btn">Войти</button>
+          <div id="loginError" class="login-error-text" style="display:none;" data-i18n="login_error">Неверный логин или пароль</div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
-
-<script>
-let deferredPrompt;
-
-// Проверяем, запущено ли приложение уже как PWA
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-
-// Ловим событие установки
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  // Если приложение ещё не установлено — показываем баннер
-  if (!isStandalone) {
-    const installBanner = document.createElement('div');
-    installBanner.className = "alert alert-info text-center mt-3";
-    installBanner.innerHTML = `
-      <p>📲 Установите приложение для быстрого доступа<br>
-      Davomat dasturini yuklab oling</p>
-      <button id="installBtn" class="btn btn-success">Установить</button>
-    `;
-    document.body.appendChild(installBanner);
-
-    document.getElementById('installBtn').addEventListener('click', () => {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => {
-        deferredPrompt = null;
-        installBanner.remove(); // убираем баннер после выбора
-      });
-    });
-  }
-});
-</script>
-
-
-
-
