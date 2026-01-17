@@ -1,318 +1,207 @@
+// 1. БАЗА ДАННЫХ УЧИТЕЛЕЙ (Из твоего списка)
+const users = [
+    { name: "Dadabayeva.I.D.", className: "1A" },
+    { name: "Cherimitsina.A.K.", className: "1B" },
+    { name: "Ermakova.D.Y.", className: "1V" },
+    { name: "Nurmatova.N.R.", className: "1G" },
+    { name: "Musamatova.G.M.", className: "2A" },
+    { name: "Toshmatova.Y.Z.", className: "2B" },
+    { name: "Movlonova.U.U.", className: "2V" },
+    { name: "Ubaydullayeva.M.M.", className: "2G" },
+    { name: "Ismoilova.N.E.", className: "2D" },
+    { name: "Izalxan.L.I.", className: "3A" },
+    { name: "Matkarimova.N.B.", className: "3B" },
+    { name: "Qarshibayeva.N.A.", className: "3V" },
+    { name: "Djamalova.F.A.", className: "3D" },
+    { name: "Kambarova.K.M.", className: "4A" },
+    { name: "Polyakova.V.A.", className: "4B" },
+    { name: "Normuratova.D.X.", className: "4V" },
+    { name: "Madaminova.S.Y.", className: "4G" },
+    { name: "Sheranova.D.T.", className: "4D" },
+    { name: "Zokirxonova.G.B.", className: "5A" },
+    { name: "Abdumavlonova.X.M.", className: "5B" },
+    { name: "Ermatova.X.A.", className: "5V" },
+    { name: "Mamatqulova.O.S.", className: "5G" },
+    { name: "Raximov.R.R.", className: "6A" },
+    { name: "Ismoilov.A.K.", className: "6B" },
+    { name: "Yettiyeva.D.M.", className: "6V" },
+    { name: "Malikova.B.A.", className: "6G" },
+    { name: "Normatova.G.D.", className: "6D" },
+    { name: "Nefyodova.N.A.", className: "7A" },
+    { name: "Xakimova.D.A.", className: "7B" },
+    { name: "Fozilov.I.O.", className: "7V" },
+    { name: "Buligina.V.Y.", className: "8A" },
+    { name: "Yardamova.M.M.", className: "8B" },
+    { name: "Mandiyev.O.A.", className: "8V" },
+    { name: "Pardayeva.N.M.", className: "9A" },
+    { name: "Aripov.A.I.", className: "9B" },
+    { name: "Mamajanova.M.A.", className: "9V" },
+    { name: "Xodjahanov.A.O.", className: "9G" },
+    { name: "Ismoilova.M.A.", className: "9D" },
+    { name: "Xasanova.O.G.", className: "10A" },
+    { name: "Satimova.D.F.", className: "10B" },
+    { name: "Ruzmatova.S.M.", className: "10V" },
+    { name: "Baltabayeva.M.T.", className: "11A" },
+    { name: "Ryabinina.S.Y.", className: "11B" },
+    { name: "Abdullayeva.M.R.", className: "11V" },
+    { name: "Aliyeva.N.M.", className: "11G" }
+].filter(u => u.className);
+
+const API_URL = 'https://attendancesrv.vercel.app/api/absents';
 const translations = {
     ru: {
         admin_panel_title: "Админ-панель школы №22",
         choose_date: "Выберите дату:",
         total_absent: "Всего отсутствующих",
-        reason_stats: "Статистика причин отсутствия",
+        reason_stats: "Статистика причин",
         clear_history: "Очистить историю",
-        absent_list: "Список отсутствующих"
+        export_btn: "Скачать Excel"
     },
     uz: {
         admin_panel_title: "22-maktab admin paneli",
         choose_date: "Sana tanlang:",
         total_absent: "Yo‘qlarning jami",
-        reason_stats: "Yo‘qlik sabablari statistikasi",
+        reason_stats: "Sabablar statistikasi",
         clear_history: "Tarixni tozalash",
-        absent_list: "Yo‘qliklar ro‘yxati"
+        export_btn: "Excel yuklash"
     }
 };
 
-// Функция смены языка
+let absents = [];
+const reasonColors = ['#09ff00', '#ff0000', '#0d6efd', '#ffc107', '#6610f2'];
+
+// --- СМЕНА ЯЗЫКА ---
 function setLang(lang) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-            el.textContent = translations[lang][key];
-        }
+        if (translations[lang][key]) el.textContent = translations[lang][key];
     });
-    
-    // Переключаем активный класс на кнопках
     document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`lang-${lang}`);
-    if (activeBtn) activeBtn.classList.add('active');
-    
+    if (document.getElementById(`lang-${lang}`)) document.getElementById(`lang-${lang}`).classList.add('active');
+    if (document.getElementById('langGroup')) document.getElementById('langGroup').setAttribute('data-active', lang);
     localStorage.setItem('lang', lang);
 }
 
 document.getElementById('lang-ru').onclick = () => setLang('ru');
 document.getElementById('lang-uz').onclick = () => setLang('uz');
-setLang(localStorage.getItem('lang') || 'ru');
 
-let absents = [];
-
-// Загрузка данных
+// --- ЗАГРУЗКА ДАННЫХ ---
 async function loadAbsents() {
     try {
-        const res = await fetch('https://attendancesrv.vercel.app/api/absents');
+        const res = await fetch(API_URL);
         absents = await res.json();
         fillDateFilter();
-    } catch (err) {
-        console.error("Ошибка загрузки:", err);
-    }
+    } catch (err) { console.error("Ошибка:", err); }
 }
 
 function fillDateFilter() {
-    const dateFilter = document.getElementById('dateFilter');
-    dateFilter.innerHTML = '';
-    
+    const filter = document.getElementById('dateFilter');
     const dates = [...new Set(absents.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
-    const today = new Date().toISOString().split('T')[0];
-
-    dates.forEach(date => {
-        const option = document.createElement('option');
-        option.value = date;
-        option.textContent = date;
-        if (date === today) option.selected = true;
-        dateFilter.appendChild(option);
-    });
-
-    if (!dateFilter.value && dates.length > 0) dateFilter.selectedIndex = 0;
-    dateFilter.onchange = () => renderByDate();
-    renderByDate();
-}
-
-const reasonColors = ['#09ff00', '#ff0000', '#0d6efd', '#ffc107', '#6610f2'];
-
-// --- Общая диаграмма (Фикс "половинки") ---
-function renderReasonPieChart(data) {  
-    const stats = {};
-    data.forEach(item => { stats[item.reason] = (stats[item.reason] || 0) + 1; });
-    const labels = Object.keys(stats);
-    const values = Object.values(stats);
-
-    if (window.reasonChart instanceof Chart) {
-        window.reasonChart.destroy();
-    }
-
-    const ctx = document.getElementById('reasonChart').getContext('2d');
-    window.reasonChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: labels.map((_, i) => reasonColors[i % reasonColors.length]),
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false, // КРИТИЧНО: чтобы круг не резался
-            plugins: { legend: { display: false } }
-        }
-    });
-
-    const legend = labels.map((label, i) =>
-        `<div class="legend-item">
-          <span class="legend-marker" style="background:${reasonColors[i % reasonColors.length]}"></span>
-          <span>${label}</span>
-        </div>`
-    ).join('');
-    document.getElementById('reasonLegend').innerHTML = legend;
-}
-
-// --- Диаграммы по классам ---
-function renderClassPieCharts(data) {
-    const container = document.getElementById('classChartsContainer');
-    container.innerHTML = '';
-
-    const classMap = {};
-    data.forEach(item => {
-        if (!classMap[item.className]) classMap[item.className] = [];
-        classMap[item.className].push(item);
-    });
-
-    Object.keys(classMap).sort().forEach((className, idx) => {
-        const classData = classMap[className];
-        const stats = {};
-        classData.forEach(item => { stats[item.reason] = (stats[item.reason] || 0) + 1; });
-        const labels = Object.keys(stats);
-        const values = Object.values(stats);
-
-        const col = document.createElement('div');
-        col.className = 'col-lg-4 col-md-6 col-12 mb-4 d-flex';
-
-        col.innerHTML = `
-            <div class="card flex-fill shadow-sm">
-                <div class="card-body p-3">
-                    <h6 class="text-center fw-bold mb-3">Класс ${className}</h6>
-                    <div class="chart-wrapper">
-                        <div class="canvas-container">
-                            <canvas id="classChart${idx}"></canvas>
-                        </div>
-                        <div class="custom-legend">
-                            ${labels.map((label, i) => `
-                                <div class="legend-item">
-                                    <span class="legend-marker" style="background:${reasonColors[i % reasonColors.length]}"></span>
-                                    <span style="font-size: 0.8rem">${label}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="mt-3 small border-top pt-2">
-                        ${classData.map(item => `
-                            <div class="py-1">
-                                <strong>${item.studentName}</strong> — ${item.reason} 
-                                <span class="text-muted">(${item.allstudents ? 'из '+item.allstudents : ''})</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-
-        container.appendChild(col);
-
-        const ctx = document.getElementById(`classChart${idx}`).getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: labels.map((_, i) => reasonColors[i % reasonColors.length]),
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-    });
+    filter.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+    if (dates.length > 0) renderByDate();
+    filter.onchange = renderByDate;
 }
 
 function renderByDate() {
     const date = document.getElementById('dateFilter').value;
-    const filtered = date ? absents.filter(a => a.date === date) : absents;
+    const filtered = absents.filter(a => a.date === date);
     document.getElementById('totalAbsent').textContent = filtered.length;
     renderReasonPieChart(filtered);
     renderClassPieCharts(filtered);
 }
 
-// Кнопка очистки
-document.getElementById('clearHistory').onclick = async function() {
-    if (confirm('Вы уверены, что хотите очистить всю историю?')) {
-        try {
-            await fetch('https://attendancesrv.vercel.app/api/absents', { method: 'DELETE' });
-            location.reload();
-        } catch (err) { alert("Ошибка при удалении"); }
+// --- ГРАФИКИ ---
+function renderReasonPieChart(data) {
+    const stats = {};
+    data.forEach(i => stats[i.reason] = (stats[i.reason] || 0) + 1);
+    const labels = Object.keys(stats);
+    if (window.reasonChart instanceof Chart) window.reasonChart.destroy();
+    window.reasonChart = new Chart(document.getElementById('reasonChart'), {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{ data: Object.values(stats), backgroundColor: reasonColors, borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+    document.getElementById('reasonLegend').innerHTML = labels.map((l, i) => 
+        `<div class="legend-item"><span class="legend-marker" style="background:${reasonColors[i % reasonColors.length]}"></span>${l}</div>`).join('');
+}
+
+function renderClassPieCharts(data) {
+    const container = document.getElementById('classChartsContainer');
+    container.innerHTML = '';
+    const classMap = {};
+    data.forEach(i => { if(!classMap[i.className]) classMap[i.className] = []; classMap[i.className].push(i); });
+
+    Object.keys(classMap).sort().forEach((cls, idx) => {
+        const classData = classMap[cls];
+        const stats = {};
+        classData.forEach(i => stats[i.reason] = (stats[i.reason] || 0) + 1);
+
+        const col = document.createElement('div');
+        col.className = 'col-lg-4 col-md-6 mb-4';
+        col.innerHTML = `
+            <div class="card h-100 stat-card p-3">
+                <h6 class="text-center fw-bold" style="color:#0d6efd">Класс ${cls}</h6>
+                <div style="height:150px"><canvas id="classChart${idx}"></canvas></div>
+                <div class="mt-2 small border-top pt-2" style="max-height:100px; overflow-y:auto">
+                    ${classData.map(i => `<div>• ${i.studentName} (${i.reason})</div>`).join('')}
+                </div>
+            </div>`;
+        container.appendChild(col);
+        new Chart(document.getElementById(`classChart${idx}`), {
+            type: 'pie',
+            data: { labels: Object.keys(stats), datasets: [{ data: Object.values(stats), backgroundColor: reasonColors }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    });
+}
+
+// --- EXCEL С РЕЙТИНГОМ ---
+document.getElementById('exportExcel').onclick = async () => {
+    const date = document.getElementById('dateFilter').value;
+    if (!date) return alert("Нет даты!");
+    
+    const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+    const filtered = absents.filter(a => a.date === date);
+
+    const summaryRows = users.map(u => {
+        const match = filtered.find(i => norm(i.teacher) === norm(u.name));
+        const total = match ? parseFloat(match.allstudents) : 0;
+        const sick = match ? parseFloat(match.count) : 0;
+        const perc = total > 0 ? ((total - sick) / total) * 100 : 0;
+        return {
+            "Учитель": u.name, "Класс": u.className,
+            "Пришли (%)": parseFloat(perc.toFixed(1)),
+            "Статус": match ? "✅" : "❌"
+        };
+    }).sort((a, b) => b["Пришли (%)"] - a["Пришли (%)"]);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryRows), 'Umumiy');
+    
+    const classGroups = {};
+    filtered.forEach(i => {
+        if(!classGroups[i.className]) classGroups[i.className] = [];
+        classGroups[i.className].push({ "Ученик": i.studentName, "Причина": i.reason });
+    });
+    Object.keys(classGroups).sort().forEach(c => {
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classGroups[c]), `Класс ${c}`);
+    });
+
+    XLSX.writeFile(wb, `Otchet_22_shkola_${date}.xlsx`);
+};
+
+// --- ОЧИСТКА ---
+document.getElementById('clearHistory').onclick = async () => {
+    if (confirm('Очистить ВСЮ базу?')) {
+        await fetch(API_URL, { method: 'DELETE' });
+        location.reload();
     }
 };
 
-// Проверка доступа
 document.addEventListener('DOMContentLoaded', () => {
-    const teacherData = localStorage.getItem('teacher');
-    if (!teacherData) {
-        window.location.href = 'index.html';
-        return;
-    }
-    const teacher = JSON.parse(teacherData);
-    const allowedAdmins = ["admin", "shaxnoza", "furkat", "matlyuba"];
-    if (!allowedAdmins.includes(teacher.login)) {
-        window.location.href = 'index.html';
-        return;
-    }
+    setLang(localStorage.getItem('lang') || 'ru');
     loadAbsents();
-});
-
-// Экспорт в Excel (исправленный)
-document.getElementById('exportExcel').addEventListener('click', async () => {
-  try {
-    const selectedDate = document.getElementById('dateFilter').value;
-    if (!selectedDate) {
-      alert("Выберите дату перед экспортом.");
-      return;
-    }
-
-    const res = await fetch('https://attendancesrv.onrender.com/api/absents');
-    const data = await res.json();
-    const filtered = data.filter(a => a.date === selectedDate);
-
-    // Вспомогательные функции для поиска
-    function normalize(name) {
-      return name.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
-    }
-    function shortenName(fullName) {
-      const parts = fullName.trim().split(/\s+/);
-      if (parts.length < 2) return fullName;
-      const surname = parts[0];
-      const initials = parts.slice(1).map(p => p[0].toUpperCase()).join('.');
-      return `${surname}.${initials}.`;
-    }
-
-    // 1. Формируем лист "umumiy" (Рейтинг учителей)
-    const summaryRows = allTeachers.map(teacherFullName => {
-      const short = shortenName(teacherFullName);
-      // Ищем данные учителя за эту дату
-      const match = filtered.find(item => normalize(item.teacher) === normalize(short));
-
-      if (!match) {
-        return {
-          "Учитель": teacherFullName,
-          "Класс": "-",
-          "Пришли (%)": 0,
-          "Всего": 0,
-          "Болеют": 0
-        };
-      }
-
-      const total = parseFloat(match.allstudents) || 0;
-      const sick = parseFloat(match.count) || 0;
-      const present = total - sick;
-      
-      // Расчет: сколько ПРИШЛО из общего количества
-      const percentValue = total > 0 ? (present / total) * 100 : 0;
-
-      return {
-        "Учитель": teacherFullName,
-        "Класс": match.className || "-",
-        "Пришли (%)": parseFloat(percentValue.toFixed(1)), // Число для правильной сортировки
-        "Всего": total,
-        "Болеют": sick
-      };
-    });
-
-    // 🔥 Сортировка: у кого 100% — тот первый, у кого 0% — тот последний
-    summaryRows.sort((a, b) => b["Пришли (%)"] - a["Пришли (%)"]);
-
-    // 2. Группируем подробные листы по классам
-    const classMap = {};
-    filtered.forEach(item => {
-      const total = parseFloat(item.allstudents) || 0;
-      const sick = parseFloat(item.count) || 0;
-      const present = total - sick;
-      const percent = total > 0 ? `${((present / total) * 100).toFixed(1)}%` : '0%';
-
-      if (!classMap[item.className]) classMap[item.className] = [];
-      classMap[item.className].push({
-        "Дата": item.date,
-        "Ученик": item.studentName,
-        "Причина": item.reason,
-        "Всего в классе": total,
-        "Болеют": sick,
-        "Пришли": present,
-        "Процент": percent
-      });
-    });
-
-    // 3. Создаем книгу Excel
-    const workbook = XLSX.utils.book_new();
-
-    // Добавляем главный лист "umumiy"
-    const umumiySheet = XLSX.utils.json_to_sheet(summaryRows);
-    XLSX.utils.book_append_sheet(workbook, umumiySheet, 'umumiy');
-
-    // Добавляем листы по классам
-    Object.keys(classMap).sort().forEach(className => {
-      const sheet = XLSX.utils.json_to_sheet(classMap[className]);
-      XLSX.utils.book_append_sheet(workbook, sheet, `Класс ${className}`);
-    });
-
-    XLSX.writeFile(workbook, `DAVOMAT_${selectedDate}.xlsx`);
-  } catch (error) {
-    console.error("Ошибка при экспорте:", error);
-    alert("Ошибка при создании отчета.");
-  }
 });
