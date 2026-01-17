@@ -1,18 +1,36 @@
+/* ГЛАВНЫЙ ФИРМЕННЫЙ ФОН */
 body {
-  background: #0f172a url('logo3.png') no-repeat center center fixed;
-  background-size: 400px; /* Чтобы лого не расплывалось */
-  min-height: 100vh;
-  margin: 0;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    /* Темный градиент поверх картинки, чтобы текст всегда читался */
+    background: 
+        linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
+        url('logo3.png') no-repeat center center fixed;
+    background-size: 500px; /* Размер твоего логотипа на фоне */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    color: #fff;
 }
 
-/* ФИКС ВИДЕО */
-.video-overlay {
-  position: fixed;
-  top:0; left:0; width:100%; height:100%;
-  z-index: 10000; background: #000;
-  transition: opacity 0.5s ease;
+/* Если на страницах Teacher/Admin контента много, фон должен тянуться */
+@media (min-height: 1000px) {
+    body {
+        background-attachment: fixed;
+    }
 }
-.video-overlay video { width: 100%; height: 100%; object-fit: cover; }
+
+/* ФИКС ДЛЯ МОБИЛОК (чтобы фон не прыгал при появлении клавиатуры) */
+@media (max-width: 768px) {
+    body {
+        background-size: 300px; /* Уменьшаем лого на мобилках */
+        background-position: center 20%; /* Сдвигаем чуть выше центра */
+    }
+}
+
 
 /* КАРТОЧКА ВХОДА */
 .login-card {
@@ -144,12 +162,4 @@ h2, h4, h5 {
     color: rgba(255,255,255,0.7) !important;
 }
 
-/* Фикс для мобильной версии (чтобы карточки не слипались) */
-@media (max-width: 576px) {
-    .container {
-        padding: 10px !important;
-    }
-    .stat-card {
-        padding: 15px;
-    }
-}
+
