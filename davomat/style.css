@@ -1,15 +1,17 @@
-/* 1. ПОДКЛЮЧАЕМ ШРИФТ INTER (Обязательно в самом верху) */
+/* =========================================
+   1. ОСНОВА И ШРИФТЫ
+   ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-    --danger-gradient: linear-gradient(135deg, #dc3545 0%, #a71d2a 100%);
     --glass-bg: rgba(255, 255, 255, 0.9);
-    --glass-border: rgba(255, 255, 255, 0.5);
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --primary-grad: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    --danger-grad: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    --shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    --text-dark: #1e293b;
 }
 
-/* 2. БАЗОВЫЕ НАСТРОЙКИ */
 * {
     font-family: 'Inter', sans-serif !important;
     box-sizing: border-box;
@@ -17,236 +19,195 @@
 
 body {
     margin: 0;
-    /* Твой фон + темная подложка на случай, если картинка не загрузится */
-    background: #121212 url('/logo3.png') no-repeat center fixed;
+    min-height: 100vh;
+    background: #0f172a url('/logo3.png') no-repeat center fixed;
     background-size: cover;
-    color: #1a1a1a;
-    -webkit-font-smoothing: antialiased; /* Шрифты будут четче */
-    padding-bottom: 50px;
+    color: var(--text-dark);
 }
 
-/* Красивый скроллбар */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-}
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 4px;
+/* Затемняющий слой для читаемости на любом фоне */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: -1;
 }
 
-/* 3. ГЛАВНЫЙ ЗАГОЛОВОК */
-.main-title {
-    color: #ffffff;
-    font-size: 2.8rem;
-    font-weight: 800;
-    text-align: center;
-    letter-spacing: -0.03em;
-    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    margin: 40px 0;
-}
-
-/* 4. КАРТОЧКИ (GLASSMORPHISM) */
-.card {
+/* =========================================
+   2. КАРТОЧКИ (Glassmorphism)
+   ========================================= */
+.card, .stat-card {
     background: var(--glass-bg) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border) !important;
-    border-radius: 24px !important;
-    box-shadow: var(--shadow-soft);
+    border-radius: 26px !important;
+    box-shadow: var(--shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
-    height: 100%; /* Чтобы карточки в ряду были одной высоты */
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
 }
 
-/* 5. СЕТКА ДЛЯ КЛАССОВ (Стабилизация размеров) */
-#classChartsContainer {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 25px !important;
-    justify-content: center !important;
-    padding: 20px 0;
-}
-
-#classChartsContainer > div {
-    flex: 0 1 360px !important; /* Базовая ширина 360px */
-    width: 100% !important;
-    max-width: 380px !important; /* Не растягиваться шире 380px */
-    min-width: 300px !important; /* Не сжиматься уже 300px */
-}
-
-/* 6. СТАТИСТИКА И ЦИФРЫ */
-.stat-card .card-subtitle {
-    color: #6c757d;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-}
-
-.stat-number {
-    font-size: 4rem !important;
+/* =========================================
+   3. ЗАГОЛОВКИ
+   ========================================= */
+.main-title {
+    color: #ffffff !important;
     font-weight: 800;
-    margin: 0;
-    line-height: 1.1;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
+    font-size: 2.5rem;
+    letter-spacing: -0.04em;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-/* 7. ГРАФИКИ (Центрирование) */
-.chart-wrapper {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-height: 220px;
-    padding: 10px;
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.canvas-container {
-    width: 160px !important;
-    height: 160px !important;
-    position: relative;
-    margin-bottom: 15px;
+/* =========================================
+   4. ФОРМЫ (Teacher & Login)
+   ========================================= */
+.custom-input, .form-control, .form-select {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 12px 16px !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-canvas {
-    width: 100% !important;
-    height: 100% !important;
+.custom-input:focus, .form-control:focus {
+    background: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15) !important;
+    border-color: #0d6efd !important;
+    outline: none;
 }
 
-/* 8. КНОПКИ */
-.btn-action-group {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
-    justify-content: flex-end;
-    padding-right: 15px;
+/* Подсветка для поля "Кол-во болеющих" */
+.highlighted {
+    border: 1.5px solid rgba(13, 110, 253, 0.3) !important;
+    background: rgba(13, 110, 253, 0.05) !important;
 }
 
-.btn-custom, .btn-primary-custom, .btn-danger-custom {
-    border-radius: 16px !important;
-    padding: 12px 24px !important;
-    font-weight: 600 !important;
+/* =========================================
+   5. КНОПКИ
+   ========================================= */
+.btn-primary-custom, .btn-primary {
+    background: var(--primary-grad) !important;
     border: none !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.3s ease;
+    border-radius: 16px !important;
     color: white !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
+    font-weight: 700 !important;
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+    transition: 0.3s ease;
 }
 
-/* Градиенты для кнопок */
-.btn-primary-custom, #exportExcel {
-    background: var(--primary-gradient) !important;
+.btn-danger-custom {
+    background: var(--danger-grad) !important;
+    border: none !important;
+    border-radius: 16px !important;
+    color: white !important;
+    font-weight: 600;
 }
 
-.btn-danger-custom, #clearHistory {
-    background: var(--danger-gradient) !important;
-}
-
-.btn-custom:hover, .btn-primary-custom:hover, .btn-danger-custom:hover {
-    transform: translateY(-2px);
+.btn:hover {
+    transform: scale(1.02);
     filter: brightness(1.1);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
-/* 9. ВЫБОР ЯЗЫКА (Фикс флагов) */
+/* =========================================
+   6. СПИСКИ (Absent List)
+   ========================================= */
+.list-group-item {
+    background: transparent !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+    padding: 15px 0;
+    font-weight: 500;
+}
+
+.badge {
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+}
+
+/* =========================================
+   7. ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА
+   ========================================= */
 .language-picker {
     position: fixed;
-    top: 25px;
-    right: 25px;
+    top: 20px;
+    right: 20px;
     z-index: 9999;
 }
 
 .glass-btn-group {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
     border-radius: 50px;
-    padding: 6px;
+    padding: 5px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
-    gap: 5px;
 }
 
 .btn-lang {
     background: transparent;
     border: none;
-    color: white;
+    color: #fff;
     padding: 8px 16px;
-    border-radius: 40px;
+    border-radius: 50px;
+    font-size: 0.85rem;
     font-weight: 600;
-    font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 8px;
-    cursor: pointer;
     transition: 0.3s;
 }
 
-.btn-lang:hover {
-    background: rgba(255, 255, 255, 0.15);
+.btn-lang img {
+    width: 20px;
+    height: 14px;
+    object-fit: cover;
+    border-radius: 2px;
 }
 
 .btn-lang.active {
-    background: white !important;
-    color: black !important;
-    box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+    background: #fff !important;
+    color: #000 !important;
 }
 
-/* ЖЕСТКИЙ ФИКС РАЗМЕРА ФЛАГОВ */
-.btn-lang img {
-    width: 22px !important;
-    height: 15px !important;
-    min-width: 22px !important;
-    object-fit: cover !important;
-    border-radius: 3px !important;
+/* =========================================
+   8. АДМИНКА: ФИКС СЕТКИ
+   ========================================= */
+#classChartsContainer {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 20px !important;
+    justify-content: center !important;
 }
 
-/* 10. ПОЛЯ ВВОДА */
-.custom-select {
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.9);
-    cursor: pointer;
-    font-weight: 500;
+#classChartsContainer > div {
+    flex: 0 1 360px !important;
+    width: 360px !important;
 }
 
-/* Списки учеников */
-.small.border-top {
-    font-size: 0.85rem;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.02);
-    max-height: 150px;
-    overflow-y: auto;
-    border-top: 1px solid rgba(0,0,0,0.05) !important;
+.stat-number {
+    font-size: 4rem !important;
+    font-weight: 800;
+    background: var(--primary-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* 11. АДАПТИВНОСТЬ */
+/* =========================================
+   9. АДАПТИВНОСТЬ
+   ========================================= */
 @media (max-width: 768px) {
-    .main-title { font-size: 1.8rem; margin: 20px 0; }
-    .stat-number { font-size: 3rem !important; }
-    
-    .btn-action-group {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    /* На телефоне карточки на всю ширину */
-    #classChartsContainer > div {
-        max-width: 100% !important;
-    }
+    .main-title { font-size: 1.8rem; }
+    .container { padding-top: 20px !important; }
+    .language-picker { top: 10px; right: 10px; }
+    #classChartsContainer > div { width: 100% !important; max-width: 100% !important; }
 }
