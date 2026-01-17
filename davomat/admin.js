@@ -1,4 +1,4 @@
-// 1. БАЗА ДАННЫХ УЧИТЕЛЕЙ (Твои пользователи)
+// 1. БАЗА ДАННЫХ УЧИТЕЛЕЙ
 const users = [
     { name: "Dadabayeva.I.D.", className: "1A" },
     { name: "Cherimitsina.A.K.", className: "1B" },
@@ -48,6 +48,14 @@ const users = [
 ].filter(u => u.className);
 
 const API_URL = 'https://attendancesrv.vercel.app/api/absents';
+let absents = [];
+
+const translations = {
+    ru: { admin_panel_title: "Админ-панель №22", choose_date: "Дата:", total_absent: "Отсутствуют", reason_stats: "Статистика", clear_history: "Очистить историю", export_excel: "Excel отчёт" },
+    uz: { admin_panel_title: "22-maktab admin paneli", choose_date: "Sana:", total_absent: "Yo'qlar", reason_stats: "Statistika", clear_history: "Tozalash", export_excel: "Excel yuklash" }
+};
+
+// --- ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ЯЗЫКА (ИСПРАВЛЕННАЯ) ---
 function setLang(lang) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -70,6 +78,9 @@ function setLang(lang) {
     localStorage.setItem('lang', lang);
 }
 
+document.getElementById('lang-ru').onclick = () => setLang('ru');
+document.getElementById('lang-uz').onclick = () => setLang('uz');
+
 // --- ЭКСПОРТ В EXCEL ---
 document.getElementById('exportExcel').onclick = async () => {
     const selectedDate = document.getElementById('dateFilter').value;
@@ -81,7 +92,7 @@ document.getElementById('exportExcel').onclick = async () => {
         const filtered = allData.filter(a => a.date === selectedDate);
         const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
 
-        // 1. ЛИСТ "Umumiy" - Чистый рейтинг
+        // 1. ЛИСТ "Umumiy" - Только рейтинг, без лишних подробностей
         const summaryRows = users.map(u => {
             const match = filtered.find(i => norm(i.teacher) === norm(u.name));
             const total = match ? parseFloat(match.allstudents) || 0 : 0;
@@ -100,8 +111,6 @@ document.getElementById('exportExcel').onclick = async () => {
 
         const wb = XLSX.utils.book_new();
         const wsUmumiy = XLSX.utils.json_to_sheet(summaryRows);
-        
-        // Ширина колонок для Umumiy (Учитель - 30, остальное по 12)
         wsUmumiy['!cols'] = [{wch:12}, {wch:30}, {wch:10}, {wch:18}, {wch:12}];
         XLSX.utils.book_append_sheet(wb, wsUmumiy, 'Umumiy');
 
@@ -109,7 +118,6 @@ document.getElementById('exportExcel').onclick = async () => {
         const classGroups = {};
         filtered.forEach(i => {
             if(!classGroups[i.className]) classGroups[i.className] = [];
-            
             const total = parseFloat(i.allstudents) || 0;
             const sick = parseFloat(i.count) || 0;
             const present = total - sick;
@@ -128,7 +136,6 @@ document.getElementById('exportExcel').onclick = async () => {
 
         Object.keys(classGroups).sort().forEach(cls => {
             const wsClass = XLSX.utils.json_to_sheet(classGroups[cls]);
-            // Ширина колонок для классов (Ученик - 30)
             wsClass['!cols'] = [{wch:12}, {wch:30}, {wch:20}, {wch:15}, {wch:10}, {wch:10}, {wch:15}];
             XLSX.utils.book_append_sheet(wb, wsClass, `Класс ${cls}`);
         });
@@ -139,21 +146,7 @@ document.getElementById('exportExcel').onclick = async () => {
     }
 };
 
-// --- ФУНКЦИИ ИНТЕРФЕЙСА (ОСТАВЬ КАК ЕСТЬ) ---
-let absents = [];
-const translations = {
-    ru: { admin_panel_title: "Админ-панель №22", choose_date: "Дата:", total_absent: "Отсутствуют", reason_stats: "Статистика", clear_history: "Очистить историю", export_btn: "Excel" },
-    uz: { admin_panel_title: "22-maktab admin paneli", choose_date: "Sana:", total_absent: "Yo'qlar", reason_stats: "Statistika", clear_history: "Tozalash", export_btn: "Excel" }
-};
-
-function setLang(lang) {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[lang][key]) el.textContent = translations[lang][key];
-    });
-    localStorage.setItem('lang', lang);
-}
-
+// --- ФУНКЦИИ ИНТЕРФЕЙСА ---
 async function loadAbsents() {
     try {
         const res = await fetch(API_URL);
@@ -207,5 +200,7 @@ function renderClassPieCharts(data) {
 
 document.getElementById('clearHistory').onclick = async () => { if (confirm('Очистить ВСЮ базу?')) { await fetch(API_URL, { method: 'DELETE' }); location.reload(); } };
 
-document.addEventListener('DOMContentLoaded', () => { loadAbsents(); setLang(localStorage.getItem('lang') || 'ru'); });
-
+document.addEventListener('DOMContentLoaded', () => { 
+    loadAbsents(); 
+    setLang(localStorage.getItem('lang') || 'ru'); 
+});
