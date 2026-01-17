@@ -1,75 +1,20 @@
-/* 1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ И ШРИФТЫ */
-:root {
-    --primary-color: #0d6efd;
-    --primary-hover: #0b5ed7;
-    --glass-bg: rgba(255, 255, 255, 0.95); /* Плотный белый фон для читаемости */
-    --text-dark: #1a1a1a;   /* Глубокий темный цвет для текста */
-    --text-muted: #64748b;
-    --border-color: rgba(0, 0, 0, 0.1);
-}
-
+/* 1. БАЗОВЫЕ НАСТРОЙКИ */
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    margin: 0;
     font-family: 'Inter', -apple-system, sans-serif;
-    background: #0f172a url('logo3.png') no-repeat center center fixed; /* Фон как на скриншотах */
-    background-size: cover;
-    color: var(--text-dark);
+    /* Фон с логотипом: центрируем и запрещаем растягиваться больше экрана */
+    background: #0f172a url('logo3.png') no-repeat center center fixed;
+    background-size: contain; 
+    color: #1a1a1a;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
-/* 2. КАРТОЧКИ И КОНТЕЙНЕРЫ (ИСПРАВЛЕНИЕ ВИДИМОСТИ) */
-.card, .stat-card {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border-color) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    color: var(--text-dark) !important;
-}
-
-.card-body h3, .card-body h5, .card-body h6, .form-label {
-    color: var(--text-dark) !important;
-    font-weight: 700 !important;
-}
-
-/* 3. ПОЛЯ ВВОДА (INPUTS) */
-.custom-input, .form-control {
-    background: rgba(0, 0, 0, 0.05) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 12px !important;
-    color: var(--text-dark) !important;
-    padding: 12px 15px !important;
-    transition: all 0.3s;
-}
-
-.custom-input:focus {
-    background: white !important;
-    border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
-}
-
-/* 4. КНОПКИ */
-.btn-primary-custom, .btn-primary {
-    background: var(--primary-color);
-    border: none;
-    border-radius: 12px;
-    padding: 14px;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-.btn-primary:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-/* 5. ПОЛЗУНОК ВЫБОРА ЯЗЫКА (SLIDER) */
+/* 2. ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА (SLIDER) */
 .language-picker {
     position: fixed;
     top: 20px;
@@ -78,82 +23,106 @@ body {
 }
 
 .glass-btn-group {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    padding: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50px;
     display: flex;
     position: relative;
-    width: 150px; /* Ширина всего переключателя */
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 160px; /* Фиксированная ширина */
+    height: 42px;
+    padding: 3px;
 }
 
 .lang-slider {
     position: absolute;
-    top: 4px;
-    left: 4px;
-    height: calc(100% - 8px);
-    width: calc(50% - 4px); /* Ровно половина */
-    background: white;
+    top: 3px;
+    left: 3px;
+    height: 36px;
+    width: 77px; /* Ровно половина минус отступы */
+    background: #ffffff;
     border-radius: 50px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1;
 }
 
 /* Движение ползунка */
 .glass-btn-group[data-active="uz"] .lang-slider {
-    transform: translateX(100%);
+    transform: translateX(77px);
 }
 
 .btn-lang {
     background: transparent !important;
     border: none !important;
-    color: white !important;
+    color: #ffffff !important;
     font-size: 13px;
     font-weight: 700;
     flex: 1;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     cursor: pointer;
-    padding: 8px 0;
     transition: color 0.3s;
 }
 
-/* Текст на активной кнопке становится черным, т.к. под ним белый ползунок */
 .btn-lang.active {
-    color: #000 !important;
+    color: #000000 !important;
 }
 
-/* ИСПРАВЛЕНИЕ ОГРОМНЫХ ФЛАГОВ */
+/* ФИКС ФЛАГОВ: Чтобы не растягивались на весь экран */
 .btn-lang img {
-    width: 18px !important; 
-    height: 14px !important;
+    width: 20px !important;    /* Строго 20 пикселей в ширину */
+    height: 14px !important;   /* Строго 14 пикселей в высоту */
+    min-width: 20px !important;
+    max-width: 20px !important;
     object-fit: cover;
     border-radius: 2px;
+    display: block;
 }
 
-/* 6. СПИСОК ОТСУТСТВУЮЩИХ (ДЛЯ ТЕACHER/ADMIN) */
+/* 3. КАРТОЧКА ВХОДА (LOGIN CARD) */
+.login-card, .card {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-radius: 24px !important;
+    border: none !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
+    color: #1a1a1a !important;
+}
+
+.card-body h3, .form-label {
+    color: #1a1a1a !important;
+    font-weight: 700 !important;
+}
+
+.form-control {
+    background: #f1f5f9 !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    color: #1a1a1a !important;
+}
+
+.form-control:focus {
+    border-color: #0d6efd !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2) !important;
+}
+
+/* 4. СПИСКИ (TEACHER / ADMIN) */
 .list-group-item {
-    background: transparent !important;
-    color: var(--text-dark) !important;
-    border-bottom: 1px solid rgba(0,0,0,0.05) !important;
-    padding: 15px 10px !important;
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    border: 1px solid #f1f5f9 !important;
+    border-radius: 10px !important;
+    margin-bottom: 8px !important;
 }
 
-.list-group-item span {
-    color: var(--text-dark) !important;
-    font-size: 0.95rem;
-}
-
-
-
-/* 8. АДАПТИВНОСТЬ ДЛЯ МОБИЛОК */
+/* АДАПТИВНОСТЬ */
 @media (max-width: 576px) {
-    .container { padding: 15px; }
-    .header-section h2 { font-size: 1.5rem; }
     .language-picker { top: 10px; right: 10px; }
+    .glass-btn-group { width: 140px; height: 38px; }
+    .lang-slider { width: 67px; height: 32px; }
+    .glass-btn-group[data-active="uz"] .lang-slider { transform: translateX(67px); }
 }
