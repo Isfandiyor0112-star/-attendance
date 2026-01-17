@@ -72,9 +72,6 @@ document.getElementById('exportExcel').onclick = async () => {
                 "Дата": selectedDate,
                 "Ф.И.О. Учителя": u.name,
                 "Класс": u.className,
-                "Всего учеников": total,
-                "Пришли": present,
-                "Болеют": sick,
                 "Посещаемость (%)": parseFloat(perc.toFixed(1)),
                 "Статус": match ? "✅" : "❌"
             };
@@ -191,3 +188,4 @@ function renderClassPieCharts(data) {
 document.getElementById('clearHistory').onclick = async () => { if (confirm('Очистить ВСЮ базу?')) { await fetch(API_URL, { method: 'DELETE' }); location.reload(); } };
 
 document.addEventListener('DOMContentLoaded', () => { loadAbsents(); setLang(localStorage.getItem('lang') || 'ru'); });
+
