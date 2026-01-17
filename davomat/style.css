@@ -6,103 +6,100 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif !important; /* Твой шрифт */
-    background: #1a1a1a url('/logo3.png') no-repeat fixed center;
+    font-family: 'Inter', sans-serif; /* Твой шрифт Inter */
+    background-image: url('/logo3.png');
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: #1a1a1a;
 }
 
-/* --- ШРИФТЫ И ЗАГОЛОВОК --- */
+/* Главный заголовок — возвращаем твой размер */
 .main-title {
     color: #ffffff;
-    font-size: 2rem !important; /* Чуть меньше, чтобы не занимал пол-экрана */
+    font-size: 2.8rem;
     font-weight: 800;
     text-align: center;
     letter-spacing: -0.04em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    margin: 20px 0 !important;
+    margin: 30px 0;
 }
 
-/* --- ТВОЙ ДИЗАЙН КАРТОЧЕК --- */
+/* Твои стеклянные карточки */
 .card {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(12px) !important;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border) !important;
-    border-radius: 20px !important;
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
-    overflow: hidden !important; /* Чтобы графики не вылезали */
+    margin-bottom: 20px;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-}
-
-/* --- СТАТИСТИКА (Компактно) --- */
+/* Статистика: возвращаем 4rem */
 .stat-number {
-    font-size: 2.8rem !important; /* Оптимальный размер */
+    font-size: 4rem;
     font-weight: 800;
-    margin: 5px 0 !important;
+    margin: 0;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
 }
 
-/* --- ГРАФИКИ (Жесткий контроль) --- */
+/* ФИКС ДЛЯ КАРТОЧЕК КЛАССОВ (Чтобы они были нормальной ширины) */
+#classChartsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+#classChartsContainer .card {
+    flex: 0 1 350px; /* Фиксируем ширину карточки класса, чтобы не сжималась */
+    min-width: 300px;
+}
+
+/* Контейнер для графиков — делаем его адекватным */
 .chart-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 140px !important; /* Жесткая высота контейнера */
-    padding: 10px !important;
-    position: relative;
+    min-height: 200px; /* Чтобы не сплющивало как на скрине */
 }
 
 .canvas-container {
-    width: 120px !important; /* Четкий размер круга */
-    height: 120px !important;
+    width: 180px !important; /* Твой оригинальный размер */
+    height: 180px !important;
     position: relative;
 }
 
-canvas {
-    max-width: 120px !important;
-    max-height: 120px !important;
-}
-
-/* --- СЕТКА ДЛЯ КАРТОЧЕК КЛАССОВ --- */
-#classChartsContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Карточки станут в ряд */
-    gap: 20px;
-    padding: 20px;
-}
-
-/* --- ТВОИ КНОПКИ --- */
+/* Кнопки — возвращаем твой дизайн */
 .btn-action {
-    border-radius: 12px !important;
-    padding: 10px 22px !important;
+    border-radius: 14px;
+    padding: 12px 24px;
     font-weight: 600;
     border: none;
-    transition: 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary-custom {
-    background: var(--primary-gradient) !important;
-    color: white !important;
-    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+    background: var(--primary-gradient);
+    color: white;
 }
 
 .btn-danger-custom {
-    background: rgba(220, 53, 69, 0.1) !important;
-    color: #dc3545 !important;
-    border: 1.5px solid #dc3545 !important;
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1.5px solid #dc3545;
 }
 
-/* ЯЗЫК (Флаги) */
+/* Флаги — теперь они будут маленькими, как на твоем удачном скрине */
 .btn-lang img {
     width: 20px !important;
     height: 14px !important;
-    object-fit: cover;
+    border-radius: 3px;
+    display: inline-block;
 }
