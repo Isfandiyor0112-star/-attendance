@@ -1,85 +1,64 @@
+// НЕ храните users здесь!
+
 document.addEventListener('DOMContentLoaded', function() {
-  // --- ЛОГИКА ВХОДА ---
-  const loginForm = document.getElementById('loginForm');
-  if (loginForm) {
-    loginForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const login = document.getElementById('login').value;
-      const password = document.getElementById('password').value;
+ 
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const login = document.getElementById('login').value;
+    const password = document.getElementById('password').value;
 
-      try {
-        const res = await fetch('https://attendancesrv.vercel.app/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ login, password })
-        });
-        const data = await res.json();
+    const res = await fetch('https://attendancesrv.vercel.app/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, password })
+    });
+    const data = await res.json();
 
-        if (data.status === "ok") {
-          localStorage.setItem('teacher', JSON.stringify(data.user));
-          const adminLogins = ["shaxnoza", "furkat", "matlyuba", "admin"];
+    if (data.status === "ok") {
+      localStorage.setItem('teacher', JSON.stringify(data.user));
+     const adminLogins = ["shaxnoza", "furkat", "matlyuba", "admin"];
 
-          if (adminLogins.includes(data.user.login)) {
-            window.location.href = "admin.html";
-          } else {
-            window.location.href = "teacher.html";
-          }
-        } else {
-          document.getElementById('loginError').style.display = 'block';
-        }
-      } catch (err) {
-        console.error("Ошибка входа:", err);
-        alert("Ошибка сервера");
-      }
-    });
-  }
+     if (adminLogins.includes(data.user.login)) {
+     window.location.href = "admin.html";
+   } else {
+  window.location.href = "teacher.html";
+}
 
-  // --- ИНИЦИАЛИЗАЦИЯ ЯЗЫКА ПРИ ЗАГРУЗКЕ ---
-  const savedLang = localStorage.getItem('lang') || 'ru';
-  setLang(savedLang);
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  });
 });
 
-// --- ОБЪЕКТ ПЕРЕВОДОВ ---
 const translations = {
-  ru: {
-    login_title: "Вход",
-    login_label: "Логин",
-    password_label: "Пароль",
-    login_btn: "Войти",
-    login_error: "Неверный логин или пароль"
-  },
-  uz: {
-    login_title: "Kirish",
-    login_label: "Login",
-    password_label: "Parol",
-    login_btn: "Kirish",
-    login_error: "Login yoki parol noto'g'ri"
-  }
+  ru: {
+    login_title: "Вход",
+    login_label: "Логин",
+    password_label: "Пароль",
+    login_btn: "Войти",
+    login_error: "Неверный логин или пароль"
+    // ...добавьте остальные тексты
+  },
+  uz: {
+    login_title: "Kirish",
+    login_label: "Login",
+    password_label: "Parol",
+    login_btn: "Kirish",
+    login_error: "Login yoki parol noto'g'ri"
+    // ...добавьте остальные тексты
+  }
 };
 
-// --- ГЛОБАЛЬНАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ---
-window.setLang = function(lang) {
-  // 1. ДВИГАЕМ ПОЛЗУНОК (обновляем атрибут контейнера)
-  const group = document.getElementById('langGroup');
-  if (group) {
-    group.setAttribute('data-active', lang);
-  }
+function setLang(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  localStorage.setItem('lang', lang);
+}
 
-  // 2. МЕНЯЕМ АКТИВНУЮ КНОПКУ (для цвета текста)
-  document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
-  const activeBtn = document.getElementById(`lang-${lang}`);
-  if (activeBtn) {
-    activeBtn.classList.add('active');
-  }
+document.getElementById('lang-ru').onclick = () => setLang('ru');
+document.getElementById('lang-uz').onclick = () => setLang('uz');
 
-  // 3. ПЕРЕВОДИМ ТЕКСТ
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (translations[lang] && translations[lang][key]) {
-      el.textContent = translations[lang][key];
-    }
-  });
-
-  // 4. СОХРАНЯЕМ ВЫБОР
-  localStorage.setItem('lang', lang);
-};
+// При загрузке страницы
+setLang(localStorage.getItem('lang') || 'ru');
