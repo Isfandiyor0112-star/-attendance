@@ -1,149 +1,137 @@
-// Объект с переводами
 const translations = {
     ru: {
-        teacher_panel: "Панель учителя",
+        teacher_prefix: "Учитель: ",
+        management_desc: "Управление посещаемостью класса",
+        general_info: "Общая информация",
+        label_class: "Класс",
+        label_date: "Дата",
+        label_total: "Всего по списку",
+        absence_data: "Данные об отсутствии",
+        label_sick: "Кол-во болеющих",
+        label_names: "Имена (через запятую)",
+        label_reason: "Причина",
         mark_btn: "🚀 Отправить отчет в базу",
-        absent_list: "Список отсутствующих"
+        absent_list: "Список отсутствующих",
+        today: "Сегодня"
     },
     uz: {
-        teacher_panel: "O'qituvchi paneli",
+        teacher_prefix: "O'qituvchi: ",
+        management_desc: "Sinf davomatini boshqarish",
+        general_info: "Umumiy ma'lumot",
+        label_class: "Sinf",
+        label_date: "Sana",
+        label_total: "Ro'yxat bo'yicha jami",
+        absence_data: "Yo'qlama ma'lumotlari",
+        label_sick: "Kasal bo'lganlar soni",
+        label_names: "Ismlar (vergul bilan)",
+        label_reason: "Sababi",
         mark_btn: "🚀 Hisobotni yuborish",
-        absent_list: "Yo'qlama ro'yxati"
+        absent_list: "Yo'qlama ro'yxati",
+        today: "Bugun"
     }
 };
 
-// ГЛОБАЛЬНАЯ функция переключения языка (чтобы работала из HTML onclick)
+// Функция смены языка (Глобальная)
 window.setLang = function(lang) {
-    // 1. Управляем активным классом кнопок
     document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(`lang-${lang}`);
     if (activeBtn) activeBtn.classList.add('active');
 
-    // 2. ДВИГАЕМ ПОЛЗУНОК
     const group = document.getElementById('langGroup');
     if (group) group.setAttribute('data-active', lang);
 
-    // 3. ПЕРЕВОДИМ ТЕКСТ (элементы с data-i18n)
+    // Перевод текстов
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-            el.textContent = translations[lang][key];
-        }
+        if (translations[lang][key]) el.textContent = translations[lang][key];
     });
 
-    // Сохраняем выбор
+    // Перевод имени учителя
+    const teacher = JSON.parse(localStorage.getItem('teacher'));
+    if (teacher) {
+        document.getElementById('teacherName').textContent = `${translations[lang].teacher_prefix}${teacher.name}`;
+    }
+
     localStorage.setItem('lang', lang);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    // --- ИНИЦИАЛИЗАЦИЯ ЯЗЫКА ---
+    const teacher = JSON.parse(localStorage.getItem('teacher'));
+    if (!teacher) { window.location.href = 'index.html'; return; }
+
     const savedLang = localStorage.getItem('lang') || 'ru';
     setLang(savedLang);
 
-    // --- ТВОЯ ЛОГИКА СЕРВЕРА ---
-    const teacher = JSON.parse(localStorage.getItem('teacher'));
-    const teacherDisplay = document.getElementById('teacherName');
-    
-    if (teacher) {
-        // Устанавливаем имя, сохраняя возможность перевода заголовка если нужно, 
-        // но здесь просто выводим как ты просил
-        teacherDisplay.textContent = `Учитель: ${teacher.name}`;
-        document.getElementById('className').value = teacher.className;
-    }
-
+    document.getElementById('className').value = teacher.className;
     const form = document.getElementById('attendanceForm');
     const absentList = document.getElementById('absentList');
 
-    async function getMyAbsents() {
+    async function updateList() {
+        absentList.innerHTML = '<div class="text-center p-3 text-white-50">Загрузка...</div>';
         try {
             const res = await fetch('https://attendancesrv.vercel.app/api/absents');
             const allAbsents = await res.json();
-            return allAbsents.filter(item => item.teacher === teacher.name);
-        } catch (err) {
-            console.error("Ошибка загрузки:", err);
-            return [];
+            const myAbsents = allAbsents.filter(item => item.teacher === teacher.name);
+            
+            absentList.innerHTML = '';
+            myAbsents.forEach(item => {
+                const li = document.createElement('li');
+                li.className = "list-group-item d-flex justify-content-between align-items-center bg-transparent border-light text-white";
+                li.innerHTML = `
+                    <span>${item.date} | ${item.studentName} — ${item.reason}</span>
+                    <div>
+                        <button class="btn btn-sm btn-outline-light me-1" onclick="editEntry('${item._id}', '${item.studentName}')">✏️</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEntry('${item._id}', '${item.studentName}')">🗑️</button>
+                    </div>
+                `;
+                absentList.appendChild(li);
+            });
+        } catch (e) { absentList.innerHTML = "Ошибка связи с сервером"; }
+    }
+
+    // Выносим функции в window для onclick
+    window.deleteEntry = async (id, name) => {
+        if (confirm(`Удалить ${name}?`)) {
+            await fetch(`https://attendancesrv.vercel.app/api/absent/${id}`, { method: 'DELETE' });
+            updateList();
         }
-    }
+    };
 
-    async function updateList() {
-        absentList.innerHTML = '';
-        const myAbsents = await getMyAbsents();
-        
-        myAbsents.forEach(item => {
-            const li = document.createElement('li');
-            li.className = "list-group-item d-flex justify-content-between align-items-center";
-            
-            const textSpan = document.createElement('span');
-            textSpan.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason})`;
-            
-            const btnGroup = document.createElement('div');
-
-            // Кнопка РЕДАКТИРОВАТЬ
-            const editBtn = document.createElement('button');
-            editBtn.innerHTML = '✏️';
-            editBtn.className = 'btn btn-sm btn-outline-primary me-2';
-            editBtn.onclick = async () => {
-                const newName = prompt('Изменить имя ученика:', item.studentName);
-                if (newName && newName !== item.studentName) {
-                    await fetch(`https://attendancesrv.vercel.app/api/absent/${item._id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ studentName: newName })
-                    });
-                    updateList();
-                }
-            };
-
-            // Кнопка УДАЛИТЬ
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '🗑️';
-            deleteBtn.className = 'btn btn-sm btn-outline-danger';
-            deleteBtn.onclick = async () => {
-                if (confirm(`Удалить запись об ученике ${item.studentName}?`)) {
-                    await fetch(`https://attendancesrv.vercel.app/api/absent/${item._id}`, {
-                        method: 'DELETE'
-                    });
-                    updateList();
-                }
-            };
-
-            btnGroup.appendChild(editBtn);
-            btnGroup.appendChild(deleteBtn);
-            li.appendChild(textSpan);
-            li.appendChild(btnGroup);
-            absentList.appendChild(li);
-        });
-    }
+    window.editEntry = async (id, oldName) => {
+        const newName = prompt('Новое имя:', oldName);
+        if (newName && newName !== oldName) {
+            await fetch(`https://attendancesrv.vercel.app/api/absent/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentName: newName })
+            });
+            updateList();
+        }
+    };
 
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        const className = document.getElementById('className').value;
-        const date = document.getElementById('date').value;
-        const count = document.getElementById('count').value;
         const studentNames = document.getElementById('studentName').value.split(',').map(s => s.trim());
-        const reason = document.getElementById('reason').value;
-        const allstudents = document.getElementById('allstudents').value;
-
+        
         for (const name of studentNames) {
             if (!name) continue;
-            const absentData = {
-                teacher: teacher.name,
-                className,
-                date,
-                count,
-                studentName: name,
-                reason,
-                allstudents 
-            };
             await fetch('https://attendancesrv.vercel.app/api/absent', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(absentData)
+                body: JSON.stringify({
+                    teacher: teacher.name,
+                    className: teacher.className,
+                    date: document.getElementById('date').value,
+                    count: document.getElementById('count').value,
+                    studentName: name,
+                    reason: document.getElementById('reason').value,
+                    allstudents: document.getElementById('allstudents').value
+                })
             });
         }
         form.reset();
         document.getElementById('className').value = teacher.className;
-        await updateList();
+        updateList();
     });
 
     updateList();
