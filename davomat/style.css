@@ -1,3 +1,6 @@
+/* Подключаем шрифт заново */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
 :root {
     --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
     --glass-bg: rgba(255, 255, 255, 0.85);
@@ -6,13 +9,46 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif; /* Красивый шрифт */
     background: #1a1a1a url('/logo3.png') no-repeat fixed center;
     background-size: cover;
     color: #1a1a1a;
+    min-height: 100vh;
 }
 
-/* 1. КНОПКИ ЯЗЫКА И ФИКС ФЛАГОВ */
+/* ФИКС: Чтобы карточки не тянулись и не обрезали графики */
+.row {
+    align-items: flex-start !important;
+}
+
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 20px;
+    overflow: visible !important; /* Чтобы круг не был наполовину */
+    min-height: 180px;
+}
+
+/* ГРАФИКИ: Теперь ровные и по центру */
+.chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    width: 100%;
+}
+
+.canvas-container {
+    width: 150px !important; 
+    height: 150px !important;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+/* КНОПКИ ЯЗЫКА (Идеальная капсула) */
 .language-picker {
     position: fixed;
     top: 20px;
@@ -33,23 +69,14 @@ body {
     background: transparent !important;
     border: none !important;
     color: white !important;
-    padding: 6px 14px !important;
+    padding: 8px 16px !important;
     border-radius: 50px !important;
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 14px;
     cursor: pointer;
-}
-
-/* ЖЕСТКИЙ ФИКС: Чтобы флаги не растягивались */
-.btn-lang img {
-    width: 20px !important;
-    height: 14px !important;
-    min-width: 20px !important;
-    object-fit: cover !important;
-    border-radius: 2px;
-    display: inline-block !important;
+    font-family: 'Inter', sans-serif;
 }
 
 .btn-lang.active {
@@ -57,66 +84,43 @@ body {
     color: black !important;
 }
 
-/* 2. КНОПКИ EXCEL И ОЧИСТКИ (Возвращаем видимость) */
+.btn-lang img {
+    width: 20px !important;
+    height: 14px !important;
+    object-fit: cover !important;
+    border-radius: 2px;
+}
+
+/* КНОПКИ ДЕЙСТВИЙ: Яркие и видимые */
 .btn-action {
     border-radius: 12px !important;
-    padding: 10px 20px !important;
+    padding: 10px 24px !important;
     font-weight: 600 !important;
+    font-family: 'Inter', sans-serif;
     border: none !important;
+    color: white !important;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    color: white !important; /* Делаем текст белым */
-    transition: 0.3s;
+    gap: 10px;
+    transition: 0.3s ease;
 }
 
 .btn-primary-custom {
-    background: #0d6efd !important; /* Яркий синий */
-    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+    background: #0d6efd !important;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
 }
 
 .btn-danger-custom {
-    background: #dc3545 !important; /* Яркий красный */
-    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    background: #dc3545 !important;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
 }
 
-.btn-action:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-
-/* 3. КАРТОЧКИ И ГРАФИКИ (Больше не накладываются) */
-.row {
-    align-items: flex-start !important;
-}
-
-.card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-}
-
-.chart-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
-}
-
-.canvas-container {
-    width: 150px !important; /* Фиксируем размер, чтобы не вылезал */
-    height: 150px !important;
-    position: relative;
-}
-
-/* 4. ТЕКСТ СТАТИСТИКИ */
+/* СТАТИСТИКА */
 .stat-number {
-    font-size: 3.5rem;
+    font-size: 4.5rem;
     font-weight: 800;
-    color: #0d6efd;
-    margin: 0;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
 }
