@@ -6,78 +6,103 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif;
-    background-image: url('/logo3.png');
+    font-family: 'Inter', sans-serif !important; /* Твой шрифт */
+    background: #1a1a1a url('/logo3.png') no-repeat fixed center;
     background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     color: #1a1a1a;
 }
 
-/* 1. Уменьшаем заголовок */
+/* --- ШРИФТЫ И ЗАГОЛОВОК --- */
 .main-title {
     color: #ffffff;
-    font-size: 2.2rem; /* Было 2.8rem */
+    font-size: 2rem !important; /* Чуть меньше, чтобы не занимал пол-экрана */
     font-weight: 800;
     text-align: center;
     letter-spacing: -0.04em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    margin: 20px 0;
+    margin: 20px 0 !important;
 }
 
-/* 2. Делаем карточки компактнее */
+/* --- ТВОЙ ДИЗАЙН КАРТОЧЕК --- */
 .card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px; /* Было 24px */
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    overflow: hidden !important; /* Чтобы графики не вылезали */
 }
 
-/* 3. Ограничиваем высоту больших цифр */
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* --- СТАТИСТИКА (Компактно) --- */
 .stat-number {
-    font-size: 3rem; /* Было 4rem */
+    font-size: 2.8rem !important; /* Оптимальный размер */
     font-weight: 800;
-    margin: 0;
+    margin: 5px 0 !important;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    line-height: 1.2;
+    text-align: center;
 }
 
-/* 4. ЖЕСТКИЙ ФИКС ДЛЯ ГРАФИКОВ (убираем огромность) */
+/* --- ГРАФИКИ (Жесткий контроль) --- */
 .chart-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
-    height: 160px !important; /* Было неограниченно */
+    height: 140px !important; /* Жесткая высота контейнера */
+    padding: 10px !important;
+    position: relative;
 }
 
 .canvas-container {
-    width: 130px !important; /* Было 180px */
-    height: 130px !important;
+    width: 120px !important; /* Четкий размер круга */
+    height: 120px !important;
     position: relative;
-    margin: 0 auto;
 }
 
-/* 5. Уменьшаем карточки классов в контейнере */
-#classChartsContainer .card {
-    min-height: 250px; /* Ограничиваем высоту, чтобы не тянулись вниз */
+canvas {
+    max-width: 120px !important;
+    max-height: 120px !important;
 }
 
-/* Поля ввода и кнопки */
-.custom-select {
-    border-radius: 12px;
-    padding: 8px 12px; /* Было 12px */
-    font-size: 0.9rem;
+/* --- СЕТКА ДЛЯ КАРТОЧЕК КЛАССОВ --- */
+#classChartsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Карточки станут в ряд */
+    gap: 20px;
+    padding: 20px;
 }
 
+/* --- ТВОИ КНОПКИ --- */
 .btn-action {
-    border-radius: 12px;
-    padding: 10px 20px;
-    font-size: 0.95rem;
+    border-radius: 12px !important;
+    padding: 10px 22px !important;
+    font-weight: 600;
+    border: none;
+    transition: 0.3s;
+}
+
+.btn-primary-custom {
+    background: var(--primary-gradient) !important;
+    color: white !important;
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+}
+
+.btn-danger-custom {
+    background: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+    border: 1.5px solid #dc3545 !important;
+}
+
+/* ЯЗЫК (Флаги) */
+.btn-lang img {
+    width: 20px !important;
+    height: 14px !important;
+    object-fit: cover;
 }
