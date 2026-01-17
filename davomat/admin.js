@@ -32,7 +32,7 @@ setLang(localStorage.getItem('lang') || 'ru');
 let absents = [];
 
 async function loadAbsents() {
-  const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+  const res = await fetch('https://attendancesrv.vercel.app/api/absents');
   absents = await res.json();
   renderByDate();
   fillDateFilter();
@@ -265,7 +265,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
       return;
     }
 
-    const res = await fetch('https://attendancesrv.onrender.com/api/absents');
+    const res = await fetch('https://attendancesrv.vercel.app/api/absents');
     const data = await res.json();
     const filtered = data.filter(a => a.date === selectedDate);
 
@@ -411,6 +411,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
