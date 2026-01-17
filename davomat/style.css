@@ -1,93 +1,134 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
-/* Глобальные настройки */
-* {
-    font-family: 'Inter', sans-serif !important;
-    box-sizing: border-box;
-}
-
+/* Современный сброс и шрифты */
 body {
-    margin: 0;
-    padding: 20px;
-    background: #1a1a1a url('/logo3.png') no-repeat fixed center;
-    background-size: cover;
-    color: #2D3436;
-    min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-image: url('/logo3.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: #2D3436;
+  min-height: 100vh;
 }
 
-/* ФИКС ГИГАНТСКИХ ФЛАГОВ - теперь они точно будут 20px */
-.btn-glass img, 
-.language-picker img,
-img[src*="russia"], 
-img[src*="uzbekistan"] {
-    width: 20px !important;
-    height: 14px !important;
-    max-width: 20px !important;
-    max-height: 14px !important;
-    min-width: 20px !important;
-    object-fit: cover !important;
-    display: inline-block !important;
-    margin: 0 5px !important;
+/* Эффект матового стекла для карточек */
+.card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Кнопки выбора языка */
+/* Контейнер графиков */
+#classChartsContainer {
+  gap: 12px !important;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+}
+
+/* Заголовок с нео-эффектом */
+h2[data-i18n="admin_panel_title"] {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 40px 0 20px;
+  letter-spacing: -0.03em;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Современные инпуты */
+input[type="text"],
+input[type="password"] {
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 16px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #0d6efd;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+  /* Вместо scale(1.02) используем мягкое свечение */
+}
+
+/* Кнопка с градиентом и "подъемом" */
+button[type="submit"] {
+  background: linear-gradient(135deg, #0d6efd 0%, #0052cc 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-2px); /* Эффект парения */
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+  filter: brightness(1.1);
+}
+
+button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* Улучшение читаемости на мобильных устройствах */
+@media (max-width: 768px) {
+  h2[data-i18n="admin_panel_title"] {
+    font-size: 1.8rem;
+  }
+}
+
+/* Улучшенные кнопки выбора языка */
 .glass-btn-group {
-    position: fixed;
-    top: 20px;
-    right: 20px;
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(8px);
     border-radius: 12px;
     padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     display: flex;
-    z-index: 9999;
+    gap: 4px;
 }
 
-/* Карточки с эффектом стекла */
-.card {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(12px);
-    border-radius: 20px !important;
-    border: none !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    margin-bottom: 20px;
-    overflow: hidden !important; /* Обрезает всё, что вылезает */
-}
-
-/* ЖЕСТКИЙ ФИКС ГРАФИКОВ - чтобы круги не взрывались */
-.chart-wrapper {
-    position: relative;
-    height: 180px !important; /* Ограничиваем высоту */
-    width: 100% !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.canvas-container {
-    width: 150px !important; /* Фиксируем ширину круга */
-    height: 150px !important;
-    position: relative;
-}
-
-canvas {
-    max-width: 150px !important;
-    max-height: 150px !important;
-}
-
-/* Кнопки управления */
-.btn-primary-custom {
-    background: #0d6efd !important;
-    color: white !important;
-    border-radius: 10px;
-    padding: 10px 20px;
+.btn-glass {
     border: none;
+    color: white;
+    background: transparent;
+    border-radius: 8px;
+    transition: background 0.3s;
 }
 
-.btn-danger-custom {
-    background: #dc3545 !important;
-    color: white !important;
-    border-radius: 10px;
-    padding: 10px 20px;
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Стилизация селекта */
+.custom-select {
+    border-radius: 12px;
+    padding: 10px;
     border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Утилита для больших чисел */
+#totalAbsent {
+    text-shadow: none;
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
