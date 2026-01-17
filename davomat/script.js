@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const login = document.getElementById('login').value;
     const password = document.getElementById('password').value;
 
-    const res = await fetch('https://attendancesrv.onrender.com/api/login', {
+    const res = await fetch('https://attendancesrv.vercel.app/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ login, password })
@@ -62,6 +62,7 @@ document.getElementById('lang-uz').onclick = () => setLang('uz');
 
 // При загрузке страницы
 setLang(localStorage.getItem('lang') || 'ru');
+
 
 
 
