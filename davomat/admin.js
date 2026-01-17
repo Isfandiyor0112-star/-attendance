@@ -48,6 +48,27 @@ const users = [
 ].filter(u => u.className);
 
 const API_URL = 'https://attendancesrv.vercel.app/api/absents';
+function setLang(lang) {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+            el.textContent = translations[lang][key];
+        }
+    });
+    
+    // Переключаем кнопки
+    document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`lang-${lang}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    // Двигаем ползунок через атрибут
+    const group = document.getElementById('langGroup');
+    if (group) {
+        group.setAttribute('data-active', lang);
+    }
+    
+    localStorage.setItem('lang', lang);
+}
 
 // --- ЭКСПОРТ В EXCEL ---
 document.getElementById('exportExcel').onclick = async () => {
@@ -187,3 +208,4 @@ function renderClassPieCharts(data) {
 document.getElementById('clearHistory').onclick = async () => { if (confirm('Очистить ВСЮ базу?')) { await fetch(API_URL, { method: 'DELETE' }); location.reload(); } };
 
 document.addEventListener('DOMContentLoaded', () => { loadAbsents(); setLang(localStorage.getItem('lang') || 'ru'); });
+
