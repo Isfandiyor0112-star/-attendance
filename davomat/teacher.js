@@ -18,15 +18,56 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   async function updateList() {
-    absentList.innerHTML = '';
-    const myAbsents = await getMyAbsents();
-    myAbsents.forEach(item => {
-      const li = document.createElement('li');
-      li.className = "list-group-item";
-      li.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason})`;
-      absentList.appendChild(li);
-    });
-  }
+  absentList.innerHTML = '';
+  const myAbsents = await getMyAbsents();
+  
+  myAbsents.forEach(item => {
+    const li = document.createElement('li');
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    
+    // Текст записи
+    const textSpan = document.createElement('span');
+    textSpan.textContent = `${item.date} | ${item.className} | ${item.studentName} — (${item.reason})`;
+    
+    // Контейнер для кнопок
+    const btnGroup = document.createElement('div');
+
+    // Кнопка РЕДАКТИРОВАТЬ
+    const editBtn = document.createElement('button');
+    editBtn.innerHTML = '✏️';
+    editBtn.className = 'btn btn-sm btn-outline-primary me-2';
+    editBtn.onclick = async () => {
+      const newName = prompt('Изменить имя ученика:', item.studentName);
+      if (newName && newName !== item.studentName) {
+        await fetch(`https://attendancesrv.vercel.app/api/absent/${item._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentName: newName })
+        });
+        updateList();
+      }
+    };
+
+    // Кнопка УДАЛИТЬ
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.className = 'btn btn-sm btn-outline-danger';
+    deleteBtn.onclick = async () => {
+      if (confirm(`Удалить запись об ученике ${item.studentName}?`)) {
+        await fetch(`https://attendancesrv.vercel.app/api/absent/${item._id}`, {
+          method: 'DELETE'
+        });
+        updateList();
+      }
+    };
+
+    btnGroup.appendChild(editBtn);
+    btnGroup.appendChild(deleteBtn);
+    li.appendChild(textSpan);
+    li.appendChild(btnGroup);
+    absentList.appendChild(li);
+  });
+}
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -73,4 +114,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
 
