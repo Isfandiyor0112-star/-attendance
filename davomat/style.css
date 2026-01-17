@@ -4,8 +4,13 @@
     --glass-border: rgba(255, 255, 255, 0.4);
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
+    padding: 0;
     font-family: 'Inter', sans-serif;
     background-image: url('/logo3.png');
     background-size: cover;
@@ -13,6 +18,16 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
     color: #1a1a1a;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Контейнер для адаптивности */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 15px;
+    margin: 0 auto;
 }
 
 /* Главный заголовок */
@@ -23,9 +38,10 @@ body {
     text-align: center;
     letter-spacing: -0.04em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin-top: 60px; /* Отступ под кнопки языка */
 }
 
-/* Карточки в стиле Glassmorphism */
+/* Карточки Glassmorphism */
 .card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -34,23 +50,16 @@ body {
     border-radius: 24px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    margin-bottom: 20px;
 }
 
 .card:hover {
     transform: translateY(-5px);
 }
 
-/* Стили для статистики */
-.stat-card .card-subtitle {
-    color: #6c757d;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-}
-
+/* Статистика */
 .stat-number {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: 800;
     margin: 0;
     background: var(--primary-gradient);
@@ -58,27 +67,76 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* Контейнер для графиков */
-.chart-wrapper {
+/* ИСПРАВЛЕННЫЙ Выбор языка */
+.language-picker {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1100;
+}
+
+.glass-btn-group {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 4px;
+    border-radius: 12px;
+    display: flex;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-lang {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
+    gap: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
-.canvas-container {
-    max-width: 180px;
-    position: relative;
+.btn-lang img {
+    width: 20px;
+    height: 14px;
+    object-fit: cover;
+    border-radius: 2px;
 }
 
-/* Кнопки */
+.btn-lang:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-lang.active {
+    background: white !important;
+    color: #000 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Поля ввода и кнопки */
+.custom-input, .custom-select {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 12px 15px;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
 .btn-action {
     border-radius: 14px;
-    padding: 12px 24px;
+    padding: 14px 24px;
     font-weight: 600;
+    width: 100%;
     border: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
 }
 
 .btn-primary-custom {
@@ -87,126 +145,63 @@ body {
     box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
 }
 
-.btn-primary-custom:hover {
-    box-shadow: 0 12px 25px rgba(13, 110, 253, 0.5);
-    filter: brightness(1.1);
-}
-
-.btn-danger-custom {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-    border: 1.5px solid #dc3545;
-}
-
-.btn-danger-custom:hover {
-    background: #dc3545;
-    color: white;
-}
-
-/* Выбор языка */
-.language-picker {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.glass-btn-group {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    padding: 5px;
-    border-radius: 15px;
-    display: flex;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-lang {
-    background: transparent;
-    border: none;
-    color: white;
-    padding: 6px 15px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.3s;
-}
-
-.btn-lang img {
-    width: 20px;
-    border-radius: 3px;
-}
-
-.btn-lang:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.btn-lang.active {
-    background: white;
-    color: black;
-}
-
-/* Поля ввода */
-.custom-select {
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    cursor: pointer;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .main-title { font-size: 1.8rem; }
-    .stat-number { font-size: 3rem; }
-}
-
-/* Специальные стили для страницы учителя */
-.custom-input {
-    background: rgba(255, 255, 255, 0.6) !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    border-radius: 12px !important;
-    padding: 10px 15px;
-    transition: all 0.3s ease;
-}
-
-.custom-input:focus {
-    background: #fff !important;
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1) !important;
-    border-color: #0d6efd !important;
-}
-
-.custom-input.highlighted {
-    border-left: 4px solid #0d6efd !important;
-}
-
-.form-label {
-    color: #495057;
-    margin-bottom: 6px;
-}
-
-/* Красивый список отсутствующих */
+/* Список отсутствующих с кнопками управления */
 .list-group-item {
-    background: transparent !important;
-    border-left: none;
-    border-right: none;
-    padding: 15px 0;
+    background: rgba(255, 255, 255, 0.4) !important;
+    margin-bottom: 8px;
+    border-radius: 12px !important;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-.list-group-item:last-child {
-    border-bottom: none;
+.item-actions {
+    display: flex;
+    gap: 10px;
 }
 
-/* Анимация при наведении на форму */
-.stat-card {
-    border: 1px solid rgba(255, 255, 255, 0.4);
+.btn-edit, .btn-delete {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
+.btn-edit { background: #e3f2fd; color: #0d6efd; }
+.btn-delete { background: #ffebee; color: #dc3545; }
 
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .main-title { 
+        font-size: 1.8rem; 
+        margin-top: 70px;
+    }
+    
+    .stat-number { font-size: 2.8rem; }
 
+    .list-group-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
 
+    .item-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .btn-lang span {
+        display: none; /* Оставляем только флаги на мобилках */
+    }
+    
+    .glass-btn-group {
+        padding: 2px;
+    }
+}
