@@ -236,7 +236,7 @@ function renderAbsentList(data) {
 // Назначаем обработчик кнопки очистки истории вне функции renderAbsentList
 document.getElementById('clearHistory').onclick = async function() {
   if (confirm('Вы уверены, что хотите очистить всю историю отсутствующих?')) {
-    await fetch('https://attendancesrv.onrender.com/api/absents', { method: 'DELETE' });
+    await fetch('https://attendancesrv.vercel.app/api/absents', { method: 'DELETE' });
     location.reload();
   }
 };
@@ -411,6 +411,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
