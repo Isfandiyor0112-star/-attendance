@@ -1,165 +1,139 @@
-/* ГЛАВНЫЙ ФИРМЕННЫЙ ФОН */
-body {
+/* 1. БАЗА И ФИРМЕННЫЙ ФОН */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    /* Твой логотип: без синевы, четко по центру */
+    background: #0f172a url('logo3.png') no-repeat center center fixed;
+    background-size: 600px; 
     min-height: 100vh;
-    /* Темный градиент поверх картинки, чтобы текст всегда читался */
-    background: 
-        linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
-        url('logo3.png') no-repeat center center fixed;
-    background-size: 500px; /* Размер твоего логотипа на фоне */
+    color: #fff;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Inter', sans-serif;
-    color: #fff;
 }
 
-/* Если на страницах Teacher/Admin контента много, фон должен тянуться */
-@media (min-height: 1000px) {
-    body {
-        background-attachment: fixed;
-    }
+/* 2. ИНТРО (НЕ ТРОГАЕМ МАСШТАБ) */
+#videoIntro {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 10000;
+    background: #000;
+}
+#videoIntro video {
+    width: 100%; height: 100%;
+    object-fit: contain;
 }
 
-/* ФИКС ДЛЯ МОБИЛОК (чтобы фон не прыгал при появлении клавиатуры) */
-@media (max-width: 768px) {
-    body {
-        background-size: 300px; /* Уменьшаем лого на мобилках */
-        background-position: center 20%; /* Сдвигаем чуть выше центра */
-    }
-}
-
-
-/* КАРТОЧКА ВХОДА */
-.login-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 30px;
-  padding: 40px;
-  width: 100%;
-  max-width: 380px;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-  color: #fff;
-}
-
-.form-control {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: #fff !important;
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.btn-primary-custom {
-  background: #3b82f6;
-  color: #fff;
-  border: none;
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: bold;
-  margin-top: 10px;
-  transition: 0.3s;
-}
-
-/* ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА */
-.language-picker { position: fixed; top: 20px; right: 20px; z-index: 999; }
-.glass-btn-group {
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 50px;
-  padding: 4px; display: flex; width: 140px; position: relative;
-}
-.lang-slider {
-  position: absolute; top: 4px; left: 4px;
-  width: 66px; height: 32px;
-  background: #fff; border-radius: 50px;
-  transition: 0.3s ease; z-index: 1;
-}
-.glass-btn-group[data-active="uz"] .lang-slider { transform: translateX(66px); }
-
-.btn-lang {
-  flex: 1; background: none; border: none; color: #fff;
-  z-index: 2; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  gap: 5px; font-size: 12px; font-weight: bold;
-}
-.btn-lang.active { color: #000; }
-
-/* ЗАЩИТА ФЛАГОВ */
-.btn-lang img {
-  width: 18px !important; height: 12px !important;
-  object-fit: cover !important; border-radius: 2px;
-}
-
-/* --- СТИЛИ ДЛЯ TEACHER.HTML И ADMIN.HTML --- */
-
-/* Контейнеры для списков и статистики */
-.stat-card, .list-container {
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 20px !important;
-    padding: 20px;
-    margin-bottom: 20px;
+/* 3. ГЛАССМОРФИЗМ (ДЛЯ ВСЕХ КАРТОЧЕК) */
+.card, .login-card, .stat-card, .list-container {
+    background: rgba(255, 255, 255, 0.1) !important; /* Прозрачность */
+    backdrop-filter: blur(15px) saturate(150%);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 25px !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     color: #fff !important;
 }
 
-/* Стили для строк с учениками (Список отсутствующих) */
+/* Поля ввода (тоже стекло) */
+.form-control, .custom-input {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    border-radius: 12px !important;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* 4. ИСПРАВЛЕННЫЙ СЛАЙДЕР ЯЗЫКА */
+.language-picker {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 11000; /* Выше интро на всякий случай */
+}
+
+.glass-btn-group {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 3px;
+    display: flex;
+    width: 150px;
+    height: 40px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lang-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 72px; /* Ровно половина */
+    height: 32px;
+    background: #fff;
+    border-radius: 50px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+/* Логика движения слайдера */
+.glass-btn-group[data-active="uz"] .lang-slider {
+    transform: translateX(72px);
+}
+
+.btn-lang {
+    flex: 1;
+    background: none !important;
+    border: none !important;
+    color: #fff !important;
+    z-index: 2;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: color 0.3s;
+}
+
+/* Текст на белом фоне становится черным */
+.btn-lang.active {
+    color: #000 !important;
+}
+
+/* ЖЕСТКИЙ ФИКС ФЛАГОВ */
+.btn-lang img {
+    width: 20px !important;
+    height: 14px !important;
+    min-width: 20px !important;
+    object-fit: cover !important;
+    border-radius: 2px;
+}
+
+/* 5. СПИСКИ (TEACHER / ADMIN) */
 .list-group-item {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
+    border-radius: 15px !important;
+    margin-bottom: 10px !important;
+    backdrop-filter: blur(5px);
+}
+
+.btn-primary {
+    background: #0d6efd !important;
+    border: none !important;
     border-radius: 12px !important;
-    margin-bottom: 8px !important;
-    transition: 0.3s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.list-group-item:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    transform: translateX(5px);
-}
-
-/* Текст внутри списков */
-.list-group-item span, .list-group-item div {
-    color: #fff !important;
-    font-size: 0.95rem;
-}
-
-/* Кнопки действий (редактировать/удалить) */
-.btn-action {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: #fff;
-    border-radius: 8px;
-    padding: 5px 10px;
-    margin-left: 5px;
-    transition: 0.2s;
-}
-
-.btn-action:hover {
-    background: #3b82f6;
-}
-
-/* Заголовки на страницах */
-h2, h4, h5 {
-    color: #ffffff !important;
+    padding: 12px !important;
     font-weight: 700 !important;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
-
-/* Таблицы (если есть в админке) */
-.table {
-    color: #fff !important;
-}
-
-.table thead th {
-    border-bottom: 2px solid rgba(255,255,255,0.1) !important;
-    color: rgba(255,255,255,0.7) !important;
-}
-
-
