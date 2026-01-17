@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
 :root {
     --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
     --glass-bg: rgba(255, 255, 255, 0.85);
@@ -6,89 +8,125 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif !important;
     background-image: url('/logo3.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
     color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Главный заголовок */
+/* --- Главный заголовок --- */
 .main-title {
     color: #ffffff;
-    font-size: 2.8rem;
+    font-size: 2.5rem; /* Оптимизировано, чтобы не был на пол-экрана */
     font-weight: 800;
     text-align: center;
     letter-spacing: -0.04em;
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin: 30px 0;
 }
 
-/* Карточки в стиле Glassmorphism */
+/* --- Карточки Glassmorphism --- */
 .card {
-    background: var(--glass-bg);
+    background: var(--glass-bg) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 24px !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
-    margin-bottom: 20px; /* Добавил отступ снизу */
+    overflow: hidden; /* Чтобы контент не вылезал за скругления */
 }
 
 .card:hover {
     transform: translateY(-5px);
 }
 
-/* Стили для статистики */
-.stat-card .card-subtitle {
-    color: #6c757d;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-}
-
+/* --- Статистика --- */
 .stat-number {
-    font-size: 4rem;
+    font-size: 3.5rem !important; /* Было 4, уменьшили для компактности */
     font-weight: 800;
     margin: 0;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-align: center;
 }
 
-/* Контейнер для графиков */
+/* --- ГРАФИКИ (Жесткие лимиты) --- */
 .chart-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
-    min-height: 200px; /* Чтобы не сплющивало как на скрине */
+    justify-content: center;
+    flex-wrap: nowrap; /* Чтобы легенда не прыгала под график */
+    gap: 15px;
+    min-height: 160px !important; 
+    padding: 10px;
 }
 
 .canvas-container {
-    max-width: 180px;
-    width: 100%;
+    width: 130px !important; /* Фикс огромных кругов */
+    height: 130px !important;
     position: relative;
-    display: flex;
-    justify-content: center;
+    flex-shrink: 0;
 }
 
-/* Кнопки */
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* --- Динамическая сетка классов --- */
+#classChartsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    padding: 10px 0;
+}
+
+/* --- Легенда --- */
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.legend-marker {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* --- ФЛАГИ (Фикс гигантизма) --- */
+.btn-lang img {
+    width: 20px !important;
+    height: 14px !important;
+    min-width: 20px !important;
+    object-fit: cover !important;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+/* --- Кнопки и формы --- */
 .btn-action {
     border-radius: 14px;
-    padding: 12px 24px;
+    padding: 10px 20px;
     font-weight: 600;
-    border: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
 }
 
 .btn-primary-custom {
     background: var(--primary-gradient);
     color: white;
+    border: none;
     box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
 }
 
@@ -98,7 +136,6 @@ body {
     border: 1.5px solid #dc3545;
 }
 
-/* Выбор языка */
 .language-picker {
     position: fixed;
     top: 20px;
@@ -109,8 +146,8 @@ body {
 .glass-btn-group {
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
-    padding: 5px;
-    border-radius: 15px;
+    padding: 4px;
+    border-radius: 12px;
     display: flex;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -119,40 +156,22 @@ body {
     background: transparent;
     border: none;
     color: white;
-    padding: 6px 15px;
-    border-radius: 10px;
-    font-size: 0.9rem;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: 0.3s;
+    gap: 6px;
 }
 
-.btn-lang img {
-    width: 20px !important; /* Жестко ограничил */
-    height: 14px !important; /* Чтобы не было как на скрине с флагами */
-    object-fit: cover;
-    border-radius: 3px;
+.btn-lang.active {
+    background: white !important;
+    color: black !important;
 }
 
-/* Сетка для карточек классов (чтобы не были в одну узкую полоску) */
-#classChartsContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-/* Поля ввода */
-.custom-select {
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    cursor: pointer;
-}
-
-/* Адаптивность */
+/* --- Адаптивность --- */
 @media (max-width: 768px) {
     .main-title { font-size: 1.8rem; }
-    .stat-number { font-size: 3rem; }
+    .stat-number { font-size: 2.8rem; }
+    .chart-wrapper { flex-direction: column; height: auto !important; }
 }
