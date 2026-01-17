@@ -41,14 +41,35 @@ async function loadAbsents() {
 function fillDateFilter() {
   const dateFilter = document.getElementById('dateFilter');
   dateFilter.innerHTML = '';
-  const dates = [...new Set(absents.map(a => a.date))];
+  
+  // Получаем уникальные даты из данных
+  const dates = [...new Set(absents.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
+  
+  // Получаем сегодняшнюю дату в формате YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
+
   dates.forEach(date => {
     const option = document.createElement('option');
     option.value = date;
     option.textContent = date;
+    
+    // Если дата совпадает с сегодняшней, помечаем её как выбранную
+    if (date === today) {
+      option.selected = true;
+    }
+    
     dateFilter.appendChild(option);
   });
+
+  // Если сегодня данных нет, выберем самую свежую имеющуюся дату
+  if (!dateFilter.value && dates.length > 0) {
+    dateFilter.selectedIndex = 0;
+  }
+
   dateFilter.onchange = () => renderByDate();
+  
+  // Сразу запускаем рендер для выбранной даты
+  renderByDate();
 }
 
 // Цвета для разных причин (можно расширить)
@@ -411,6 +432,7 @@ document.getElementById('exportExcel').addEventListener('click', async () => {
     alert("Не удалось создать отчёт. Попробуйте позже.");
   }
 });
+
 
 
 
