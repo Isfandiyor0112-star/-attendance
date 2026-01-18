@@ -33,13 +33,13 @@ const translations = {
         admin_panel_title: "Админ-панель №22", choose_date: "Дата:", total_absent: "Отсутствуют", 
         reason_stats: "Статистика причин", clear_history: "Очистить историю", export_excel: "Excel отчёт",
         select_period: "Выберите период", report_day: "За 1 день", report_week: "За неделю (6 дн.)",
-        report_month: "Месячный отчет", not_enough_data: "Нужно минимум 6 дней данных!", not_enough_month: "Данных за этот месяц нет!"
+        report_month: "Месячный отчет", not_enough_data: "Нужно минимум 6 дней данных!", not_enough_month: "Данных мало!"
     },
     uz: { 
         admin_panel_title: "22-maktab admin paneli", choose_date: "Sana:", total_absent: "Yo'qlar", 
         reason_stats: "Statistika", clear_history: "Tozalash", export_excel: "Excel yuklash",
         select_period: "Davrni tanlang", report_day: "1 kunlik", report_week: "Haftalik (6 kun)",
-        report_month: "Oylik hisobot", not_enough_data: "Kamida 6 kunlik ma'lumot kerak!", not_enough_month: "Bu oy uchun ma'lumot yo'q!"
+        report_month: "Oylik hisobot", not_enough_data: "Kamida 6 kunlik ma'lumot kerak!", not_enough_month: "Ma'lumot kam!"
     }
 };
 
@@ -49,8 +49,6 @@ function setLang(lang) {
         if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
     });
     localStorage.setItem('lang', lang);
-    const langGroup = document.getElementById('langGroup');
-    if(langGroup) langGroup.setAttribute('data-active', lang);
 }
 
 async function handleExcelExport(type) {
@@ -67,7 +65,6 @@ async function handleExcelExport(type) {
         if (type === 'day') {
             filtered = allData.filter(a => a.date === selectedDate);
         } else if (type === 'week') {
-            if (uniqueDates.length < 6) return alert(translations[lang].not_enough_data);
             const last6 = uniqueDates.slice(0, 6);
             filtered = allData.filter(a => last6.includes(a.date));
         } else if (type === 'month') {
@@ -76,12 +73,19 @@ async function handleExcelExport(type) {
                 const id = new Date(item.date);
                 return id.getFullYear() === d.getFullYear() && id.getMonth() === d.getMonth();
             });
-            if ([...new Set(filtered.map(a => a.date))].length < 2) return alert(translations[lang].not_enough_month);
         }
+
+        if (filtered.length === 0) return alert("No data!");
+
         generateExcel(filtered, selectedDate, type, lang);
-        const modal = bootstrap.Modal.getInstance(document.getElementById('excelModal'));
-        if(modal) modal.hide();
-    } catch (e) { console.error(e); }
+
+        // Закрываем модальное окно
+        const modalEl = document.getElementById('excelModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+    } catch (e) { alert("Ошибка загрузки данных"); }
 }
 
 function generateExcel(filtered, date, type, lang) {
@@ -89,7 +93,7 @@ function generateExcel(filtered, date, type, lang) {
     const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
     const activeDates = [...new Set(filtered.map(a => a.date))].sort();
 
-    // 1. Лист Рейтинга (Rating)
+    // 1. Rating
     const summaryRows = users.map(u => {
         const matches = filtered.filter(i => norm(i.teacher) === norm(u.name));
         let tot = 0, abs = 0;
@@ -106,10 +110,9 @@ function generateExcel(filtered, date, type, lang) {
     }).sort((a, b) => parseFloat(b["Davomat (%)"]) - parseFloat(a["Davomat (%)"]));
 
     const wsRating = XLSX.utils.json_to_sheet(summaryRows);
-    wsRating['!cols'] = [{ wch: 25 }, { wch: 10 }, { wch: 15 }, { wch: 25 }];
     XLSX.utils.book_append_sheet(wb, wsRating, 'Rating');
 
-    // 2. Листы Классов
+    // 2. Классы
     const grp = {};
     filtered.forEach(i => { if(!grp[i.className]) grp[i.className] = []; grp[i.className].push(i); });
 
@@ -121,9 +124,7 @@ function generateExcel(filtered, date, type, lang) {
         classData.forEach(i => {
             const tot = parseFloat(i.allstudents) || 0;
             const absCount = parseFloat(i.count) || 0;
-            const perc = tot > 0 ? (((tot - absCount) / tot) * 100).toFixed(1) : 0;
             totalSumAll += tot; totalSumAbs += absCount;
-
             rows.push({
                 [lang==='ru'?'Дата':'Sana']: i.date,
                 [lang==='ru'?'Учитель':'O\'qituvchi']: i.teacher,
@@ -131,54 +132,61 @@ function generateExcel(filtered, date, type, lang) {
                 [lang==='ru'?'Причина':'Sabab']: i.reason,
                 [lang==='ru'?'Всего':'Jami']: tot,
                 [lang==='ru'?'Нет':'Yo\'q']: absCount,
-                [lang==='ru'?'%']: perc + "%"
+                [lang==='ru'?'%']: (tot > 0 ? (((tot - absCount) / tot) * 100).toFixed(1) : 0) + "%"
             });
         });
 
-        const finalPerc = totalSumAll > 0 ? (((totalSumAll - totalSumAbs) / totalSumAll) * 100).toFixed(1) : 0;
-        rows.push({});
+        rows.push({}); // Пустая строка
         rows.push({
             [lang==='ru'?'Дата':'Sana']: lang==='ru'?'ИТОГО:':'YAKUN:',
             [lang==='ru'?'Причина':'Sabab']: lang==='ru'?'Средний %:':'O\'rtacha %:',
             [lang==='ru'?'Нет':'Yo\'q']: totalSumAbs,
-            [lang==='ru'?'%']: finalPerc + "%"
+            [lang==='ru'?'%']: (totalSumAll > 0 ? (((totalSumAll - totalSumAbs) / totalSumAll) * 100).toFixed(1) : 0) + "%"
         });
 
         const wsClass = XLSX.utils.json_to_sheet(rows);
-        wsClass['!cols'] = [{ wch: 12 }, { wch: 20 }, { wch: 25 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 10 }];
         XLSX.utils.book_append_sheet(wb, wsClass, c);
     });
 
-    XLSX.writeFile(wb, `School22_${type.toUpperCase()}_${date}.xlsx`);
+    XLSX.writeFile(wb, `Report22_${type}_${date}.xlsx`);
 }
 
 async function loadAbsents() {
-    const res = await fetch(API_URL);
-    absents = await res.json();
-    const f = document.getElementById('dateFilter');
-    const dts = [...new Set(absents.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
-    f.innerHTML = dts.map(d => `<option value="${d}">${d}</option>`).join('');
-    if (dts.length > 0) renderByDate();
-    f.onchange = renderByDate;
+    try {
+        const res = await fetch(API_URL);
+        absents = await res.json();
+        const f = document.getElementById('dateFilter');
+        const dts = [...new Set(absents.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
+        f.innerHTML = dts.map(d => `<option value="${d}">${d}</option>`).join('');
+        if (dts.length > 0) renderByDate();
+        f.onchange = renderByDate;
+    } catch (e) { console.error("Data error"); }
 }
 
 function renderByDate() {
     const val = document.getElementById('dateFilter').value;
     const filtered = absents.filter(a => a.date === val);
-    document.getElementById('totalAbsent').textContent = filtered.length;
-    
-    const s = {}; filtered.forEach(i => s[i.reason] = (s[i.reason] || 0) + 1);
-    if (window.reasonChart instanceof Chart) window.reasonChart.destroy();
-    window.reasonChart = new Chart(document.getElementById('reasonChart'), {
-        type: 'pie',
-        data: { labels: Object.keys(s), datasets: [{ data: Object.values(s), backgroundColor: reasonColors }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-    });
+    const totalEl = document.getElementById('totalAbsent');
+    if(totalEl) totalEl.textContent = filtered.length;
 }
 
-document.getElementById('lang-ru').onclick = () => { setLang('ru'); location.reload(); };
-document.getElementById('lang-uz').onclick = () => { setLang('uz'); location.reload(); };
-document.addEventListener('DOMContentLoaded', () => { 
-    loadAbsents(); 
-    setLang(localStorage.getItem('lang') || 'ru'); 
+// ПРИВЯЗКА КНОПОК (ВАЖНО!)
+document.addEventListener('DOMContentLoaded', () => {
+    loadAbsents();
+    setLang(localStorage.getItem('lang') || 'ru');
+
+    // Кнопки перевода
+    const btnRu = document.getElementById('lang-ru');
+    const btnUz = document.getElementById('lang-uz');
+    if(btnRu) btnRu.onclick = () => { setLang('ru'); location.reload(); };
+    if(btnUz) btnUz.onclick = () => { setLang('uz'); location.reload(); };
+
+    // Кнопки экспорта (ищем их по ID)
+    const btnDay = document.getElementById('report_day');
+    const btnWeek = document.getElementById('report_week');
+    const btnMonth = document.getElementById('report_month');
+
+    if(btnDay) btnDay.onclick = () => handleExcelExport('day');
+    if(btnWeek) btnWeek.onclick = () => handleExcelExport('week');
+    if(btnMonth) btnMonth.onclick = () => handleExcelExport('month');
 });
