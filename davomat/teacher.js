@@ -69,13 +69,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('attendanceForm');
     const absentList = document.getElementById('absentList');
 
-    // Функция обновления списка (Использует API_GET)
+    // Функция обновления списка
     async function updateList() {
         absentList.innerHTML = '<div class="text-center p-3 text-white-50 small">Загрузка...</div>';
         try {
             const res = await fetch(API_GET);
             const allAbsents = await res.json();
-            // Показываем только записи этого учителя
             const myAbsents = allAbsents.filter(item => item.teacher === teacher.name);
             
             absentList.innerHTML = '';
@@ -100,25 +99,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 absentList.appendChild(li);
             });
         } catch (e) { 
-            absentList.innerHTML = '<div class="text-danger small">Ошибка связи с сервером</div>'; 
+            absentList.innerHTML = '<div class="text-danger small">Ошибка связи</div>'; 
         }
     }
 
-    // Удаление записи (Использует API_ACTION + ID)
-    window.deleteEntry = async (id, name) => {
-        if (confirm(`Удалить запись: ${name}?`)) {
-            try {
-                const res = await fetch(`${API_ACTION}/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    await updateList();
-                } else {
-                    alert("Не удалось удалить");
-                }
-            } catch (err) { alert("Сервер недоступен"); }
-        }
-    };
-
-    // Редактирование записи (Использует API_ACTION + ID)
+    // Редактирование
     window.editEntry = async (id, oldName) => {
         const newName = prompt('Изменить имя ученика:', oldName);
         if (newName && newName.trim() !== "" && newName !== oldName) {
@@ -128,26 +113,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ studentName: newName.trim() })
                 });
-                if (res.ok) {
-                    await updateList();
-                } else {
-                    alert("Ошибка при обновлении");
-                }
+                if (res.ok) await updateList();
+                else alert("Ошибка при обновлении");
             } catch (err) { alert("Сервер недоступен"); }
         }
     };
 
-    // Отправка формы (Использует API_ACTION)
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
+    // Удаление
+    window.deleteEntry = async (id, name) => {
+        if (confirm(`Удалить запись: ${name}?`)) {
+            try {
+                const res = await fetch(`${API_ACTION}/${id}`, { method: 'DELETE' });
+                if (res.ok) await updateList();
+                else alert("Ошибка при удалении");
+            } catch (err) { alert("Сервер недоступен"); }
+        }
+    };
 
+    // Отправка формы
+    form.onsubmit = async (e) => {
+        e.preventDefault();
         const studentNames = document.getElementById('studentName').value.split(',').map(s => s.trim());
-        const date = document.getElementById('date').value;
-        const count = document.getElementById('count').value;
-        const reason = document.getElementById('reason').value;
-        const allstudents = document.getElementById('allstudents').value;
         
         try {
             for (const name of studentNames) {
@@ -158,24 +144,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                         teacher: teacher.name,
                         className: teacher.className,
-                        date: date,
-                        count: count,
+                        date: document.getElementById('date').value,
+                        count: document.getElementById('count').value,
                         studentName: name,
-                        reason: reason,
-                        allstudents: allstudents
+                        reason: document.getElementById('reason').value,
+                        allstudents: document.getElementById('allstudents').value
                     })
                 });
             }
             form.reset();
             document.getElementById('className').value = teacher.className;
             await updateList();
-            alert("Данные успешно отправлены!");
-        } catch (err) { 
-            alert("Ошибка при отправке"); 
-        } finally {
-            submitBtn.disabled = false;
-        }
-    });
+            alert("Готово!");
+        } catch (err) { alert("Ошибка при отправке"); }
+    };
 
     updateList();
 });
