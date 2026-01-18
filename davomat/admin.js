@@ -1,3 +1,8 @@
+const API_URL = 'https://attendancesrv.vercel.app/api/absents';
+let absentsData = [];
+const reasonColors = ['#09ff00', '#ff0000', '#0d6efd', '#ffc107', '#6610f2', '#fd7e14', '#20c997'];
+
+// Список всех учителей для проверки статуса (✅/❌)
 const users = [
     { name: "Dadabayeva.I.D.", className: "1A" }, { name: "Cherimitsina.A.K.", className: "1B" },
     { name: "Ermakova.D.Y.", className: "1V" }, { name: "Nurmatova.N.R.", className: "1G" },
@@ -22,108 +27,148 @@ const users = [
     { name: "Ruzmatova.S.M.", className: "10V" }, { name: "Baltabayeva.M.T.", className: "11A" },
     { name: "Ryabinina.S.Y.", className: "11B" }, { name: "Abdullayeva.M.R.", className: "11V" },
     { name: "Aliyeva.N.M.", className: "11G" }
-].filter(u => u.className);
-
-const API_URL = 'https://attendancesrv.vercel.app/api/absents';
-let absentsData = [];
+];
 
 const translations = {
     ru: { 
-        msg_wait_week: "Недостаточно данных! Нужно минимум 6 рабочих дней в базе.",
-        msg_wait_month: "Недостаточно данных для месячного отчета!",
-        msg_no_date: "Выберите дату!"
+        total_absent: "Всего отсутствующих", excel_err: "Недостаточно данных!", 
+        col_teacher: "Учитель", col_class: "Класс", col_perc: "Процент %", col_status: "Статус",
+        col_date: "Дата", col_student: "Ученик", col_reason: "Причина"
     },
     uz: { 
-        msg_wait_week: "Ma'lumot yetarli emas! Bazada kamida 6 kunlik ma'lumot bo'lishi kerak.",
-        msg_wait_month: "Oylik hisobot uchun ma'lumot yetarli emas!",
-        msg_no_date: "Sanani tanlang!"
+        total_absent: "Jami yo'qlar", excel_err: "Ma'lumot yetarli emas!", 
+        col_teacher: "O'qituvchi", col_class: "Sinf", col_perc: "Foiz %", col_status: "Holat",
+        col_date: "Sana", col_student: "O'quvchi", col_reason: "Sabab"
     }
 };
 
-// Исправленная плашка
 function applyTranslations(lang) {
     const group = document.getElementById('langGroup');
-    if (lang === 'uz') {
-        group.classList.add('uz-active');
-    } else {
-        group.classList.remove('uz-active');
-    }
+    if (lang === 'uz') group.classList.add('uz-active');
+    else group.classList.remove('uz-active');
     
     localStorage.setItem('lang', lang);
-    
-    // Здесь должен быть твой обычный код перевода [data-i18n]
-    const t = {
-        ru: { admin_panel_title: "Админ-панель №22", choose_date: "Выберите дату:", total_absent: "Всего отсутствующих", reason_stats: "Статистика причин", clear_history: "Очистить историю", export_excel: "Excel отчёт", select_period: "Выберите период", report_day: "За 1 день", report_week: "За неделю", report_month: "За месяц" },
-        uz: { admin_panel_title: "22-maktab admin paneli", choose_date: "Sanani tanlang:", total_absent: "Jami yo'qlar", reason_stats: "Sabablar statistikasi", clear_history: "Tozalash", export_excel: "Excel yuklash", select_period: "Hisobot davrini tanlang", report_day: "1 kunlik", report_week: "Haftalik", report_month: "Oylik" }
-    };
-    
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (t[lang][key]) el.textContent = t[lang][key];
+        // Перевод из основного объекта в HTML (если есть)
     });
 }
 
+// ЭКСПОРТ EXCEL
 window.handleExcelExport = async function(type) {
     const lang = localStorage.getItem('lang') || 'ru';
+    const t = translations[lang];
     const selectedDate = document.getElementById('dateFilter').value;
-    if (!selectedDate) return alert(translations[lang].msg_no_date);
+    const uniqueDays = [...new Set(absentsData.map(a => a.date))].sort();
 
-    try {
-        const res = await fetch(API_URL);
-        const allData = await res.json();
+    // ПРОВЕРКА НАКОПЛЕНИЯ
+    if (type === 'week' && uniqueDays.length < 6) return alert(t.excel_err);
+    if (type === 'month' && uniqueDays.length < 20) return alert(t.excel_err);
+
+    let filtered = [];
+    if (type === 'day') filtered = absentsData.filter(a => a.date === selectedDate);
+    else if (type === 'week') filtered = absentsData.filter(a => uniqueDays.slice(-6).includes(a.date));
+    else if (type === 'month') filtered = absentsData.filter(a => a.date.startsWith(selectedDate.substring(0, 7)));
+
+    const wb = XLSX.utils.book_new();
+
+    // 1. ОБЩАЯ СТАТИСТИКА (РЕЙТИНГ С ГАЛОЧКАМИ)
+    const summaryData = users.map(u => {
+        const userAbsents = filtered.filter(a => a.teacher.trim() === u.name.trim());
+        let totalStudents = 0, absentCount = 0;
         
-        // Считаем уникальные рабочие дни в базе
-        const uniqueDays = [...new Set(allData.map(item => item.date))];
+        userAbsents.forEach(a => {
+            totalStudents += Number(a.allstudents) || 0;
+            absentCount += Number(a.count) || 1; 
+        });
 
-        if (type === 'week' && uniqueDays.length < 6) {
-            return alert(translations[lang].msg_wait_week);
-        }
-        
-        if (type === 'month' && uniqueDays.length < 20) {
-            return alert(translations[lang].msg_wait_month);
-        }
+        const percent = totalStudents > 0 ? (((totalStudents - absentCount) / totalStudents) * 100).toFixed(1) : "100";
+        const status = userAbsents.length > 0 ? "✅" : "❌";
 
-        // Логика фильтрации
-        let filtered = [];
-        if (type === 'day') {
-            filtered = allData.filter(a => a.date === selectedDate);
-        } else if (type === 'week') {
-            const last6Days = uniqueDays.sort().slice(-6);
-            filtered = allData.filter(a => last6Days.includes(a.date));
-        } else if (type === 'month') {
-            const currentMonth = selectedDate.substring(0, 7); // "2024-05"
-            filtered = allData.filter(a => a.date.startsWith(currentMonth));
-        }
+        return {
+            [t.col_date]: selectedDate,
+            [t.col_teacher]: u.name,
+            [t.col_class]: u.className,
+            [t.col_perc]: percent + "%",
+            [t.col_status]: status
+        };
+    });
 
-        // Генерация Excel (упрощенно для примера)
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(filtered);
-        XLSX.utils.book_append_sheet(wb, ws, "Report");
-        XLSX.writeFile(wb, `Report_${type}.xlsx`);
-        
-    } catch (e) {
-        console.error(e);
-    }
+    const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, wsSummary, "ОБЩАЯ СТАТИСТИКА");
+
+    // 2. ЛИСТЫ ПО КЛАССАМ (ПОДРОБНО)
+    const classes = [...new Set(filtered.map(a => a.className))].sort();
+    classes.forEach(cls => {
+        const classData = filtered.filter(a => a.className === cls).map(a => ({
+            [t.col_date]: a.date,
+            [t.col_student]: a.studentName,
+            [t.col_reason]: a.reason
+        }));
+        const wsClass = XLSX.utils.json_to_sheet(classData);
+        XLSX.utils.book_append_sheet(wb, wsClass, `Класс ${cls}`);
+    });
+
+    XLSX.writeFile(wb, `School22_${type}_Report.xlsx`);
 };
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', async () => {
-    const savedLang = localStorage.getItem('lang') || 'ru';
-    applyTranslations(savedLang);
-
-    document.getElementById('lang-ru').onclick = () => applyTranslations('ru');
-    document.getElementById('lang-uz').onclick = () => applyTranslations('uz');
-
-    // Загрузка дат в селект
+// ЗАГРУЗКА И ОТРИСОВКА
+async function loadAbsents() {
     const res = await fetch(API_URL);
     absentsData = await res.json();
     const dates = [...new Set(absentsData.map(a => a.date))].sort().reverse();
     const select = document.getElementById('dateFilter');
-    select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-    
+    if (select) {
+        select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+        select.onchange = renderDashboard;
+    }
     renderDashboard();
-});
+}
 
 function renderDashboard() {
-    // Твой код отрисовки графиков...
+    const val = document.getElementById('dateFilter').value;
+    const filtered = absentsData.filter(a => a.date === val);
+    const totalEl = document.getElementById('totalAbsent');
+    if (totalEl) totalEl.textContent = filtered.length;
+
+    // График
+    const counts = {};
+    filtered.forEach(a => counts[a.reason] = (counts[a.reason] || 0) + 1);
+    const ctx = document.getElementById('reasonChart');
+    if (ctx && window.Chart) {
+        if (window.myChart) window.myChart.destroy();
+        window.myChart = new window.Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(counts),
+                datasets: [{ data: Object.values(counts), backgroundColor: reasonColors }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // Карточки классов
+    const container = document.getElementById('classChartsContainer');
+    if (container) {
+        container.innerHTML = "";
+        const classMap = {};
+        filtered.forEach(a => {
+            if (!classMap[a.className]) classMap[a.className] = [];
+            classMap[a.className].push(a.studentName);
+        });
+        Object.keys(classMap).sort().forEach(cls => {
+            const div = document.createElement('div');
+            div.className = "col";
+            div.innerHTML = `<div class="card stat-card h-100"><div class="card-body"><h5>${cls}</h5><p>Yo'q: ${classMap[cls].length}</p><small>${classMap[cls].join(', ')}</small></div></div>`;
+            container.appendChild(div);
+        });
+    }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const lang = localStorage.getItem('lang') || 'ru';
+    applyTranslations(lang);
+    loadAbsents();
+    document.getElementById('lang-ru').onclick = () => applyTranslations('ru');
+    document.getElementById('lang-uz').onclick = () => applyTranslations('uz');
+});
