@@ -28,20 +28,20 @@ const users = [
     { name: "Aliyeva.N.M.", className: "11G" }
 ];
 
-// ПЕРЕВОД И ПЛАШКА
 function applyTranslations(lang) {
     const group = document.getElementById('langGroup');
     if (group) group.setAttribute('data-active', lang);
     localStorage.setItem('lang', lang);
+    // (Тут можно добавить логику перевода текста через data-i18n если нужно)
 }
 
-// ЭКСПОРТ EXCEL
 window.handleExcelExport = async function(type) {
     const selectedDate = document.getElementById('dateFilter').value;
-    const uniqueDays = [...new Set(absentsData.map(a => a.date))].sort();
+    if (!selectedDate) return alert("Выберите дату!");
 
-    if (type === 'week' && uniqueDays.length < 6) return alert("Мало данных для недели!");
-    if (type === 'month' && uniqueDays.length < 20) return alert("Мало данных для месяца!");
+    const uniqueDays = [...new Set(absentsData.map(a => a.date))].sort();
+    if (type === 'week' && uniqueDays.length < 6) return alert("Недостаточно данных для недели (минимум 6 дн.)");
+    if (type === 'month' && uniqueDays.length < 20) return alert("Недостаточно данных для месяца (минимум 20 дн.)");
 
     let filtered = [];
     if (type === 'day') filtered = absentsData.filter(a => a.date === selectedDate);
@@ -50,98 +50,137 @@ window.handleExcelExport = async function(type) {
 
     const wb = XLSX.utils.book_new();
 
-    // 1. ЛИСТ ОБЩЕЙ СТАТИСТИКИ (С СОРТИРОВКОЙ)
+    // 1. ОБЩИЙ ЛИСТ С УМНОЙ СОРТИРОВКОЙ
     const summary = users.map(u => {
         const matches = filtered.filter(a => a.className === u.className);
-        let totalStudentsInClass = matches.length > 0 ? Number(matches[0].allstudents) : 0;
-        let absentCount = matches.length; 
+        const hasData = matches.length > 0;
         
-        let perc = 100;
-        if (totalStudentsInClass > 0) {
-            perc = (((totalStudentsInClass - absentCount) / totalStudentsInClass) * 100).toFixed(1);
+        // Берем данные об общем кол-ве учеников из записи, если она есть
+        let totalCount = hasData ? Number(matches[0].allstudents) : 0;
+        // Считаем уникальные записи отсутствующих для этого класса
+        let absentCount = hasData ? [...new Set(matches.map(m => m.studentName))].length : 0;
+        
+        let perc = 0;
+        if (hasData && totalCount > 0) {
+            perc = (((totalCount - absentCount) / totalCount) * 100).toFixed(1);
+        } else if (!hasData) {
+            perc = 0; // Чтобы те, кто не сдал, улетели вниз
         }
 
         return {
+            "Дата": selectedDate,
             "Учитель": u.name,
             "Класс": u.className,
-            "Всего": totalStudentsInClass || "-",
-            "Отсутствует": absentCount,
+            "Всего учеников": totalCount || "-",
+            "Отсутствует": hasData ? absentCount : "-",
             "Процент %": Number(perc),
-            "Статус": matches.length > 0 ? "✅" : "❌"
+            "Статус": hasData ? "✅" : "❌"
         };
     });
 
-    // СОРТИРОВКА: Сначала те, кто сдал (✅), затем по убыванию процента
+    // СОРТИРОВКА: Сначала ✅ (те кто сдал), потом по убыванию Процента. ❌ всегда внизу.
     summary.sort((a, b) => {
         if (a.Статус !== b.Статус) return a.Статус === "✅" ? -1 : 1;
         return b["Процент %"] - a["Процент %"];
     });
 
-    const wsSummary = XLSX.utils.json_to_sheet(summary);
-    XLSX.utils.book_append_sheet(wb, wsSummary, "ОБЩИЙ ОТЧЕТ");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), "ОБЩАЯ СТАТИСТИКА");
 
-    // 2. ПОДРОБНЫЕ ЛИСТЫ ПО КЛАССАМ
-    const classes = [...new Set(filtered.map(a => a.className))].sort();
-    classes.forEach(cls => {
-        const classInfo = filtered.filter(a => a.className === cls);
-        const detailedRows = classInfo.map(a => ({
+    // 2. ЛИСТЫ ПО КЛАССАМ (ПОДРОБНО)
+    const activeClasses = [...new Set(filtered.map(a => a.className))].sort();
+    activeClasses.forEach(cls => {
+        const classData = filtered.filter(a => a.className === cls).map(a => ({
             "Дата": a.date,
+            "Учитель": a.teacher,
             "Ученик": a.studentName,
             "Причина": a.reason,
             "Всего в классе": a.allstudents
         }));
-        
-        const wsClass = XLSX.utils.json_to_sheet(detailedRows);
-        XLSX.utils.book_append_sheet(wb, wsClass, `Класс ${cls}`);
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classData), `Класс ${cls}`);
     });
 
-    XLSX.writeFile(wb, `School22_${type}_${selectedDate}.xlsx`);
+    XLSX.writeFile(wb, `School22_Report_${type}_${selectedDate}.xlsx`);
 };
 
-// ОЧИСТКА ИСТОРИИ (ИСПРАВЛЕНО)
+// Функция очистки (вынесена отдельно для надежности)
 async function clearHistory() {
-    if (confirm("ВНИМАНИЕ! Вы точно хотите полностью очистить всю базу данных?")) {
-        try {
-            const res = await fetch(API_URL, { method: 'DELETE' });
-            if (res.ok) {
-                alert("База успешно очищена!");
-                location.reload();
-            } else {
-                alert("Ошибка при очистке");
-            }
-        } catch (e) {
-            alert("Ошибка сервера");
+    if (!confirm("ВНИМАНИЕ! Вы точно хотите безвозвратно удалить ВСЮ историю посещаемости?")) return;
+    
+    try {
+        const response = await fetch(API_URL, { method: 'DELETE' });
+        if (response.ok) {
+            alert("База данных успешно очищена.");
+            location.reload();
+        } else {
+            alert("Ошибка при удалении данных.");
         }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Ошибка соединения с сервером.");
     }
 }
 
 async function loadAbsents() {
-    const res = await fetch(API_URL);
-    absentsData = await res.json();
-    const dates = [...new Set(absentsData.map(a => a.date))].sort().reverse();
-    const select = document.getElementById('dateFilter');
-    if (select) {
-        select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-        select.onchange = renderDashboard;
+    try {
+        const res = await fetch(API_URL);
+        absentsData = await res.json();
+        
+        const select = document.getElementById('dateFilter');
+        if (select && absentsData.length > 0) {
+            const dates = [...new Set(absentsData.map(a => a.date))].sort().reverse();
+            select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+            select.onchange = renderDashboard;
+        }
+        renderDashboard();
+    } catch (e) {
+        console.error("Load error:", e);
     }
-    renderDashboard();
 }
 
 function renderDashboard() {
     const val = document.getElementById('dateFilter').value;
-    const filtered = absentsData.filter(a => a.date === val);
-    const totalEl = document.getElementById('totalAbsent');
-    if (totalEl) totalEl.textContent = filtered.length;
+    if (!val) return;
 
+    const filtered = absentsData.filter(a => a.date === val);
+    document.getElementById('totalAbsent').textContent = filtered.length;
+
+    // График причин
+    const counts = {};
+    filtered.forEach(a => counts[a.reason] = (counts[a.reason] || 0) + 1);
+    
+    const ctx = document.getElementById('reasonChart');
+    if (ctx) {
+        if (window.myChart) window.myChart.destroy();
+        window.myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(counts),
+                datasets: [{ data: Object.values(counts), backgroundColor: reasonColors }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // Карточки классов
     const container = document.getElementById('classChartsContainer');
     if (container) {
         container.innerHTML = "";
         const map = {};
-        filtered.forEach(a => { if(!map[a.className]) map[a.className] = []; map[a.className].push(a.studentName); });
+        filtered.forEach(a => {
+            if (!map[a.className]) map[a.className] = [];
+            map[a.className].push(a.studentName);
+        });
         Object.keys(map).sort().forEach(cls => {
             const div = document.createElement('div');
             div.className = "col";
-            div.innerHTML = `<div class="card stat-card h-100"><div class="card-body"><h5>${cls}</h5><p>Yo'q: ${map[cls].length}</p><small>${map[cls].join(', ')}</small></div></div>`;
+            div.innerHTML = `
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-warning">${cls}</h5>
+                        <p class="mb-1">Yo'q: <b>${map[cls].length}</b></p>
+                        <small class="text-white-50">${map[cls].join(', ')}</small>
+                    </div>
+                </div>`;
             container.appendChild(div);
         });
     }
@@ -150,10 +189,13 @@ function renderDashboard() {
 document.addEventListener('DOMContentLoaded', () => {
     applyTranslations(localStorage.getItem('lang') || 'ru');
     loadAbsents();
+
     document.getElementById('lang-ru').onclick = () => applyTranslations('ru');
     document.getElementById('lang-uz').onclick = () => applyTranslations('uz');
     
-    // Привязываем очистку к кнопке
+    // Кнопка очистки
     const clearBtn = document.getElementById('clearHistory');
-    if (clearBtn) clearBtn.onclick = clearHistory;
+    if (clearBtn) {
+        clearBtn.onclick = clearHistory;
+    }
 });
