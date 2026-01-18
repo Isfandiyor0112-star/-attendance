@@ -10,9 +10,7 @@
         try {
             const user = JSON.parse(localStorage.getItem('teacher'));
             const adminLogins = ['shaxnoza', 'furkat', 'matlyuba', 'admin'];
-
             if (!user || !adminLogins.includes(user.login)) {
-                // Если не админ, выкидываем на вход
                 window.location.replace('index.html');
             }
         } catch (e) {
@@ -28,7 +26,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-
 
 <div class="container py-5">
     <div class="language-picker mb-4">
@@ -52,7 +49,7 @@
                 <select id="dateFilter" class="form-select custom-select"></select>
             </div>
             <div class="col-md-8 d-flex justify-content-md-end gap-2 flex-wrap">
-                <button id="exportExcel" class="btn btn-action btn-primary-custom">
+                <button type="button" class="btn btn-action btn-primary-custom" data-bs-toggle="modal" data-bs-target="#excelModal">
                     <span class="me-1">📄</span> <span data-i18n="export_excel">Excel отчёт</span>
                 </button>
                 <button id="clearHistory" class="btn btn-action btn-danger-custom" data-i18n="clear_history">Очистить историю</button>
@@ -88,8 +85,29 @@
     <div id="classChartsContainer" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-2"></div>
 </div>
 
+<div class="modal fade" id="excelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg" style="background: #1a1a1a; border: 1px solid #333; border-radius: 20px;">
+      <div class="modal-header border-bottom border-secondary">
+        <h5 class="modal-title text-white fw-bold" data-i18n="select_period">Выберите период отчета</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <div class="d-grid gap-3">
+          <button class="btn btn-outline-primary py-3 fw-bold rounded-pill" onclick="handleExcelExport('day')">
+            📅 <span data-i18n="report_day">Однодневный отчет</span>
+          </button>
+          <button class="btn btn-outline-info py-3 fw-bold rounded-pill" onclick="handleExcelExport('week')">
+            🗓️ <span data-i18n="report_week">Шестидневный отчет (6 дней)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>
-
