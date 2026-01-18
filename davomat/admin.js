@@ -28,46 +28,27 @@ const API_URL = 'https://attendancesrv.vercel.app/api/absents';
 let absents = [];
 const reasonColors = ['#09ff00', '#ff0000', '#0d6efd', '#ffc107', '#6610f2'];
 
-const translations = {
-    ru: { 
-        admin_panel_title: "Админ-панель №22", choose_date: "Дата:", total_absent: "Отсутствуют", 
-        reason_stats: "Статистика причин", clear_history: "Очистить историю", export_excel: "Excel отчёт",
-        select_period: "Выберите период", report_day: "За 1 день", report_week: "За неделю (6 дн.)",
-        report_month: "Месячный отчет", not_enough_data: "Нужно минимум 6 дней данных!", not_enough_month: "Данных за этот месяц нет!"
-    },
-    uz: { 
-        admin_panel_title: "22-maktab admini", choose_date: "Sana:", total_absent: "Yo'qlar", 
-        reason_stats: "Statistika", clear_history: "Tozalash", export_excel: "Excel yuklash",
-        select_period: "Davrni tanlang", report_day: "1 kunlik", report_week: "Haftalik (6 kun)",
-        report_month: "Oylik hisobot", not_enough_data: "Kamida 6 kunlik ma'lumot kerak!", not_enough_month: "Bu oy uchun ma'lumot yo'q!"
-    }
-};
-
-function setLang(lang) {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
-    });
-    localStorage.setItem('lang', lang);
-    document.getElementById('langGroup').setAttribute('data-active', lang);
-}
-
 async function handleExcelExport(type) {
     const selectedDate = document.getElementById('dateFilter').value;
     const lang = localStorage.getItem('lang') || 'ru';
-    if (!selectedDate) return alert("Выберите дату!");
+    if (!selectedDate) return;
 
     try {
         const res = await fetch(API_URL);
         const allData = await res.json();
         let filtered = [];
-        const uniqueDates = [...new Set(allData.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
+        
+        // Получаем все даты из базы для проверки их количества
+        const uniqueDatesInDb = [...new Set(allData.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
 
         if (type === 'day') {
             filtered = allData.filter(a => a.date === selectedDate);
         } else if (type === 'week') {
-            if (uniqueDates.length < 6) return alert(translations[lang].not_enough_data);
-            const last6 = uniqueDates.slice(0, 6);
+            // Берем последние 6 рабочих дней
+            if (uniqueDatesInDb.length < 6) {
+                return alert(lang === 'ru' ? "Недостаточно данных для недели (нужно хотя бы 6 дней в базе)!" : "Haftalik hisobot uchun kamida 6 kunlik ma'lumot kerak!");
+            }
+            const last6 = uniqueDatesInDb.slice(0, 6);
             filtered = allData.filter(a => last6.includes(a.date));
         } else if (type === 'month') {
             const d = new Date(selectedDate);
@@ -75,49 +56,64 @@ async function handleExcelExport(type) {
                 const id = new Date(item.date);
                 return id.getFullYear() === d.getFullYear() && id.getMonth() === d.getMonth();
             });
-            if (filtered.length === 0) return alert(translations[lang].not_enough_month);
+            
+            // Проверка: Если в этом месяце в базе всего 1-2 дня, не даем скачать "Месячный" отчет
+            const uniqueMonthDates = [...new Set(filtered.map(a => a.date))];
+            if (uniqueMonthDates.length < 3) { // Минимум 3 дня для "месячного" вида
+                return alert(lang === 'ru' ? "Слишком мало данных для месячного отчета!" : "Oylik hisobot uchun ma'lumot juda kam!");
+            }
         }
 
         generateExcel(filtered, selectedDate, type, lang);
         bootstrap.Modal.getInstance(document.getElementById('excelModal')).hide();
-    } catch (e) { alert("Error loading data"); }
+    } catch (e) { alert("Error"); }
 }
 
 function generateExcel(filtered, date, type, lang) {
     const wb = XLSX.utils.book_new();
     const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+    const activeDates = [...new Set(filtered.map(a => a.date))].sort();
 
-    // 1. Rating Sheet
+    // 1. Лист Рейтинга (Rating) со статусами
     const summaryRows = users.map(u => {
         const matches = filtered.filter(i => norm(i.teacher) === norm(u.name));
         let tot = 0, abs = 0;
         matches.forEach(m => { tot += parseFloat(m.allstudents) || 0; abs += parseFloat(m.count) || 0; });
+        
         const p = tot > 0 ? (((tot - abs) / tot) * 100).toFixed(1) : 0;
+        
+        // Логика галочек: проверяем для каждой даты из периода, подал ли этот учитель отчет
+        let statusIcons = "";
+        activeDates.forEach(d => {
+            const hasRecord = matches.some(m => m.date === d);
+            statusIcons += hasRecord ? "✅" : "❌";
+        });
+
         return {
             [lang==='ru'?'Учитель':'O\'qituvchi']: u.name,
             "Sinf": u.className,
             "Davomat (%)": p + "%",
-            [lang==='ru'?'Дней':'Kunlar']: [...new Set(matches.map(m=>m.date))].length
+            [lang==='ru'?'Статус (Подача)':'Holat']: statusIcons
         };
     }).sort((a, b) => parseFloat(b["Davomat (%)"]) - parseFloat(a["Davomat (%)"]));
+
     const wsRating = XLSX.utils.json_to_sheet(summaryRows);
-    wsRating['!cols'] = [{ wch: 30 }, { wch: 10 }, { wch: 15 }, { wch: 10 }];
+    wsRating['!cols'] = [{ wch: 30 }, { wch: 10 }, { wch: 15 }, { wch: 20 }];
     XLSX.utils.book_append_sheet(wb, wsRating, 'Rating');
 
-    // 2. Statistika Sheet (Side by Side tables)
+    // 2. Лист Statistika (как просил - две таблицы рядом)
     if (type !== 'day') {
         const rs = {}; filtered.forEach(i => rs[i.reason || "Noma'lum"] = (rs[i.reason] || 0) + 1);
         const cs = {}; filtered.forEach(i => cs[i.className] = (cs[i.className] || 0) + 1);
         const sortedClasses = Object.keys(cs).sort((a,b) => cs[b] - cs[a]);
 
         const statRows = [
-            { A: lang==='ru'?'СТАТИСТИКА ПО ПРИЧИНАМ':'SABABLAR TAHLILI', C: lang==='ru'?'АНТИРЕЙТИНГ КЛАССОВ':'SINFLAR ANTIREYTINGI' },
+            { A: lang==='ru'?'АНАЛИЗ ПРИЧИН':'SABABLAR TAHLILI', C: lang==='ru'?'АНТИРЕЙТИНГ КЛАССОВ':'SINFLAR ANTIREYTINGI' },
             { A: lang==='ru'?'Причина':'Sabab', B: lang==='ru'?'Кол-во':'Soni', C: lang==='ru'?'Класс':'Sinf', D: lang==='ru'?'Пропуски':'Yo\'qlamalar' }
         ];
 
         const maxRows = Math.max(Object.keys(rs).length, sortedClasses.length);
         const rKeys = Object.keys(rs);
-
         for (let i = 0; i < maxRows; i++) {
             statRows.push({
                 A: rKeys[i] || "", B: rKeys[i] ? rs[rKeys[i]] : "",
@@ -129,7 +125,7 @@ function generateExcel(filtered, date, type, lang) {
         XLSX.utils.book_append_sheet(wb, wsStats, 'Statistika');
     }
 
-    // 3. Class Sheets (Full Data)
+    // 3. Листы Классов
     const grp = {};
     filtered.forEach(i => {
         if(!grp[i.className]) grp[i.className] = [];
@@ -149,6 +145,7 @@ function generateExcel(filtered, date, type, lang) {
     XLSX.writeFile(wb, `Report22_${type.toUpperCase()}_${date}.xlsx`);
 }
 
+// Функции рендеринга графиков (остаются без изменений)
 async function loadAbsents() {
     const res = await fetch(API_URL);
     absents = await res.json();
@@ -160,7 +157,7 @@ async function loadAbsents() {
 }
 
 function renderByDate() {
-    const val = document.getElementById('dateFilter').value;
+    const val = f = document.getElementById('dateFilter').value;
     const filtered = absents.filter(a => a.date === val);
     document.getElementById('totalAbsent').textContent = filtered.length;
     
@@ -194,7 +191,11 @@ function renderByDate() {
     });
 }
 
-document.getElementById('lang-ru').onclick = () => setLang('ru');
-document.getElementById('lang-uz').onclick = () => setLang('uz');
+document.getElementById('lang-ru').onclick = () => { localStorage.setItem('lang','ru'); location.reload(); };
+document.getElementById('lang-uz').onclick = () => { localStorage.setItem('lang','uz'); location.reload(); };
 document.getElementById('clearHistory').onclick = async () => { if(confirm('Ochirish?')) { await fetch(API_URL, {method:'DELETE'}); location.reload(); }};
-document.addEventListener('DOMContentLoaded', () => { loadAbsents(); setLang(localStorage.getItem('lang') || 'ru'); });
+document.addEventListener('DOMContentLoaded', () => { 
+    loadAbsents(); 
+    const lang = localStorage.getItem('lang') || 'ru';
+    document.getElementById('langGroup').setAttribute('data-active', lang);
+});
