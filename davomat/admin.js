@@ -109,7 +109,20 @@ window.handleExcelExport = async function(type) {
         return b[t.xl_perc] - a[t.xl_perc];
     });
 
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), "SUMMARY");
+    const wsSummary = XLSX.utils.json_to_sheet(summary);
+    
+    // УСТАНОВКА ШИРИНЫ КОЛОНОК (wch: символы)
+    wsSummary['!cols'] = [
+        { wch: 12 }, // Дата
+        { wch: 25 }, // Учитель (РАСШИРЕНО)
+        { wch: 10 }, // Класс
+        { wch: 15 }, // Всего
+        { wch: 12 }, // Отсутствует
+        { wch: 10 }, // Процент
+        { wch: 10 }  // Статус
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsSummary, "SUMMARY");
 
     // 2. ПОДРОБНО ПО КЛАССАМ
     const activeClasses = [...new Set(filtered.map(a => a.className))].sort();
@@ -121,7 +134,13 @@ window.handleExcelExport = async function(type) {
             [t.xl_absent]: a.studentName,
             [t.xl_reason]: a.reason
         }));
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classRows), `Class ${cls}`);
+        const wsClass = XLSX.utils.json_to_sheet(classRows);
+        
+        wsClass['!cols'] = [
+            { wch: 12 }, { wch: 25 }, { wch: 10 }, { wch: 25 }, { wch: 20 }
+        ];
+
+        XLSX.utils.book_append_sheet(wb, wsClass, `Class ${cls}`);
     });
 
     XLSX.writeFile(wb, `School22_${type}_${selectedDate}.xlsx`);
@@ -134,15 +153,17 @@ async function clearHistory() {
 }
 
 async function loadAbsents() {
-    const res = await fetch(API_URL);
-    absentsData = await res.json();
-    const select = document.getElementById('dateFilter');
-    if (select && absentsData.length > 0) {
-        const dates = [...new Set(absentsData.map(a => a.date))].sort().reverse();
-        select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-        select.onchange = renderDashboard;
-    }
-    renderDashboard();
+    try {
+        const res = await fetch(API_URL);
+        absentsData = await res.json();
+        const select = document.getElementById('dateFilter');
+        if (select && absentsData.length > 0) {
+            const dates = [...new Set(absentsData.map(a => a.date))].sort().reverse();
+            select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+            select.onchange = renderDashboard;
+        }
+        renderDashboard();
+    } catch (e) { console.error(e); }
 }
 
 function renderDashboard() {
