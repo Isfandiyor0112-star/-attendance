@@ -2,6 +2,37 @@ const API_URL = 'https://attendancesrv.vercel.app/api/absents';
 let absentsData = [];
 const reasonColors = ['#09ff00', '#ff0000', '#0d6efd', '#ffc107', '#6610f2', '#fd7e14', '#20c997'];
 
+const translations = {
+    ru: {
+        admin_panel_title: "Админ-панель школы №22",
+        choose_date: "Выберите дату:",
+        export_excel: "Excel отчёт",
+        clear_history: "Очистить историю",
+        total_absent: "Всего отсутствующих",
+        reason_stats: "Статистика причин",
+        select_period: "Выберите период отчета",
+        report_day: "За 1 день",
+        report_week: "За неделю (6 дн.)",
+        report_month: "За месяц",
+        xl_date: "Дата", xl_teacher: "Учитель", xl_class: "Класс", xl_total: "Всего учеников",
+        xl_absent: "Отсутствует", xl_perc: "Процент %", xl_status: "Статус", xl_reason: "Причина"
+    },
+    uz: {
+        admin_panel_title: "22-maktab admin paneli",
+        choose_date: "Sanani tanlang:",
+        export_excel: "Excel yuklash",
+        clear_history: "Tozalash",
+        total_absent: "Jami yo'qlar",
+        reason_stats: "Sabablar statistikasi",
+        select_period: "Hisobot davrini tanlang",
+        report_day: "1 kunlik",
+        report_week: "Haftalik (6 kun)",
+        report_month: "Oylik hisobot",
+        xl_date: "Sana", xl_teacher: "O'qituvchi", xl_class: "Sinf", xl_total: "Jami o'quvchi",
+        xl_absent: "Yo'qlar", xl_perc: "Foiz %", xl_status: "Holat", xl_reason: "Sabab"
+    }
+};
+
 const users = [
     { name: "Dadabayeva.I.D.", className: "1A" }, { name: "Cherimitsina.A.K.", className: "1B" },
     { name: "Ermakova.D.Y.", className: "1V" }, { name: "Nurmatova.N.R.", className: "1G" },
@@ -32,17 +63,21 @@ function applyTranslations(lang) {
     const group = document.getElementById('langGroup');
     if (group) group.setAttribute('data-active', lang);
     localStorage.setItem('lang', lang);
-    // (Тут можно добавить логику перевода текста через data-i18n если нужно)
+
+    const t = translations[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) el.textContent = t[key];
+    });
 }
 
 window.handleExcelExport = async function(type) {
+    const lang = localStorage.getItem('lang') || 'ru';
+    const t = translations[lang];
     const selectedDate = document.getElementById('dateFilter').value;
-    if (!selectedDate) return alert("Выберите дату!");
+    if (!selectedDate) return;
 
     const uniqueDays = [...new Set(absentsData.map(a => a.date))].sort();
-    if (type === 'week' && uniqueDays.length < 6) return alert("Недостаточно данных для недели (минимум 6 дн.)");
-    if (type === 'month' && uniqueDays.length < 20) return alert("Недостаточно данных для месяца (минимум 20 дн.)");
-
     let filtered = [];
     if (type === 'day') filtered = absentsData.filter(a => a.date === selectedDate);
     else if (type === 'week') filtered = absentsData.filter(a => uniqueDays.slice(-6).includes(a.date));
@@ -50,106 +85,76 @@ window.handleExcelExport = async function(type) {
 
     const wb = XLSX.utils.book_new();
 
-    // 1. ОБЩИЙ ЛИСТ С УМНОЙ СОРТИРОВКОЙ
+    // 1. ОБЩАЯ СТАТИСТИКА
     const summary = users.map(u => {
         const matches = filtered.filter(a => a.className === u.className);
         const hasData = matches.length > 0;
-        
-        // Берем данные об общем кол-ве учеников из записи, если она есть
-        let totalCount = hasData ? Number(matches[0].allstudents) : 0;
-        // Считаем уникальные записи отсутствующих для этого класса
-        let absentCount = hasData ? [...new Set(matches.map(m => m.studentName))].length : 0;
-        
-        let perc = 0;
-        if (hasData && totalCount > 0) {
-            perc = (((totalCount - absentCount) / totalCount) * 100).toFixed(1);
-        } else if (!hasData) {
-            perc = 0; // Чтобы те, кто не сдал, улетели вниз
-        }
+        let total = hasData ? Number(matches[0].allstudents) : 0;
+        let absent = hasData ? [...new Set(matches.map(m => m.studentName))].length : 0;
+        let perc = hasData && total > 0 ? (((total - absent) / total) * 100).toFixed(1) : 0;
 
         return {
-            "Дата": selectedDate,
-            "Учитель": u.name,
-            "Класс": u.className,
-            "Всего учеников": totalCount || "-",
-            "Отсутствует": hasData ? absentCount : "-",
-            "Процент %": Number(perc),
-            "Статус": hasData ? "✅" : "❌"
+            [t.xl_date]: selectedDate,
+            [t.xl_teacher]: u.name,
+            [t.xl_class]: u.className,
+            [t.xl_total]: total || "-",
+            [t.xl_absent]: hasData ? absent : "-",
+            [t.xl_perc]: Number(perc),
+            [t.xl_status]: hasData ? "✅" : "❌"
         };
     });
 
-    // СОРТИРОВКА: Сначала ✅ (те кто сдал), потом по убыванию Процента. ❌ всегда внизу.
     summary.sort((a, b) => {
-        if (a.Статус !== b.Статус) return a.Статус === "✅" ? -1 : 1;
-        return b["Процент %"] - a["Процент %"];
+        if (a[t.xl_status] !== b[t.xl_status]) return a[t.xl_status] === "✅" ? -1 : 1;
+        return b[t.xl_perc] - a[t.xl_perc];
     });
 
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), "ОБЩАЯ СТАТИСТИКА");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), "SUMMARY");
 
-    // 2. ЛИСТЫ ПО КЛАССАМ (ПОДРОБНО)
+    // 2. ПОДРОБНО ПО КЛАССАМ
     const activeClasses = [...new Set(filtered.map(a => a.className))].sort();
     activeClasses.forEach(cls => {
-        const classData = filtered.filter(a => a.className === cls).map(a => ({
-            "Дата": a.date,
-            "Учитель": a.teacher,
-            "Ученик": a.studentName,
-            "Причина": a.reason,
-            "Всего в классе": a.allstudents
+        const classRows = filtered.filter(a => a.className === cls).map(a => ({
+            [t.xl_date]: a.date,
+            [t.xl_teacher]: a.teacher,
+            [t.xl_class]: a.className,
+            [t.xl_absent]: a.studentName,
+            [t.xl_reason]: a.reason
         }));
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classData), `Класс ${cls}`);
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classRows), `Class ${cls}`);
     });
 
-    XLSX.writeFile(wb, `School22_Report_${type}_${selectedDate}.xlsx`);
+    XLSX.writeFile(wb, `School22_${type}_${selectedDate}.xlsx`);
 };
 
-// Функция очистки (вынесена отдельно для надежности)
 async function clearHistory() {
-    if (!confirm("ВНИМАНИЕ! Вы точно хотите безвозвратно удалить ВСЮ историю посещаемости?")) return;
-    
-    try {
-        const response = await fetch(API_URL, { method: 'DELETE' });
-        if (response.ok) {
-            alert("База данных успешно очищена.");
-            location.reload();
-        } else {
-            alert("Ошибка при удалении данных.");
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Ошибка соединения с сервером.");
-    }
+    if (!confirm("Удалить ВСЮ историю?")) return;
+    const res = await fetch(API_URL, { method: 'DELETE' });
+    if (res.ok) { alert("База очищена!"); location.reload(); }
 }
 
 async function loadAbsents() {
-    try {
-        const res = await fetch(API_URL);
-        absentsData = await res.json();
-        
-        const select = document.getElementById('dateFilter');
-        if (select && absentsData.length > 0) {
-            const dates = [...new Set(absentsData.map(a => a.date))].sort().reverse();
-            select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-            select.onchange = renderDashboard;
-        }
-        renderDashboard();
-    } catch (e) {
-        console.error("Load error:", e);
+    const res = await fetch(API_URL);
+    absentsData = await res.json();
+    const select = document.getElementById('dateFilter');
+    if (select && absentsData.length > 0) {
+        const dates = [...new Set(absentsData.map(a => a.date))].sort().reverse();
+        select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+        select.onchange = renderDashboard;
     }
+    renderDashboard();
 }
 
 function renderDashboard() {
     const val = document.getElementById('dateFilter').value;
     if (!val) return;
-
     const filtered = absentsData.filter(a => a.date === val);
     document.getElementById('totalAbsent').textContent = filtered.length;
 
-    // График причин
-    const counts = {};
-    filtered.forEach(a => counts[a.reason] = (counts[a.reason] || 0) + 1);
-    
     const ctx = document.getElementById('reasonChart');
     if (ctx) {
+        const counts = {};
+        filtered.forEach(a => counts[a.reason] = (counts[a.reason] || 0) + 1);
         if (window.myChart) window.myChart.destroy();
         window.myChart = new Chart(ctx, {
             type: 'doughnut',
@@ -161,26 +166,15 @@ function renderDashboard() {
         });
     }
 
-    // Карточки классов
     const container = document.getElementById('classChartsContainer');
     if (container) {
         container.innerHTML = "";
         const map = {};
-        filtered.forEach(a => {
-            if (!map[a.className]) map[a.className] = [];
-            map[a.className].push(a.studentName);
-        });
+        filtered.forEach(a => { if(!map[a.className]) map[a.className] = []; map[a.className].push(a.studentName); });
         Object.keys(map).sort().forEach(cls => {
             const div = document.createElement('div');
             div.className = "col";
-            div.innerHTML = `
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <h5 class="fw-bold text-warning">${cls}</h5>
-                        <p class="mb-1">Yo'q: <b>${map[cls].length}</b></p>
-                        <small class="text-white-50">${map[cls].join(', ')}</small>
-                    </div>
-                </div>`;
+            div.innerHTML = `<div class="card stat-card h-100"><div class="card-body"><h5>${cls}</h5><p>Yo'q: ${map[cls].length}</p><small>${map[cls].join(', ')}</small></div></div>`;
             container.appendChild(div);
         });
     }
@@ -189,13 +183,7 @@ function renderDashboard() {
 document.addEventListener('DOMContentLoaded', () => {
     applyTranslations(localStorage.getItem('lang') || 'ru');
     loadAbsents();
-
     document.getElementById('lang-ru').onclick = () => applyTranslations('ru');
     document.getElementById('lang-uz').onclick = () => applyTranslations('uz');
-    
-    // Кнопка очистки
-    const clearBtn = document.getElementById('clearHistory');
-    if (clearBtn) {
-        clearBtn.onclick = clearHistory;
-    }
+    document.getElementById('clearHistory').onclick = clearHistory;
 });
