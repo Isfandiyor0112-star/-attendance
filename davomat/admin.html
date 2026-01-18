@@ -87,7 +87,7 @@
 
 <div class="modal fade" id="excelModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="background: #1a1a1a; border: 1px solid #333; border-radius: 20px;">
+    <div class="modal-content shadow-lg" style="background: #1a1a1a; border: 1px solid #333; border-radius: 20px;">
       <div class="modal-header border-bottom border-secondary">
         <h5 class="modal-title text-white fw-bold" data-i18n="select_period">Выберите период отчета</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -95,13 +95,13 @@
       <div class="modal-body p-4">
         <div class="d-grid gap-3">
           <button class="btn btn-outline-primary py-3 fw-bold rounded-pill" onclick="handleExcelExport('day')">
-            📅 <span data-i18n="report_day">Однодневный отчет</span>
+            📅 <span data-i18n="report_day">Отчет за 1 день</span>
           </button>
           <button class="btn btn-outline-info py-3 fw-bold rounded-pill" onclick="handleExcelExport('week')">
-            🗓️ <span data-i18n="report_week">Шестидневный отчет (Неделя)</span>
+            🗓️ <span data-i18n="report_week">Отчет за неделю (6 дн.)</span>
           </button>
           <button class="btn btn-outline-warning py-3 fw-bold rounded-pill" onclick="handleExcelExport('month')">
-            📊 <span data-i18n="report_month">Месячный отчет</span>
+            📊 <span data-i18n="report_month">Отчет за месяц</span>
           </button>
         </div>
       </div>
