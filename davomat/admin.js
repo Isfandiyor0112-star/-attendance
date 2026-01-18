@@ -77,11 +77,30 @@ window.handleExcelExport = async function(type) {
     const selectedDate = document.getElementById('dateFilter').value;
     if (!selectedDate) return;
 
+    // --- ПРОВЕРКА ДАННЫХ ПО ДНЯМ ---
     const uniqueDays = [...new Set(absentsData.map(a => a.date))].sort();
+    
+    if (type === 'week' && uniqueDays.length < 6) {
+        return alert(lang === 'ru' ? `Нужно минимум 6 дней данных. Сейчас: ${uniqueDays.length}` : `Kamida 6 kunlik ma'lumot kerak. Hozir: ${uniqueDays.length}`);
+    }
+    if (type === 'month' && uniqueDays.length < 20) {
+        return alert(lang === 'ru' ? `Нужно минимум 20 дней данных. Сейчас: ${uniqueDays.length}` : `Kamida 20 kunlik ma'lumot kerak. Hozir: ${uniqueDays.length}`);
+    }
+
     let filtered = [];
-    if (type === 'day') filtered = absentsData.filter(a => a.date === selectedDate);
-    else if (type === 'week') filtered = absentsData.filter(a => uniqueDays.slice(-6).includes(a.date));
-    else if (type === 'month') filtered = absentsData.filter(a => a.date.startsWith(selectedDate.substring(0, 7)));
+    if (type === 'day') {
+        filtered = absentsData.filter(a => a.date === selectedDate);
+    } else if (type === 'week') {
+        const lastSix = uniqueDays.slice(-6);
+        filtered = absentsData.filter(a => lastSix.includes(a.date));
+    } else if (type === 'month') {
+        const monthPart = selectedDate.substring(0, 7);
+        filtered = absentsData.filter(a => a.date.startsWith(monthPart));
+    }
+
+    if (filtered.length === 0) {
+        return alert(lang === 'ru' ? "Нет данных для выгрузки!" : "Ma'lumot topilmadi!");
+    }
 
     const wb = XLSX.utils.book_new();
 
@@ -91,7 +110,7 @@ window.handleExcelExport = async function(type) {
         const hasData = matches.length > 0;
         let total = hasData ? Number(matches[0].allstudents) : 0;
         let absent = hasData ? [...new Set(matches.map(m => m.studentName))].length : 0;
-        let perc = hasData && total > 0 ? (((total - absent) / total) * 100).toFixed(1) : 0;
+        let perc = (hasData && total > 0) ? (((total - absent) / total) * 100).toFixed(1) : 0;
 
         return {
             [t.xl_date]: selectedDate,
@@ -104,6 +123,7 @@ window.handleExcelExport = async function(type) {
         };
     });
 
+    // СОРТИРОВКА: Сначала ✅, затем по убыванию процентов
     summary.sort((a, b) => {
         if (a[t.xl_status] !== b[t.xl_status]) return a[t.xl_status] === "✅" ? -1 : 1;
         return b[t.xl_perc] - a[t.xl_perc];
@@ -111,20 +131,14 @@ window.handleExcelExport = async function(type) {
 
     const wsSummary = XLSX.utils.json_to_sheet(summary);
     
-    // УСТАНОВКА ШИРИНЫ КОЛОНОК (wch: символы)
+    // РАСШИРЕНИЕ КОЛОНОК
     wsSummary['!cols'] = [
-        { wch: 12 }, // Дата
-        { wch: 25 }, // Учитель (РАСШИРЕНО)
-        { wch: 10 }, // Класс
-        { wch: 15 }, // Всего
-        { wch: 12 }, // Отсутствует
-        { wch: 10 }, // Процент
-        { wch: 10 }  // Статус
+        { wch: 12 }, { wch: 30 }, { wch: 10 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 10 }
     ];
 
     XLSX.utils.book_append_sheet(wb, wsSummary, "SUMMARY");
 
-    // 2. ПОДРОБНО ПО КЛАССАМ
+    // 2. ПОДРОБНЫЕ ЛИСТЫ ПО КЛАССАМ
     const activeClasses = [...new Set(filtered.map(a => a.className))].sort();
     activeClasses.forEach(cls => {
         const classRows = filtered.filter(a => a.className === cls).map(a => ({
@@ -135,11 +149,7 @@ window.handleExcelExport = async function(type) {
             [t.xl_reason]: a.reason
         }));
         const wsClass = XLSX.utils.json_to_sheet(classRows);
-        
-        wsClass['!cols'] = [
-            { wch: 12 }, { wch: 25 }, { wch: 10 }, { wch: 25 }, { wch: 20 }
-        ];
-
+        wsClass['!cols'] = [{ wch: 12 }, { wch: 30 }, { wch: 10 }, { wch: 30 }, { wch: 25 }];
         XLSX.utils.book_append_sheet(wb, wsClass, `Class ${cls}`);
     });
 
@@ -147,9 +157,21 @@ window.handleExcelExport = async function(type) {
 };
 
 async function clearHistory() {
-    if (!confirm("Удалить ВСЮ историю?")) return;
-    const res = await fetch(API_URL, { method: 'DELETE' });
-    if (res.ok) { alert("База очищена!"); location.reload(); }
+    const lang = localStorage.getItem('lang') || 'ru';
+    const msg = lang === 'ru' ? "Удалить ВСЮ историю безвозвратно?" : "Barcha ma'lumotlarni butunlay o'chirish?";
+    if (!confirm(msg)) return;
+
+    try {
+        const res = await fetch(API_URL, { method: 'DELETE' });
+        if (res.ok) {
+            alert("OK!");
+            location.reload();
+        } else {
+            alert("Error!");
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function loadAbsents() {
@@ -163,14 +185,17 @@ async function loadAbsents() {
             select.onchange = renderDashboard;
         }
         renderDashboard();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 function renderDashboard() {
     const val = document.getElementById('dateFilter').value;
     if (!val) return;
     const filtered = absentsData.filter(a => a.date === val);
-    document.getElementById('totalAbsent').textContent = filtered.length;
+    const totalEl = document.getElementById('totalAbsent');
+    if (totalEl) totalEl.textContent = filtered.length;
 
     const ctx = document.getElementById('reasonChart');
     if (ctx) {
@@ -195,7 +220,14 @@ function renderDashboard() {
         Object.keys(map).sort().forEach(cls => {
             const div = document.createElement('div');
             div.className = "col";
-            div.innerHTML = `<div class="card stat-card h-100"><div class="card-body"><h5>${cls}</h5><p>Yo'q: ${map[cls].length}</p><small>${map[cls].join(', ')}</small></div></div>`;
+            div.innerHTML = `
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <h5>${cls}</h5>
+                        <p>Yo'q: ${map[cls].length}</p>
+                        <small>${map[cls].join(', ')}</small>
+                    </div>
+                </div>`;
             container.appendChild(div);
         });
     }
@@ -206,5 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAbsents();
     document.getElementById('lang-ru').onclick = () => applyTranslations('ru');
     document.getElementById('lang-uz').onclick = () => applyTranslations('uz');
-    document.getElementById('clearHistory').onclick = clearHistory;
+    
+    const clearBtn = document.getElementById('clearHistory');
+    if (clearBtn) clearBtn.onclick = clearHistory;
 });
