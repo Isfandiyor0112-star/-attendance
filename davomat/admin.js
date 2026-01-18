@@ -7,7 +7,7 @@ const users = [
     { name: "Musamatova.G.M.", className: "2A" },
     { name: "Toshmatova.Y.Z.", className: "2B" },
     { name: "Movlonova.U.U.", className: "2V" },
-    { name: "Matluba.M.M.", className: "2G" }, // Поправил имя в базе
+    { name: "Matluba.M.M.", className: "2G" },
     { name: "Ismoilova.N.E.", className: "2D" },
     { name: "Izalxan.L.I.", className: "3A" },
     { name: "Matkarimova.N.B.", className: "3B" },
@@ -52,92 +52,80 @@ let absents = [];
 
 const translations = {
     ru: { 
-        admin_panel_title: "Админ-панель №22", 
-        choose_date: "Дата:", 
-        total_absent: "Отсутствуют", 
-        reason_stats: "Статистика", 
-        clear_history: "Очистить историю", 
-        export_excel: "Excel отчёт",
-        select_period: "Выберите период отчета",
-        report_day: "Однодневный отчет",
-        report_week: "Шестидневный отчет",
-        not_enough_data: "Отчет еще не накопился! Нужно минимум 6 дней данных."
+        admin_panel_title: "Админ-панель №22", export_excel: "Excel отчёт", choose_date: "Дата:",
+        select_period: "Выберите период", report_day: "За 1 день", report_week: "За неделю (6 дн.)", report_month: "За месяц",
+        not_enough_data: "Данных за неделю еще нет!", not_enough_month: "В этом месяце еще нет данных!",
+        total_absent: "Отсутствуют", reason_stats: "Статистика причин", clear_history: "Очистить историю"
     },
     uz: { 
-        admin_panel_title: "22-maktab admin paneli", 
-        choose_date: "Sana:", 
-        total_absent: "Yo'qlar", 
-        reason_stats: "Statistika", 
-        clear_history: "Tozalash", 
-        export_excel: "Excel yuklash",
-        select_period: "Hisobot davrini tanlang",
-        report_day: "Bir kunlik hisobot",
-        report_week: "Olti kunlik hisobot",
-        not_enough_data: "Hisobot hali yig'ilmadi! Kamida 6 kunlik ma'lumot kerak."
+        admin_panel_title: "22-maktab admin paneli", export_excel: "Excel yuklash", choose_date: "Sana:",
+        select_period: "Davrni tanlang", report_day: "1 kunlik", report_week: "Haftalik (6 kun)", report_month: "Oylik hisobot",
+        not_enough_data: "Haftalik ma'lumot yetarli emas!", not_enough_month: "Bu oy uchun ma'lumot yetarli emas!",
+        total_absent: "Yo'qlar", reason_stats: "Sabablar statistikasi", clear_history: "Tozalash"
     }
 };
 
+// --- ИНИЦИАЛИЗАЦИЯ ЯЗЫКА ---
 function setLang(lang) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-            el.textContent = translations[lang][key];
-        }
+        if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
     });
-    document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`lang-${lang}`).classList.add('active');
-    document.getElementById('langGroup').setAttribute('data-active', lang);
     localStorage.setItem('lang', lang);
+    const group = document.getElementById('langGroup');
+    if(group) group.setAttribute('data-active', lang);
+    
+    document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`lang-${lang}`);
+    if(activeBtn) activeBtn.classList.add('active');
 }
 
-document.getElementById('lang-ru').onclick = () => setLang('ru');
-document.getElementById('lang-uz').onclick = () => setLang('uz');
-
-// --- НОВАЯ ЛОГИКА ЭКСПОРТА ---
-
+// --- УМНЫЙ ЭКСПОРТ ---
 async function handleExcelExport(type) {
     const selectedDate = document.getElementById('dateFilter').value;
     const lang = localStorage.getItem('lang') || 'ru';
-    
     if (!selectedDate) return alert(lang === 'ru' ? "Выберите дату!" : "Sana tanlang!");
 
     try {
         const res = await fetch(API_URL);
         const allData = await res.json();
         let filtered = [];
+        const uniqueDates = [...new Set(allData.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
 
         if (type === 'day') {
             filtered = allData.filter(a => a.date === selectedDate);
-        } else {
-            // Берем уникальные даты и проверяем их количество
-            const uniqueDates = [...new Set(allData.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
-            
-            if (uniqueDates.length < 6) {
-                alert(translations[lang].not_enough_data);
-                return;
-            }
-            
-            // Берем последние 6 дней
+        } 
+        else if (type === 'week') {
             const last6 = uniqueDates.slice(0, 6);
+            if (last6.length < 1) return alert(translations[lang].not_enough_data);
             filtered = allData.filter(a => last6.includes(a.date));
+        } 
+        else if (type === 'month') {
+            const dateObj = new Date(selectedDate);
+            const targetYear = dateObj.getFullYear();
+            const targetMonth = dateObj.getMonth();
+
+            filtered = allData.filter(item => {
+                const itemDate = new Date(item.date);
+                return itemDate.getFullYear() === targetYear && itemDate.getMonth() === targetMonth;
+            });
+
+            if (filtered.length === 0) return alert(translations[lang].not_enough_month);
         }
 
-        generateExcelFile(filtered, selectedDate, type, lang);
+        generateExcel(filtered, selectedDate, type, lang);
         
-        // Закрываем модалку
-        const modal = bootstrap.Modal.getInstance(document.getElementById('excelModal'));
+        const modalEl = document.getElementById('excelModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
-
-    } catch (e) {
-        alert("Ошибка: " + e.message);
-    }
+    } catch (e) { alert("Ошибка: " + e.message); }
 }
 
-function generateExcelFile(filtered, date, type, lang) {
+function generateExcel(filtered, date, type, lang) {
     const wb = XLSX.utils.book_new();
     const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
 
-    // Лист 1: Общий рейтинг
+    // 1. ЛИСТ: ОБЩИЙ РЕЙТИНГ
     const summaryRows = users.map(u => {
         const matches = filtered.filter(i => norm(i.teacher) === norm(u.name));
         let total = 0, absent = 0;
@@ -146,35 +134,72 @@ function generateExcelFile(filtered, date, type, lang) {
             absent += parseFloat(m.count) || 0;
         });
         const perc = total > 0 ? (((total - absent) / total) * 100).toFixed(1) : 0;
-
         return {
             [lang==='ru'?'Учитель':'O\'qituvchi']: u.name,
             "Sinf": u.className,
-            "Hozir (%)": perc + "%",
-            [lang==='ru'?'Заполнено':'Holati']: matches.length > 0 ? "✅" : "❌"
+            "Davomat (%)": perc + "%",
+            [lang==='ru'?'Дней':'Kunlar']: [...new Set(matches.map(m => m.date))].length
         };
+    }).sort((a, b) => parseFloat(b["Davomat (%)"]) - parseFloat(a["Davomat (%)"]));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryRows), 'Rating');
+
+    // 2. ЛИСТ: СТАТИСТИКА (Для Недели и Месяца)
+    if (type !== 'day') {
+        const stats = [];
+        // Статистика по причинам
+        const reasons = {};
+        filtered.forEach(i => {
+            const r = i.reason || (lang==='ru'?'Не указана':'Noma\'lum');
+            reasons[r] = (reasons[r] || 0) + 1;
+        });
+        stats.push({ [lang==='ru'?'АНАЛИЗ':'TAHLIL']: lang==='ru'?'ПО ПРИЧИНАМ':'SABABLAR BO\'YICHA' });
+        Object.keys(reasons).forEach(r => stats.push({ [lang==='ru'?'Показатель':'Ko\'rsatkich']: r, [lang==='ru'?'Кол-во':'Soni']: reasons[r] }));
+        
+        stats.push({ "": "" }, { [lang==='ru'?'АНАЛИЗ':'TAHLIL']: lang==='ru'?'АНТИРЕЙТИНГ КЛАССОВ (Прогулы)':'SINFLAR REYTINGI (Dars qoldirish)' });
+        
+        // Статистика по классам (кто больше всех гуляет)
+        const classStats = {};
+        filtered.forEach(i => classStats[i.className] = (classStats[i.className] || 0) + 1);
+        Object.keys(classStats).sort((a,b)=>classStats[b]-classStats[a]).forEach(c => {
+            stats.push({ [lang==='ru'?'Показатель':'Ko\'rsatkich']: lang==='ru'?`Класс ${c}`:`${c}-sinf`, [lang==='ru'?'Кол-во':'Soni']: classStats[c] });
+        });
+        
+        const wsStats = XLSX.utils.json_to_sheet(stats);
+        wsStats['!cols'] = [{wch: 35}, {wch: 15}];
+        XLSX.utils.book_append_sheet(wb, wsStats, 'Statistika');
+    }
+
+    // 3. ЛИСТЫ КЛАССОВ (Индивидуальные)
+    const classGroups = {};
+    filtered.forEach(i => {
+        if(!classGroups[i.className]) classGroups[i.className] = [];
+        classGroups[i.className].push({ 
+            [lang==='ru'?'Дата':'Sana']: i.date, 
+            [lang==='ru'?'Ученик':'O\'quvchi']: i.studentName, 
+            [lang==='ru'?'Причина':'Sabab']: i.reason 
+        });
+    });
+    Object.keys(classGroups).sort().forEach(cls => {
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classGroups[cls]), cls);
     });
 
-    const ws1 = XLSX.utils.json_to_sheet(summaryRows);
-    XLSX.utils.book_append_sheet(wb, ws1, 'Rating');
-
-    // Лист 2: Подробный список по пропускам
+    // 4. ЛИСТ: ДЕТАЛИ (Все записи)
     const detailRows = filtered.map(i => ({
-        "Sana": i.date,
-        "Sinf": i.className,
-        "O'quvchi": i.studentName,
-        "Sabab": i.reason,
-        "O'qituvchi": i.teacher
+        "Sana": i.date, "Sinf": i.className, "O'quvchi": i.studentName, "Sabab": i.reason, "O'qituvchi": i.teacher
     }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detailRows), 'Details');
 
-    const ws2 = XLSX.utils.json_to_sheet(detailRows);
-    XLSX.utils.book_append_sheet(wb, ws2, 'Details');
+    // Название файла в зависимости от месяца
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const d = new Date(date);
+    const fileName = type === 'month' 
+        ? `Report_MONTH_${monthNames[d.getMonth()]}_${d.getFullYear()}.xlsx` 
+        : `Report_22_School_${type}_${date}.xlsx`;
 
-    XLSX.writeFile(wb, `Report_22_School_${type}_${date}.xlsx`);
+    XLSX.writeFile(wb, fileName);
 }
 
-// --- СТАНДАРТНЫЕ ФУНКЦИИ ---
-
+// --- ЛОГИКА ИНТЕРФЕЙСА ---
 async function loadAbsents() {
     try {
         const res = await fetch(API_URL);
@@ -184,49 +209,39 @@ async function loadAbsents() {
         filter.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
         if (dates.length > 0) renderByDate();
         filter.onchange = renderByDate;
-    } catch (err) {}
+    } catch (err) { console.error("Load error"); }
 }
-
-const reasonColors = ['#09ff00', '#ff0000', '#0d6efd', '#ffc107', '#6610f2'];
 
 function renderByDate() {
     const date = document.getElementById('dateFilter').value;
     const filtered = absents.filter(a => a.date === date);
     document.getElementById('totalAbsent').textContent = filtered.length;
-    renderReasonPieChart(filtered);
-    renderClassPieCharts(filtered);
-}
-
-function renderReasonPieChart(data) {
-    const stats = {};
-    data.forEach(i => stats[i.reason] = (stats[i.reason] || 0) + 1);
-    const labels = Object.keys(stats);
+    
+    // Круговая диаграмма
+    const stats = {}; 
+    filtered.forEach(i => stats[i.reason] = (stats[i.reason] || 0) + 1);
     if (window.reasonChart instanceof Chart) window.reasonChart.destroy();
     window.reasonChart = new Chart(document.getElementById('reasonChart'), {
         type: 'pie',
-        data: { labels: labels, datasets: [{ data: Object.values(stats), backgroundColor: reasonColors, borderWidth: 0 }] },
+        data: { 
+            labels: Object.keys(stats), 
+            datasets: [{ data: Object.values(stats), backgroundColor: ['#09ff00', '#ff0000', '#0d6efd', '#ffc107', '#6610f2'] }] 
+        },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
-    document.getElementById('reasonLegend').innerHTML = labels.map((l, i) => `<div class="legend-item"><span class="legend-marker" style="background:${reasonColors[i % reasonColors.length]}"></span>${l}</div>`).join('');
 }
 
-function renderClassPieCharts(data) {
-    const container = document.getElementById('classChartsContainer');
-    container.innerHTML = '';
-    const classMap = {};
-    data.forEach(i => { if(!classMap[i.className]) classMap[i.className] = []; classMap[i.className].push(i); });
-    Object.keys(classMap).sort().forEach((cls, idx) => {
-        const classData = classMap[cls];
-        const stats = {}; classData.forEach(i => stats[i.reason] = (stats[i.reason] || 0) + 1);
-        const col = document.createElement('div');
-        col.className = 'col-lg-4 col-md-6 mb-4';
-        col.innerHTML = `<div class="card h-100 stat-card p-3"><h6 class="text-center fw-bold" style="color:#0d6efd">Класс ${cls}</h6><div style="height:150px"><canvas id="classChart${idx}"></canvas></div><div class="mt-2 small border-top pt-2" style="max-height:100px; overflow-y:auto">${classData.map(i => `<div>• ${i.studentName} (${i.reason})</div>`).join('')}</div></div>`;
-        container.appendChild(col);
-        new Chart(document.getElementById(`classChart${idx}`), { type: 'pie', data: { labels: Object.keys(stats), datasets: [{ data: Object.values(stats), backgroundColor: reasonColors }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-    });
-}
+document.getElementById('clearHistory').onclick = async () => {
+    const lang = localStorage.getItem('lang') || 'ru';
+    const msg = lang === 'ru' ? 'Очистить ВСЮ базу данных?' : 'Barcha ma\'lumotlarni o\'chirib tashlaysizmi?';
+    if (confirm(msg)) {
+        await fetch(API_URL, { method: 'DELETE' });
+        location.reload();
+    }
+};
 
-document.getElementById('clearHistory').onclick = async () => { if (confirm('Очистить ВСЮ базу?')) { await fetch(API_URL, { method: 'DELETE' }); location.reload(); } };
+document.getElementById('lang-ru').onclick = () => setLang('ru');
+document.getElementById('lang-uz').onclick = () => setLang('uz');
 
 document.addEventListener('DOMContentLoaded', () => { 
     loadAbsents(); 
