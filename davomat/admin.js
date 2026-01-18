@@ -43,6 +43,16 @@ const translations = {
     }
 };
 
+// Функция ПЕРЕВОДА
+function applyTranslations() {
+    const lang = localStorage.getItem('lang') || 'ru';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) el.textContent = translations[lang][key];
+    });
+}
+
+// ГЛОБАЛЬНАЯ функция экспорта
 window.handleExcelExport = async function(type) {
     const selectedDate = document.getElementById('dateFilter').value;
     const lang = localStorage.getItem('lang') || 'ru';
@@ -67,46 +77,66 @@ window.handleExcelExport = async function(type) {
             });
         }
 
-        if (filtered.length === 0) return alert("Нет данных!");
+        if (filtered.length === 0) return alert("Нет данных за этот период!");
         generateExcel(filtered, selectedDate, type, lang);
-        bootstrap.Modal.getInstance(document.getElementById('excelModal')).hide();
-    } catch (e) { alert("Excel Error"); }
+        
+        const modalEl = document.getElementById('excelModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if(modal) modal.hide();
+    } catch (e) { alert("Ошибка при скачивании"); }
 };
 
 function generateExcel(filtered, date, type, lang) {
     const wb = XLSX.utils.book_new();
-    const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+    const norm = (s) => (s || "").toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
     const activeDates = [...new Set(filtered.map(a => a.date))].sort();
 
-    // Лист Rating
+    // 1. Лист Рейтинга
     const summaryRows = users.map(u => {
-        const matches = filtered.filter(i => norm(i.teacher || "") === norm(u.name));
+        const matches = filtered.filter(i => norm(i.teacher) === norm(u.name));
         let tot = 0, abs = 0;
         matches.forEach(m => { tot += parseFloat(m.allstudents) || 0; abs += parseFloat(m.count) || 0; });
         const p = tot > 0 ? (((tot - abs) / tot) * 100).toFixed(1) : 0;
         let statusIcons = "";
         activeDates.forEach(d => { statusIcons += matches.some(m => m.date === d) ? "✅" : "❌"; });
-        return { [lang==='ru'?'Учитель':'O\'qituvchi']: u.name, "Sinf": u.className, "Davomat (%)": p + "%", [translations[lang].status_col]: statusIcons };
+        return {
+            [lang==='ru'?'Учитель':'O\'qituvchi']: u.name,
+            "Sinf": u.className,
+            "Davomat (%)": p + "%",
+            [translations[lang].status_col]: statusIcons
+        };
     }).sort((a, b) => parseFloat(b["Davomat (%)"]) - parseFloat(a["Davomat (%)"]));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryRows), 'Rating');
 
-    // Листы классов
+    // 2. Листы классов
     const grp = {};
     filtered.forEach(i => { if(!grp[i.className]) grp[i.className] = []; grp[i.className].push(i); });
     Object.keys(grp).sort().forEach(c => {
         const rows = [];
-        let totalSumAll = 0, totalSumAbs = 0;
+        let tSumAll = 0, tSumAbs = 0;
         grp[c].forEach(i => {
-            const tot = parseFloat(i.allstudents) || 0, absCount = parseFloat(i.count) || 0;
-            totalSumAll += tot; totalSumAbs += absCount;
-            rows.push({ [lang==='ru'?'Дата':'Sana']: i.date, [lang==='ru'?'Учитель':'O\'qituvchi']: i.teacher, [lang==='ru'?'Ученик':'O\'quvchi']: i.studentName, [lang==='ru'?'Причина':'Sabab']: i.reason, [lang==='ru'?'Всего':'Jami']: tot, [lang==='ru'?'Нет':'Yo\'q']: absCount, [lang==='ru'?'%']: (tot > 0 ? (((tot - absCount) / tot) * 100).toFixed(1) : 0) + "%" });
+            const tot = parseFloat(i.allstudents) || 0, absC = parseFloat(i.count) || 0;
+            tSumAll += tot; tSumAbs += absC;
+            rows.push({
+                [lang==='ru'?'Дата':'Sana']: i.date,
+                [lang==='ru'?'Ученик':'O\'quvchi']: i.studentName,
+                [lang==='ru'?'Причина':'Sabab']: i.reason,
+                [lang==='ru'?'Всего':'Jami']: tot,
+                [lang==='ru'?'Нет':'Yo\'q']: absC,
+                [lang==='ru'?'%']: (tot > 0 ? (((tot - absC) / tot) * 100).toFixed(1) : 0) + "%"
+            });
         });
         rows.push({});
-        const finalPerc = totalSumAll > 0 ? (((totalSumAll - totalSumAbs) / totalSumAll) * 100).toFixed(1) : 0;
-        rows.push({ [lang==='ru'?'Дата':'Sana']: translations[lang].total_label, [lang==='ru'?'Ученик':'O\'quvchi']: translations[lang].avg_label, [lang==='ru'?'Причина':'Sabab']: finalPerc + "%", [lang==='ru'?'Нет':'Yo\'q']: totalSumAbs });
+        const finalP = tSumAll > 0 ? (((tSumAll - tSumAbs) / tSumAll) * 100).toFixed(1) : 0;
+        rows.push({
+            [lang==='ru'?'Дата':'Sana']: translations[lang].total_label,
+            [lang==='ru'?'Ученик':'O\'quvchi']: translations[lang].avg_label,
+            [lang==='ru'?'Причина':'Sabab']: finalP + "%",
+            [lang==='ru'?'Нет':'Yo\'q']: tSumAbs
+        });
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), c);
     });
-    XLSX.writeFile(wb, `School22_${type.toUpperCase()}_${date}.xlsx`);
+    XLSX.writeFile(wb, `Report22_${type.toUpperCase()}_${date}.xlsx`);
 }
 
 function renderByDate() {
@@ -114,41 +144,63 @@ function renderByDate() {
     const filtered = absents.filter(a => a.date === val);
     document.getElementById('totalAbsent').textContent = filtered.length;
 
-    // График причин
+    // График
     const s = {}; filtered.forEach(i => s[i.reason] = (s[i.reason] || 0) + 1);
     const ctx = document.getElementById('reasonChart');
     if (window.reasonChart instanceof Chart) window.reasonChart.destroy();
-    window.reasonChart = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(s), datasets: [{ data: Object.values(s), backgroundColor: reasonColors }] }, options: { responsive: true, maintainAspectRatio: false } });
+    window.reasonChart = new Chart(ctx, { 
+        type: 'doughnut', 
+        data: { labels: Object.keys(s), datasets: [{ data: Object.values(s), backgroundColor: reasonColors }] },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
 
-    // КАРТОЧКИ КЛАССОВ (Возвращено!)
+    // Карточки
     const container = document.getElementById('classChartsContainer');
     container.innerHTML = "";
     const classMap = {};
     filtered.forEach(a => { if(!classMap[a.className]) classMap[a.className] = []; classMap[a.className].push(a); });
-
     Object.keys(classMap).sort().forEach(cls => {
-        const count = classMap[cls].length;
         const div = document.createElement('div');
         div.className = "col";
-        div.innerHTML = `<div class="card stat-card h-100"><div class="card-body"><h5 class="fw-bold">${cls}</h5><p class="mb-0">Отсутствуют: <b>${count}</b></p><small class="text-secondary">${classMap[cls].map(u => u.studentName).join(', ')}</small></div></div>`;
+        div.innerHTML = `<div class="card stat-card h-100"><div class="card-body"><h5 class="fw-bold">${cls}</h5><p>Yo'qlar: <b>${classMap[cls].length}</b></p><small>${classMap[cls].map(u => u.studentName).join(', ')}</small></div></div>`;
         container.appendChild(div);
     });
 }
 
 async function loadAbsents() {
-    const res = await fetch(API_URL);
-    absents = await res.json();
-    const dts = [...new Set(absents.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
-    document.getElementById('dateFilter').innerHTML = dts.map(d => `<option value="${d}">${d}</option>`).join('');
-    if (dts.length > 0) renderByDate();
+    try {
+        const res = await fetch(API_URL);
+        absents = await res.json();
+        const f = document.getElementById('dateFilter');
+        const dts = [...new Set(absents.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
+        f.innerHTML = dts.map(d => `<option value="${d}">${d}</option>`).join('');
+        if (dts.length > 0) renderByDate();
+    } catch(e) { console.error("API error"); }
 }
 
+// ИНИЦИАЛИЗАЦИЯ
 document.addEventListener('DOMContentLoaded', () => {
+    applyTranslations();
     loadAbsents();
-    const lang = localStorage.getItem('lang') || 'ru';
-    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = translations[lang][el.getAttribute('data-i18n')]; });
-    document.getElementById('lang-ru').onclick = () => { localStorage.setItem('lang', 'ru'); location.reload(); };
-    document.getElementById('lang-uz').onclick = () => { localStorage.setItem('lang', 'uz'); location.reload(); };
-    document.getElementById('dateFilter').onchange = renderByDate;
-    document.getElementById('clearHistory').onclick = async () => { if(confirm('Очистить?')) { await fetch(API_URL, {method:'DELETE'}); location.reload(); }};
+
+    // Переключатели языков
+    document.getElementById('lang-ru').addEventListener('click', () => {
+        localStorage.setItem('lang', 'ru');
+        location.reload();
+    });
+    document.getElementById('lang-uz').addEventListener('click', () => {
+        localStorage.setItem('lang', 'uz');
+        location.reload();
+    });
+
+    // Фильтр даты
+    document.getElementById('dateFilter').addEventListener('change', renderByDate);
+
+    // Очистка истории
+    document.getElementById('clearHistory').addEventListener('click', async () => {
+        if (confirm('Вы уверены? База данных будет удалена!')) {
+            await fetch(API_URL, { method: 'DELETE' });
+            location.reload();
+        }
+    });
 });
