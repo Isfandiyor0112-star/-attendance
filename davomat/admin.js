@@ -49,7 +49,8 @@ function setLang(lang) {
         if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
     });
     localStorage.setItem('lang', lang);
-    document.getElementById('langGroup').setAttribute('data-active', lang);
+    const langGroup = document.getElementById('langGroup');
+    if(langGroup) langGroup.setAttribute('data-active', lang);
 }
 
 async function handleExcelExport(type) {
@@ -61,13 +62,13 @@ async function handleExcelExport(type) {
         const res = await fetch(API_URL);
         const allData = await res.json();
         let filtered = [];
-        const uniqueDatesInDb = [...new Set(allData.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
+        const uniqueDates = [...new Set(allData.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
 
         if (type === 'day') {
             filtered = allData.filter(a => a.date === selectedDate);
         } else if (type === 'week') {
-            if (uniqueDatesInDb.length < 6) return alert(translations[lang].not_enough_data);
-            const last6 = uniqueDatesInDb.slice(0, 6);
+            if (uniqueDates.length < 6) return alert(translations[lang].not_enough_data);
+            const last6 = uniqueDates.slice(0, 6);
             filtered = allData.filter(a => last6.includes(a.date));
         } else if (type === 'month') {
             const d = new Date(selectedDate);
@@ -75,12 +76,12 @@ async function handleExcelExport(type) {
                 const id = new Date(item.date);
                 return id.getFullYear() === d.getFullYear() && id.getMonth() === d.getMonth();
             });
-            const uniqueMonthDates = [...new Set(filtered.map(a => a.date))];
-            if (uniqueMonthDates.length < 3) return alert(translations[lang].not_enough_month);
+            if ([...new Set(filtered.map(a => a.date))].length < 2) return alert(translations[lang].not_enough_month);
         }
         generateExcel(filtered, selectedDate, type, lang);
-        bootstrap.Modal.getInstance(document.getElementById('excelModal')).hide();
-    } catch (e) { alert("Error"); }
+        const modal = bootstrap.Modal.getInstance(document.getElementById('excelModal'));
+        if(modal) modal.hide();
+    } catch (e) { console.error(e); }
 }
 
 function generateExcel(filtered, date, type, lang) {
@@ -88,6 +89,7 @@ function generateExcel(filtered, date, type, lang) {
     const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
     const activeDates = [...new Set(filtered.map(a => a.date))].sort();
 
+    // 1. Лист Рейтинга (Rating)
     const summaryRows = users.map(u => {
         const matches = filtered.filter(i => norm(i.teacher) === norm(u.name));
         let tot = 0, abs = 0;
@@ -104,47 +106,50 @@ function generateExcel(filtered, date, type, lang) {
     }).sort((a, b) => parseFloat(b["Davomat (%)"]) - parseFloat(a["Davomat (%)"]));
 
     const wsRating = XLSX.utils.json_to_sheet(summaryRows);
-    wsRating['!cols'] = [{ wch: 30 }, { wch: 10 }, { wch: 15 }, { wch: 25 }];
+    wsRating['!cols'] = [{ wch: 25 }, { wch: 10 }, { wch: 15 }, { wch: 25 }];
     XLSX.utils.book_append_sheet(wb, wsRating, 'Rating');
 
-    if (type !== 'day') {
-        const rs = {}; filtered.forEach(i => rs[i.reason || "Noma'lum"] = (rs[i.reason] || 0) + 1);
-        const cs = {}; filtered.forEach(i => cs[i.className] = (cs[i.className] || 0) + 1);
-        const sortedClasses = Object.keys(cs).sort((a,b) => cs[b] - cs[a]);
-        const statRows = [
-            { A: lang==='ru'?'АНАЛИЗ ПРИЧИН':'SABABLAR TAHLILI', C: lang==='ru'?'АНТИРЕЙТИНГ КЛАССОВ':'SINFLAR ANTIREYTINGI' },
-            { A: lang==='ru'?'Причина':'Sabab', B: lang==='ru'?'Кол-во':'Soni', C: lang==='ru'?'Класс':'Sinf', D: lang==='ru'?'Пропуски':'Yo\'qlamalar' }
-        ];
-        const maxRows = Math.max(Object.keys(rs).length, sortedClasses.length);
-        const rKeys = Object.keys(rs);
-        for (let i = 0; i < maxRows; i++) {
-            statRows.push({
-                A: rKeys[i] || "", B: rKeys[i] ? rs[rKeys[i]] : "",
-                C: sortedClasses[i] ? sortedClasses[i] + "-sinf" : "", D: sortedClasses[i] ? cs[sortedClasses[i]] : ""
-            });
-        }
-        const wsStats = XLSX.utils.json_to_sheet(statRows, { skipHeader: true });
-        wsStats['!cols'] = [{ wch: 30 }, { wch: 10 }, { wch: 25 }, { wch: 15 }];
-        XLSX.utils.book_append_sheet(wb, wsStats, 'Statistika');
-    }
-
+    // 2. Листы Классов
     const grp = {};
-    filtered.forEach(i => {
-        if(!grp[i.className]) grp[i.className] = [];
-        grp[i.className].push({
-            [lang==='ru'?'Дата':'Sana']: i.date,
-            [lang==='ru'?'Ученик':'O\'quvchi']: i.studentName,
-            [lang==='ru'?'Статус/Причина':'Sabab/Holat']: i.reason || 'Sabab yo\'q',
-            [lang==='ru'?'Учитель':'O\'qituvchi']: i.teacher
-        });
-    });
+    filtered.forEach(i => { if(!grp[i.className]) grp[i.className] = []; grp[i.className].push(i); });
+
     Object.keys(grp).sort().forEach(c => {
-        const ws = XLSX.utils.json_to_sheet(grp[c]);
-        ws['!cols'] = [{ wch: 12 }, { wch: 25 }, { wch: 35 }, { wch: 25 }];
-        XLSX.utils.book_append_sheet(wb, ws, c);
+        const classData = grp[c];
+        const rows = [];
+        let totalSumAll = 0, totalSumAbs = 0;
+
+        classData.forEach(i => {
+            const tot = parseFloat(i.allstudents) || 0;
+            const absCount = parseFloat(i.count) || 0;
+            const perc = tot > 0 ? (((tot - absCount) / tot) * 100).toFixed(1) : 0;
+            totalSumAll += tot; totalSumAbs += absCount;
+
+            rows.push({
+                [lang==='ru'?'Дата':'Sana']: i.date,
+                [lang==='ru'?'Учитель':'O\'qituvchi']: i.teacher,
+                [lang==='ru'?'Ученик':'O\'quvchi']: i.studentName,
+                [lang==='ru'?'Причина':'Sabab']: i.reason,
+                [lang==='ru'?'Всего':'Jami']: tot,
+                [lang==='ru'?'Нет':'Yo\'q']: absCount,
+                [lang==='ru'?'%']: perc + "%"
+            });
+        });
+
+        const finalPerc = totalSumAll > 0 ? (((totalSumAll - totalSumAbs) / totalSumAll) * 100).toFixed(1) : 0;
+        rows.push({});
+        rows.push({
+            [lang==='ru'?'Дата':'Sana']: lang==='ru'?'ИТОГО:':'YAKUN:',
+            [lang==='ru'?'Причина':'Sabab']: lang==='ru'?'Средний %:':'O\'rtacha %:',
+            [lang==='ru'?'Нет':'Yo\'q']: totalSumAbs,
+            [lang==='ru'?'%']: finalPerc + "%"
+        });
+
+        const wsClass = XLSX.utils.json_to_sheet(rows);
+        wsClass['!cols'] = [{ wch: 12 }, { wch: 20 }, { wch: 25 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 10 }];
+        XLSX.utils.book_append_sheet(wb, wsClass, c);
     });
 
-    XLSX.writeFile(wb, `Report22_${type.toUpperCase()}_${date}.xlsx`);
+    XLSX.writeFile(wb, `School22_${type.toUpperCase()}_${date}.xlsx`);
 }
 
 async function loadAbsents() {
@@ -169,33 +174,11 @@ function renderByDate() {
         data: { labels: Object.keys(s), datasets: [{ data: Object.values(s), backgroundColor: reasonColors }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
-    
-    const cont = document.getElementById('classChartsContainer');
-    cont.innerHTML = '';
-    const map = {}; filtered.forEach(i => { if(!map[i.className]) map[i.className]=[]; map[i.className].push(i); });
-    Object.keys(map).sort().forEach((cls, idx) => {
-        const cd = map[cls];
-        const st = {}; cd.forEach(i => st[i.reason] = (st[i.reason] || 0) + 1);
-        const col = document.createElement('div');
-        col.className = 'col-lg-4 col-md-6 mb-4';
-        col.innerHTML = `<div class="card h-100 stat-card p-3" style="background:rgba(255,255,255,0.05); border:1px solid #333; border-radius:15px;">
-            <h6 class="text-center fw-bold mb-3" style="color:#0d6efd">${cls}-sinf</h6>
-            <div style="height:150px"><canvas id="clsChrt${idx}"></canvas></div>
-            <div class="mt-3 small border-top pt-2" style="max-height:100px; overflow-y:auto">
-                ${cd.map(i => `<div>• ${i.studentName} (${i.reason})</div>`).join('')}
-            </div></div>`;
-        cont.appendChild(col);
-        new Chart(document.getElementById(`clsChrt${idx}`), { 
-            type: 'pie', data: { labels: Object.keys(st), datasets: [{ data: Object.values(st), backgroundColor: reasonColors }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-    });
 }
 
 document.getElementById('lang-ru').onclick = () => { setLang('ru'); location.reload(); };
 document.getElementById('lang-uz').onclick = () => { setLang('uz'); location.reload(); };
-document.getElementById('clearHistory').onclick = async () => { if(confirm('Ochirish?')) { await fetch(API_URL, {method:'DELETE'}); location.reload(); }};
 document.addEventListener('DOMContentLoaded', () => { 
     loadAbsents(); 
-    setLang(localStorage.getItem('lang') || 'ru');
+    setLang(localStorage.getItem('lang') || 'ru'); 
 });
