@@ -7,7 +7,7 @@ const users = [
     { name: "Musamatova.G.M.", className: "2A" },
     { name: "Toshmatova.Y.Z.", className: "2B" },
     { name: "Movlonova.U.U.", className: "2V" },
-    { name: "Ubaydullayeva.M.M.", className: "2G" },
+    { name: "Matluba.M.M.", className: "2G" }, // Поправил имя в базе
     { name: "Ismoilova.N.E.", className: "2D" },
     { name: "Izalxan.L.I.", className: "3A" },
     { name: "Matkarimova.N.B.", className: "3B" },
@@ -51,11 +51,32 @@ const API_URL = 'https://attendancesrv.vercel.app/api/absents';
 let absents = [];
 
 const translations = {
-    ru: { admin_panel_title: "Админ-панель №22", choose_date: "Дата:", total_absent: "Отсутствуют", reason_stats: "Статистика", clear_history: "Очистить историю", export_excel: "Excel отчёт" },
-    uz: { admin_panel_title: "22-maktab admin paneli", choose_date: "Sana:", total_absent: "Yo'qlar", reason_stats: "Statistika", clear_history: "Tozalash", export_excel: "Excel yuklash" }
+    ru: { 
+        admin_panel_title: "Админ-панель №22", 
+        choose_date: "Дата:", 
+        total_absent: "Отсутствуют", 
+        reason_stats: "Статистика", 
+        clear_history: "Очистить историю", 
+        export_excel: "Excel отчёт",
+        select_period: "Выберите период отчета",
+        report_day: "Однодневный отчет",
+        report_week: "Шестидневный отчет",
+        not_enough_data: "Отчет еще не накопился! Нужно минимум 6 дней данных."
+    },
+    uz: { 
+        admin_panel_title: "22-maktab admin paneli", 
+        choose_date: "Sana:", 
+        total_absent: "Yo'qlar", 
+        reason_stats: "Statistika", 
+        clear_history: "Tozalash", 
+        export_excel: "Excel yuklash",
+        select_period: "Hisobot davrini tanlang",
+        report_day: "Bir kunlik hisobot",
+        report_week: "Olti kunlik hisobot",
+        not_enough_data: "Hisobot hali yig'ilmadi! Kamida 6 kunlik ma'lumot kerak."
+    }
 };
 
-// --- ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ЯЗЫКА (ИСПРАВЛЕННАЯ) ---
 function setLang(lang) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -63,90 +84,97 @@ function setLang(lang) {
             el.textContent = translations[lang][key];
         }
     });
-    
-    // Переключаем кнопки
     document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`lang-${lang}`);
-    if (activeBtn) activeBtn.classList.add('active');
-    
-    // Двигаем ползунок через атрибут
-    const group = document.getElementById('langGroup');
-    if (group) {
-        group.setAttribute('data-active', lang);
-    }
-    
+    document.getElementById(`lang-${lang}`).classList.add('active');
+    document.getElementById('langGroup').setAttribute('data-active', lang);
     localStorage.setItem('lang', lang);
 }
 
 document.getElementById('lang-ru').onclick = () => setLang('ru');
 document.getElementById('lang-uz').onclick = () => setLang('uz');
 
-// --- ЭКСПОРТ В EXCEL ---
-document.getElementById('exportExcel').onclick = async () => {
+// --- НОВАЯ ЛОГИКА ЭКСПОРТА ---
+
+async function handleExcelExport(type) {
     const selectedDate = document.getElementById('dateFilter').value;
-    if (!selectedDate) return alert("Выберите дату!");
+    const lang = localStorage.getItem('lang') || 'ru';
+    
+    if (!selectedDate) return alert(lang === 'ru' ? "Выберите дату!" : "Sana tanlang!");
 
     try {
         const res = await fetch(API_URL);
         const allData = await res.json();
-        const filtered = allData.filter(a => a.date === selectedDate);
-        const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+        let filtered = [];
 
-        // 1. ЛИСТ "Umumiy" - Только рейтинг, без лишних подробностей
-        const summaryRows = users.map(u => {
-            const match = filtered.find(i => norm(i.teacher) === norm(u.name));
-            const total = match ? parseFloat(match.allstudents) || 0 : 0;
-            const sick = match ? parseFloat(match.count) || 0 : 0;
-            const present = total - sick;
-            const perc = total > 0 ? (present / total) * 100 : 0;
+        if (type === 'day') {
+            filtered = allData.filter(a => a.date === selectedDate);
+        } else {
+            // Берем уникальные даты и проверяем их количество
+            const uniqueDates = [...new Set(allData.map(a => a.date))].sort((a, b) => new Date(b) - new Date(a));
+            
+            if (uniqueDates.length < 6) {
+                alert(translations[lang].not_enough_data);
+                return;
+            }
+            
+            // Берем последние 6 дней
+            const last6 = uniqueDates.slice(0, 6);
+            filtered = allData.filter(a => last6.includes(a.date));
+        }
 
-            return {
-                "Дата": selectedDate,
-                "Ф.И.О. Учителя": u.name,
-                "Класс": u.className,
-                "Посещаемость (%)": parseFloat(perc.toFixed(1)),
-                "Заполнено": match ? "✅" : "❌"
-            };
-        }).sort((a, b) => b["Посещаемость (%)"] - a["Посещаемость (%)"]);
+        generateExcelFile(filtered, selectedDate, type, lang);
+        
+        // Закрываем модалку
+        const modal = bootstrap.Modal.getInstance(document.getElementById('excelModal'));
+        if (modal) modal.hide();
 
-        const wb = XLSX.utils.book_new();
-        const wsUmumiy = XLSX.utils.json_to_sheet(summaryRows);
-        wsUmumiy['!cols'] = [{wch:12}, {wch:30}, {wch:10}, {wch:18}, {wch:12}];
-        XLSX.utils.book_append_sheet(wb, wsUmumiy, 'Umumiy');
-
-        // 2. ПОДРОБНЫЕ ЛИСТЫ ПО КЛАССАМ
-        const classGroups = {};
-        filtered.forEach(i => {
-            if(!classGroups[i.className]) classGroups[i.className] = [];
-            const total = parseFloat(i.allstudents) || 0;
-            const sick = parseFloat(i.count) || 0;
-            const present = total - sick;
-            const perc = total > 0 ? ((present / total) * 100).toFixed(1) + "%" : "0%";
-
-            classGroups[i.className].push({
-                "Дата": i.date,
-                "Ф.И.О. Ученика": i.studentName,
-                "Причина отсутствия": i.reason,
-                "Всего в классе": total,
-                "Болеют": sick,
-                "Пришли": present,
-                "Процент посещ.": perc
-            });
-        });
-
-        Object.keys(classGroups).sort().forEach(cls => {
-            const wsClass = XLSX.utils.json_to_sheet(classGroups[cls]);
-            wsClass['!cols'] = [{wch:12}, {wch:30}, {wch:20}, {wch:15}, {wch:10}, {wch:10}, {wch:15}];
-            XLSX.utils.book_append_sheet(wb, wsClass, `Класс ${cls}`);
-        });
-
-        XLSX.writeFile(wb, `OTCHET_22_SKOLA_${selectedDate}.xlsx`);
     } catch (e) {
-        alert("Ошибка экспорта");
+        alert("Ошибка: " + e.message);
     }
-};
+}
 
-// --- ФУНКЦИИ ИНТЕРФЕЙСА ---
+function generateExcelFile(filtered, date, type, lang) {
+    const wb = XLSX.utils.book_new();
+    const norm = (s) => s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+
+    // Лист 1: Общий рейтинг
+    const summaryRows = users.map(u => {
+        const matches = filtered.filter(i => norm(i.teacher) === norm(u.name));
+        let total = 0, absent = 0;
+        matches.forEach(m => {
+            total += parseFloat(m.allstudents) || 0;
+            absent += parseFloat(m.count) || 0;
+        });
+        const perc = total > 0 ? (((total - absent) / total) * 100).toFixed(1) : 0;
+
+        return {
+            [lang==='ru'?'Учитель':'O\'qituvchi']: u.name,
+            "Sinf": u.className,
+            "Hozir (%)": perc + "%",
+            [lang==='ru'?'Заполнено':'Holati']: matches.length > 0 ? "✅" : "❌"
+        };
+    });
+
+    const ws1 = XLSX.utils.json_to_sheet(summaryRows);
+    XLSX.utils.book_append_sheet(wb, ws1, 'Rating');
+
+    // Лист 2: Подробный список по пропускам
+    const detailRows = filtered.map(i => ({
+        "Sana": i.date,
+        "Sinf": i.className,
+        "O'quvchi": i.studentName,
+        "Sabab": i.reason,
+        "O'qituvchi": i.teacher
+    }));
+
+    const ws2 = XLSX.utils.json_to_sheet(detailRows);
+    XLSX.utils.book_append_sheet(wb, ws2, 'Details');
+
+    XLSX.writeFile(wb, `Report_22_School_${type}_${date}.xlsx`);
+}
+
+// --- СТАНДАРТНЫЕ ФУНКЦИИ ---
+
 async function loadAbsents() {
     try {
         const res = await fetch(API_URL);
