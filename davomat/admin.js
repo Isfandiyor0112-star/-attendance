@@ -176,8 +176,20 @@ function applyTranslations(lang) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Применяем язык
     applyTranslations(localStorage.getItem('lang') || 'ru');
+    
+    // 2. Загружаем данные
     loadAbsents();
+    
+    // 3. Привязываем переключатели языков
     document.getElementById('lang-ru').onclick = () => applyTranslations('ru');
     document.getElementById('lang-uz').onclick = () => applyTranslations('uz');
+    
+    // 4. ПРИВЯЗЫВАЕМ КНОПКУ ОЧИСТКИ (То, что ты просил)
+    const clearBtn = document.getElementById('clearHistory');
+    if (clearBtn) {
+        clearBtn.onclick = clearHistory;
+    }
 });
+
