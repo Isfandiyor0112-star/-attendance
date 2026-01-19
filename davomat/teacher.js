@@ -1,6 +1,6 @@
 // Конфигурация API
-const API_GET = 'https://attendancesrv.vercel.app/api/absents';   // Для загрузки (GET)
-const API_ACTION = 'https://attendancesrv.vercel.app/api/absent'; // Для действий (POST, PUT, DELETE)
+const API_GET = 'attendancesrv.vercel.app/api/absents'; 
+const API_ACTION = 'attendancesrv.vercel.app/api/absent';
 
 const translations = {
     ru: {
@@ -16,7 +16,16 @@ const translations = {
         label_reason: "Причина",
         mark_btn: "🚀 Отправить отчет в базу",
         absent_list: "Список отсутствующих",
-        today: "Сегодня"
+        today: "Сегодня",
+        msg_success: "Отчет успешно отправлен!",
+        msg_error: "Ошибка при отправке",
+        hamma_darsda: "Все на уроках",
+        reason_100: "100% посещаемость",
+        loading: "Загрузка...",
+        no_records: "На сегодня записей нет",
+        confirm_del: "Удалить запись: ",
+        prompt_edit: "Изменить имя ученика:",
+        err_server: "Сервер недоступен"
     },
     uz: {
         teacher_prefix: "O'qituvchi: ",
@@ -31,18 +40,55 @@ const translations = {
         label_reason: "Sababi",
         mark_btn: "🚀 Hisobotni yuborish",
         absent_list: "Yo'qlama ro'yxati",
-        today: "Bugun"
+        today: "Bugun",
+        msg_success: "Muvaffaqiyatli yuborildi!",
+        msg_error: "Yuborishda xato!",
+        hamma_darsda: "Hamma darsda",
+        reason_100: "100% davomat",
+        loading: "Yuklanmoqda...",
+        no_records: "Bugun uchun yozuvlar yo'q",
+        confirm_del: "O'chirilsinmi: ",
+        prompt_edit: "Ismni tahrirlash:",
+        err_server: "Server bilan aloqa yo'q"
     }
 };
 
-// Функция смены языка
+// --- ГЛОБАЛЬНЫЕ ФУНКЦИИ (ДЛЯ КНОПОК РЕДАКТИРОВАНИЯ И УДАЛЕНИЯ) ---
+
+window.editEntry = async (id, oldName) => {
+    const lang = localStorage.getItem('lang') || 'ru';
+    const newName = prompt(translations[lang].prompt_edit, oldName);
+    if (newName && newName.trim() !== "" && newName !== oldName) {
+        try {
+            const res = await fetch(`${API_ACTION}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentName: newName.trim() })
+            });
+            if (res.ok) window.location.reload(); 
+            else alert(translations[lang].msg_error);
+        } catch (err) { alert(translations[lang].err_server); }
+    }
+};
+
+window.deleteEntry = async (id, name) => {
+    const lang = localStorage.getItem('lang') || 'ru';
+    if (confirm(`${translations[lang].confirm_del}${name}?`)) {
+        try {
+            const res = await fetch(`${API_ACTION}/${id}`, { method: 'DELETE' });
+            if (res.ok) window.location.reload();
+            else alert(translations[lang].msg_error);
+        } catch (err) { alert(translations[lang].err_server); }
+    }
+};
+
 window.setLang = function(lang) {
+    const group = document.getElementById('langGroup');
+    if (group) group.setAttribute('data-active', lang);
+
     document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(`lang-${lang}`);
     if (activeBtn) activeBtn.classList.add('active');
-
-    const group = document.getElementById('langGroup');
-    if (group) group.setAttribute('data-active', lang);
 
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -58,6 +104,8 @@ window.setLang = function(lang) {
     localStorage.setItem('lang', lang);
 };
 
+// --- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ---
+
 document.addEventListener('DOMContentLoaded', function() {
     const teacher = JSON.parse(localStorage.getItem('teacher'));
     if (!teacher) { window.location.href = 'index.html'; return; }
@@ -69,9 +117,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('attendanceForm');
     const absentList = document.getElementById('absentList');
 
-    // Функция обновления списка
     async function updateList() {
-        absentList.innerHTML = '<div class="text-center p-3 text-white-50 small">Загрузка...</div>';
+        const lang = localStorage.getItem('lang') || 'ru';
+        absentList.innerHTML = `<div class="text-center p-3 text-white-50 small">${translations[lang].loading}</div>`;
         try {
             const res = await fetch(API_GET);
             const allAbsents = await res.json();
@@ -79,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             absentList.innerHTML = '';
             if (myAbsents.length === 0) {
-                absentList.innerHTML = '<div class="text-center p-3 text-white-50">На сегодня записей нет</div>';
+                absentList.innerHTML = `<div class="text-center p-3 text-white-50">${translations[lang].no_records}</div>`;
                 return;
             }
 
@@ -91,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="text-info">${item.date}</span> | <strong>${item.studentName}</strong>
                         <div class="text-white-50 small">${item.reason}</div>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2" style="position: relative; z-index: 10;">
                         <button class="btn btn-sm btn-outline-light border-0" onclick="editEntry('${item._id}', '${item.studentName}')">✏️</button>
                         <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteEntry('${item._id}', '${item.studentName}')">🗑️</button>
                     </div>
@@ -103,41 +151,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Редактирование
-    window.editEntry = async (id, oldName) => {
-        const newName = prompt('Изменить имя ученика:', oldName);
-        if (newName && newName.trim() !== "" && newName !== oldName) {
-            try {
-                const res = await fetch(`${API_ACTION}/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ studentName: newName.trim() })
-                });
-                if (res.ok) await updateList();
-                else alert("Ошибка при обновлении");
-            } catch (err) { alert("Сервер недоступен"); }
-        }
-    };
-
-    // Удаление
-    window.deleteEntry = async (id, name) => {
-        if (confirm(`Удалить запись: ${name}?`)) {
-            try {
-                const res = await fetch(`${API_ACTION}/${id}`, { method: 'DELETE' });
-                if (res.ok) await updateList();
-                else alert("Ошибка при удалении");
-            } catch (err) { alert("Сервер недоступен"); }
-        }
-    };
-
-    // Отправка формы
     form.onsubmit = async (e) => {
         e.preventDefault();
-        const studentNames = document.getElementById('studentName').value.split(',').map(s => s.trim());
+        const lang = localStorage.getItem('lang') || 'ru';
+        const countInput = document.getElementById('count').value;
+        const namesInput = document.getElementById('studentName').value;
         
+        let studentNames = [];
+        let finalReason = document.getElementById('reason').value;
+
+        if (countInput === "0" || countInput === "") {
+            studentNames = [translations[lang].hamma_darsda]; 
+            finalReason = translations[lang].reason_100;
+        } else {
+            studentNames = namesInput.split(',').map(s => s.trim()).filter(s => s !== "");
+        }
+
         try {
             for (const name of studentNames) {
-                if (!name) continue;
                 await fetch(API_ACTION, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -145,18 +176,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         teacher: teacher.name,
                         className: teacher.className,
                         date: document.getElementById('date').value,
-                        count: document.getElementById('count').value,
+                        count: countInput || "0",
                         studentName: name,
-                        reason: document.getElementById('reason').value,
+                        reason: finalReason,
                         allstudents: document.getElementById('allstudents').value
                     })
                 });
             }
-            form.reset();
-            document.getElementById('className').value = teacher.className;
-            await updateList();
-            alert("Готово!");
-        } catch (err) { alert("Ошибка при отправке"); }
+            alert(translations[lang].msg_success);
+            window.location.reload();
+        } catch (err) { 
+            alert(translations[lang].msg_error); 
+        }
     };
 
     updateList();
