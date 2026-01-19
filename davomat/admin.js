@@ -1,3 +1,4 @@
+
 const API_URL = 'https://attendancesrv.vercel.app/api/absents';
 const API_USERS = 'https://attendancesrv.vercel.app/api/users'; 
 
@@ -73,7 +74,7 @@ window.handleExcelExport = async function(type) {
 
     const wb = XLSX.utils.book_new();
 
-    // --- ЛИСТ 1: СВОДКА ---
+    // 1. ЛИСТ СВОДКИ
     const summary = allTeachers.filter(u => u.role !== 'admin').map(u => {
         const matches = filtered.filter(a => a.className === u.className);
         const hasData = matches.length > 0;
@@ -96,11 +97,10 @@ window.handleExcelExport = async function(type) {
     wsSum['!cols'] = [{wch:12}, {wch:35}, {wch:10}, {wch:15}, {wch:12}, {wch:10}, {wch:10}];
     XLSX.utils.book_append_sheet(wb, wsSum, "Сводка");
 
-    // --- ОСТАЛЬНЫЕ ЛИСТЫ: ПО КЛАССАМ ---
+    // 2. ОТДЕЛЬНЫЕ ЛИСТЫ ПО КЛАССАМ
     const classesWithData = [...new Set(filtered.map(a => a.className))].sort();
     classesWithData.forEach(cls => {
         const classAbsents = filtered.filter(a => a.className === cls && a.studentName !== translations.ru.hamma_darsda && a.studentName !== translations.uz.hamma_darsda);
-        
         if (classAbsents.length > 0) {
             const classData = classAbsents.map(a => ({
                 [t.xl_date]: a.date,
@@ -120,7 +120,7 @@ window.handleExcelExport = async function(type) {
 
 async function clearHistory() {
     const lang = localStorage.getItem('lang') || 'ru';
-    if (!confirm(lang === 'ru' ? "Удалить ВСЮ историю?" : "Barcha ma'lumotlarni o'chirish?")) return;
+    if (!confirm(lang === 'ru' ? "Удалить всю историю?" : "Barcha ma'lumotlarni o'chirish?")) return;
     await fetch(API_URL, { method: 'DELETE' });
     location.reload();
 }
@@ -131,7 +131,25 @@ function renderDashboard() {
     const lang = localStorage.getItem('lang') || 'ru';
     const filtered = absentsData.filter(a => a.date === val);
     const realAbs = filtered.filter(a => a.studentName !== translations.ru.hamma_darsda && a.studentName !== translations.uz.hamma_darsda);
+    
     document.getElementById('totalAbsent').textContent = realAbs.length;
+
+    // ВОЗВРАЩАЕМ ГРАФИК (ЧАРТ)
+    const ctx = document.getElementById('reasonChart');
+    if (ctx) {
+        const counts = {};
+        realAbs.forEach(a => counts[a.reason] = (counts[a.reason] || 0) + 1);
+        if (window.myChart) window.myChart.destroy();
+        window.myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(counts),
+                datasets: [{ data: Object.values(counts), backgroundColor: reasonColors }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
     const container = document.getElementById('classChartsContainer');
     if (container) {
         container.innerHTML = "";
