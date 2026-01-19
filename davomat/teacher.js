@@ -1,6 +1,6 @@
 // Конфигурация API
-const API_GET = 'attendancesrv.vercel.app/api/absents'; 
-const API_ACTION = 'attendancesrv.vercel.app/api/absent';
+const API_GET = 'https://attendancesrv.vercel.app/api/absents'; 
+const API_ACTION = 'https://attendancesrv.vercel.app/api/absent';
 
 const translations = {
     ru: {
@@ -192,3 +192,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateList();
 });
+
