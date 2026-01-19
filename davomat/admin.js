@@ -1,6 +1,6 @@
 // Конфигурация API (ЛОКАЛЬНО)
-const API_URL = 'attendancesrv.vercel.app/api/absents';
-const API_USERS = 'attendancesrv.vercel.app/api/users'; 
+const API_URL = 'https://attendancesrv.vercel.app/api/absents';
+const API_USERS = 'https://attendancesrv.vercel.app/api/users'; 
 
 let absentsData = [];
 let allTeachers = []; 
@@ -196,7 +196,7 @@ function renderDashboard() {
 async function clearHistory() {
     const lang = localStorage.getItem('lang') || 'ru';
     if (!confirm(lang === 'ru' ? "Удалить всю историю?" : "Barcha ma'lumotlar o'chirilsinmi?")) return;
-    await fetch('http://localhost:3000/api/absents', { method: 'DELETE' });
+    await fetch('https://attendancesrv.vercel.app/api/absents', { method: 'DELETE' });
     location.reload();
 }
 
@@ -206,3 +206,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('lang-ru').onclick = () => applyTranslations('ru');
     document.getElementById('lang-uz').onclick = () => applyTranslations('uz');
 });
+
