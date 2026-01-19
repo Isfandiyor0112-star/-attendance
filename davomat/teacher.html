@@ -9,7 +9,6 @@
     (function() {
         try {
             const user = JSON.parse(localStorage.getItem('teacher'));
-            // Если в памяти нет данных о входе — выкидываем на главную
             if (!user) {
                 window.location.replace('index.html');
             }
@@ -57,15 +56,15 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold" data-i18n="label_sick">Кол-во болеющих</label>
-                            <input type="number" class="form-control custom-input highlighted" id="count" placeholder="0" required>
+                            <input type="number" class="form-control custom-input highlighted" id="count" min="0" value="0" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold" data-i18n="label_names">Имена (через запятую)</label>
-                            <textarea class="form-control custom-input" id="studentName" rows="1" placeholder="Иван И., Анна М." required></textarea>
+                            <textarea class="form-control custom-input" id="studentName" rows="1" placeholder="Иван И., Анна М."></textarea>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-bold" data-i18n="label_reason">Причина</label>
-                            <input type="text" class="form-control custom-input" id="reason" placeholder="Напр: По болезни" required>
+                            <input type="text" class="form-control custom-input" id="reason" placeholder="Напр: По болезни">
                         </div>
 
                         <div class="col-12 mt-4">
@@ -83,17 +82,14 @@
                         <h5 class="fw-bold mb-0 text-white" data-i18n="absent_list">Список отсутствующих</h5>
                         <span class="badge bg-primary rounded-pill" id="badgeCount" data-i18n="today">Сегодня</span>
                     </div>
-                    <ul id="absentList" class="list-group list-group-flush">
-                        </ul>
+                    <ul id="absentList" class="list-group list-group-flush"></ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <div class="language-picker">
-    <div class="glass-btn-group" id="langGroup">
-        <div class="lang-slider"></div>
+    <div class="glass-btn-group" id="langGroup" data-active="ru"> <div class="lang-slider"></div>
         <button id="lang-ru" class="btn-lang active" onclick="setLang('ru')">
             <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> Рус
         </button>
@@ -102,8 +98,23 @@
         </button>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Логика автоматической очистки полей при вводе 0
+    document.getElementById('count').addEventListener('input', function(e) {
+        if (this.value === "0") {
+            document.getElementById('studentName').value = "";
+            document.getElementById('reason').value = "";
+            document.getElementById('studentName').disabled = true;
+            document.getElementById('reason').disabled = true;
+            document.getElementById('studentName').placeholder = "Hamma darsda";
+        } else {
+            document.getElementById('studentName').disabled = false;
+            document.getElementById('reason').disabled = false;
+            document.getElementById('studentName').placeholder = "Имена через запятую";
+        }
+    });
+</script>
 <script src="teacher.js"></script>
 </body>
 </html>
