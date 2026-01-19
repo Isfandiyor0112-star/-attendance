@@ -20,9 +20,10 @@ const translations = {
         report_month: "За месяц (22 дн.)",
         xl_date: "Дата", xl_teacher: "Учитель", xl_class: "Класс", xl_total: "Всего учеников",
         xl_absent: "Отсутствует", xl_perc: "Процент %", xl_status: "Статус",
-        xl_student: "Ученик", xl_reason: "Причина",
+        xl_names: "Список отсутствующих (причина)",
         hamma_darsda: "Все на уроках",
-        err_no_data: "Недостаточно данных! Нужно минимум {n} дн."
+        err_no_data: "Недостаточно данных! Нужно минимум {n} дн.",
+        confirm_delete: "Вы уверены, что хотите удалить ВСЮ историю?"
     },
     uz: {
         admin_panel_title: "22-maktab admin paneli",
@@ -37,9 +38,10 @@ const translations = {
         report_month: "Oylik (22 kun)",
         xl_date: "Sana", xl_teacher: "O'qituvchi", xl_class: "Sinf", xl_total: "Jami o'quvchi",
         xl_absent: "Yo'qlar", xl_perc: "Foiz %", xl_status: "Holat",
-        xl_student: "O'quvchi", xl_reason: "Sababi",
+        xl_names: "Yo'qlar ro'yxati (sababi)",
         hamma_darsda: "Hamma darsda",
-        err_no_data: "Ma'lumot yetarli emas! Kamida {n} kun kerak."
+        err_no_data: "Ma'lumot yetarli emas! Kamida {n} kun kerak.",
+        confirm_delete: "Barcha ma'lumotlarni o'chirishni tasdiqlaysizmi?"
     }
 };
 
@@ -62,7 +64,6 @@ async function loadAbsents() {
             fetch(API_URL),
             fetch(API_USERS)
         ]);
-        
         absentsData = await absRes.json();
         allTeachers = await usersRes.json();
 
@@ -85,7 +86,6 @@ window.handleExcelExport = async function(type) {
     const uniqueDays = [...new Set(absentsData.map(a => a.date))].sort();
     let filtered = [];
 
-    // ПРОВЕРКИ ПЕРИОДА
     if (type === 'day') {
         filtered = absentsData.filter(a => a.date === selectedDate);
     } else if (type === 'week') {
@@ -98,10 +98,7 @@ window.handleExcelExport = async function(type) {
         filtered = absentsData.filter(a => a.date.startsWith(monthPart));
     }
 
-    const wb = XLSX.utils.book_new();
-
-    // 1. ЛИСТ СВОДКИ (С РЕЙТИНГОМ ПО ПРОЦЕНТУ)
-    const summary = allTeachers.filter(u => u.role !== 'admin').map(u => {
+    const reportData = allTeachers.filter(u => u.role !== 'admin').map(u => {
         const matches = filtered.filter(a => a.className === u.className);
         const hasData = matches.length > 0;
         let total = hasData ? Number(matches[0].allstudents) : 0;
@@ -110,49 +107,56 @@ window.handleExcelExport = async function(type) {
             m.studentName !== translations.ru.hamma_darsda && 
             m.studentName !== translations.uz.hamma_darsda
         );
+
+        const namesStr = realAbsents.length > 0 
+            ? realAbsents.map(x => `${x.studentName} (${x.reason})`).join(', ') 
+            : (hasData ? t.hamma_darsda : "-");
+
         let absentCount = realAbsents.length;
         let perc = (hasData && total > 0) ? (((total - absentCount) / total) * 100).toFixed(1) : 0;
 
         return {
             [t.xl_date]: selectedDate,
-            [t.xl_teacher]: u.name,
             [t.xl_class]: u.className,
+            [t.xl_teacher]: u.name,
             [t.xl_total]: total || "-",
             [t.xl_absent]: hasData ? absentCount : "-",
             [t.xl_perc]: hasData ? Number(perc) : 0,
-            [t.xl_status]: hasData ? "✅" : "❌"
+            [t.xl_status]: hasData ? "✅" : "❌",
+            [t.xl_names]: namesStr
         };
     });
 
-    // СОРТИРОВКА: Сначала ✅, потом по убыванию %
-    summary.sort((a, b) => {
+    // СОРТИРОВКА: Высокий процент и статус ✅ вверху
+    reportData.sort((a, b) => {
         if (a[t.xl_status] !== b[t.xl_status]) return a[t.xl_status] === "✅" ? -1 : 1;
         return b[t.xl_perc] - a[t.xl_perc];
     });
 
-    const wsSummary = XLSX.utils.json_to_sheet(summary);
-    // РАСШИРЯЕМ КОЛОНКИ (Teacher = 35)
-    wsSummary['!cols'] = [{ wch: 12 }, { wch: 35 }, { wch: 10 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 10 }];
-    XLSX.utils.book_append_sheet(wb, wsSummary, "Сводка");
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(reportData);
 
-    // 2. ПОДРОБНЫЙ ЛИСТ (СПИСОК КЛАССОВ С ИМЕНАМИ)
-    const detailList = filtered.filter(a => 
-        a.studentName !== translations.ru.hamma_darsda && 
-        a.studentName !== translations.uz.hamma_darsda
-    ).map(a => ({
-        [t.xl_date]: a.date,
-        [t.xl_class]: a.className,
-        [t.xl_student]: a.studentName,
-        [t.xl_reason]: a.reason,
-        [t.xl_teacher]: a.teacher
-    }));
+    // НАСТРОЙКА ШИРИНЫ КОЛОНОК (Учитель 35, Список имен 70)
+    ws['!cols'] = [
+        { wch: 12 }, { wch: 10 }, { wch: 35 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 70 }
+    ];
 
-    const wsDetails = XLSX.utils.json_to_sheet(detailList);
-    wsDetails['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 30 }, { wch: 25 }, { wch: 35 }];
-    XLSX.utils.book_append_sheet(wb, wsDetails, "Детальный список");
-
-    XLSX.writeFile(wb, `School22_Report_${type}_${selectedDate}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "Отчет");
+    XLSX.writeFile(wb, `School22_${type}_${selectedDate}.xlsx`);
 };
+
+async function clearHistory() {
+    const lang = localStorage.getItem('lang') || 'ru';
+    if (!confirm(translations[lang].confirm_delete)) return;
+    
+    try {
+        const res = await fetch(API_URL, { method: 'DELETE' });
+        if(res.ok) {
+            alert(lang === 'ru' ? "История очищена" : "Tarix tozalandi");
+            location.reload();
+        }
+    } catch (e) { console.error(e); }
+}
 
 function renderDashboard() {
     const val = document.getElementById('dateFilter').value;
@@ -167,6 +171,7 @@ function renderDashboard() {
     
     document.getElementById('totalAbsent').textContent = realAbsents.length;
 
+    // График причин
     const ctx = document.getElementById('reasonChart');
     if (ctx) {
         const counts = {};
@@ -182,6 +187,7 @@ function renderDashboard() {
         });
     }
 
+    // Карточки классов
     const container = document.getElementById('classChartsContainer');
     if (container) {
         container.innerHTML = "";
@@ -194,30 +200,20 @@ function renderDashboard() {
         Object.keys(map).sort().forEach(cls => {
             const div = document.createElement('div');
             div.className = "col";
-            const absentsOnly = map[cls].filter(n => 
-                n !== translations.ru.hamma_darsda && n !== translations.uz.hamma_darsda
-            );
+            const isFull = map[cls].some(n => n === translations.ru.hamma_darsda || n === translations.uz.hamma_darsda);
+            const absentsOnly = map[cls].filter(n => n !== translations.ru.hamma_darsda && n !== translations.uz.hamma_darsda);
             
             div.innerHTML = `
                 <div class="card stat-card h-100">
                     <div class="card-body">
-                        <h5 class="text-primary">${cls}</h5>
-                        <p class="mb-1">Отсутствует: ${absentsOnly.length}</p>
-                        <small class="text-white-50 d-block" style="min-height: 20px;">
-                            ${absentsOnly.length > 0 ? absentsOnly.join(', ') : translations[lang].hamma_darsda}
-                        </small>
+                        <h5>${cls}</h5>
+                        <p>${translations[lang].xl_absent}: ${absentsOnly.length}</p>
+                        <small class="${isFull ? 'text-success' : 'text-warning'}">${absentsOnly.length > 0 ? absentsOnly.join(', ') : translations[lang].hamma_darsda}</small>
                     </div>
                 </div>`;
             container.appendChild(div);
         });
     }
-}
-
-async function clearHistory() {
-    const lang = localStorage.getItem('lang') || 'ru';
-    if (!confirm(lang === 'ru' ? "Удалить всю историю?" : "Barcha ma'lumotlar o'chirilsinmi?")) return;
-    await fetch(API_URL, { method: 'DELETE' });
-    location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
