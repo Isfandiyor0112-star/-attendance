@@ -51,11 +51,42 @@ const translations = {
         confirm_del: "O'chirilsinmi: ",
         prompt_edit: "Ismni tahrirlash:",
         err_server: "Server bilan aloqa yo'q",
-        support: "Yordam: @imamaliev_11
+        support: "Yordam: @imamaliev_11"
     }
 };
 
-// --- ГЛОБАЛЬНЫЕ ФУНКЦИИ (ДЛЯ КНОПОК РЕДАКТИРОВАНИЯ И УДАЛЕНИЯ) ---
+// --- ГЛОБАЛЬНЫЕ ФУНКЦИИ ---
+
+window.setLang = function(lang) {
+    localStorage.setItem('lang', lang);
+    const group = document.getElementById('langGroup');
+    if (group) group.setAttribute('data-active', lang);
+
+    // Переключаем активный класс на кнопках
+    document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`lang-${lang}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Переводим все элементы с data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+            // Если внутри элемента есть <span> (как в кнопке отправки), переводим только его
+            const span = el.querySelector('span');
+            if (span) {
+                span.textContent = translations[lang][key];
+            } else {
+                el.textContent = translations[lang][key];
+            }
+        }
+    });
+
+    // ОБНОВЛЕНИЕ ИМЕНИ УЧИТЕЛЯ
+    const teacher = JSON.parse(localStorage.getItem('teacher'));
+    if (teacher) {
+        document.getElementById('teacherName').textContent = `${translations[lang].teacher_prefix}${teacher.name}`;
+    }
+};
 
 window.editEntry = async (id, oldName) => {
     const lang = localStorage.getItem('lang') || 'ru';
@@ -84,28 +115,6 @@ window.deleteEntry = async (id, name) => {
     }
 };
 
-window.setLang = function(lang) {
-    const group = document.getElementById('langGroup');
-    if (group) group.setAttribute('data-active', lang);
-
-    document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`lang-${lang}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-            el.textContent = translations[lang][key];
-        }
-    });
-
-    const teacher = JSON.parse(localStorage.getItem('teacher'));
-    if (teacher) {
-        document.getElementById('teacherName').textContent = `${translations[lang].teacher_prefix}${teacher.name}`;
-    }
-    localStorage.setItem('lang', lang);
-};
-
 // --- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ---
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -125,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const res = await fetch(API_GET);
             const allAbsents = await res.json();
+            // Фильтруем записи только этого учителя
             const myAbsents = allAbsents.filter(item => item.teacher === teacher.name);
             
             absentList.innerHTML = '';
@@ -141,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="text-info">${item.date}</span> | <strong>${item.studentName}</strong>
                         <div class="text-white-50 small">${item.reason}</div>
                     </div>
-                    <div class="d-flex gap-2" style="position: relative; z-index: 10;">
+                    <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-outline-light border-0" onclick="editEntry('${item._id}', '${item.studentName}')">✏️</button>
                         <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteEntry('${item._id}', '${item.studentName}')">🗑️</button>
                     </div>
@@ -194,5 +204,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateList();
 });
-
-
