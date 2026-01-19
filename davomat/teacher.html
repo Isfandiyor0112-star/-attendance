@@ -68,8 +68,8 @@
                         </div>
 
                         <div class="col-12 mt-4">
-                            <button type="submit" class="btn btn-primary-custom w-100 py-3 fw-bold" id="submitBtn" data-i18n="mark_btn">
-                                🚀 Отправить отчет в базу
+                            <button type="submit" class="btn btn-primary-custom w-100 py-3 fw-bold" id="submitBtn">
+                                <span data-i18n="mark_btn">🚀 Отправить отчет в базу</span>
                             </button>
                         </div>
                     </form>
@@ -85,11 +85,17 @@
                     <ul id="absentList" class="list-group list-group-flush"></ul>
                 </div>
             </div>
+
+            <div class="text-center mt-4">
+                <small class="text-white-50" data-i18n="support">Поддержка: @Imamaliev_11</small>
+            </div>
         </div>
     </div>
 </div>
+
 <div class="language-picker">
-    <div class="glass-btn-group" id="langGroup" data-active="ru"> <div class="lang-slider"></div>
+    <div class="glass-btn-group" id="langGroup" data-active="ru"> 
+        <div class="lang-slider"></div>
         <button id="lang-ru" class="btn-lang active" onclick="setLang('ru')">
             <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"> Рус
         </button>
@@ -98,20 +104,25 @@
         </button>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Логика автоматической очистки полей при вводе 0
+    // Ставим сегодняшнюю дату по умолчанию
+    document.getElementById('date').valueAsDate = new Date();
+
+    // Логика блокировки полей при 0
     document.getElementById('count').addEventListener('input', function(e) {
-        if (this.value === "0") {
+        const lang = localStorage.getItem('lang') || 'ru';
+        if (this.value === "0" || this.value === "") {
             document.getElementById('studentName').value = "";
             document.getElementById('reason').value = "";
             document.getElementById('studentName').disabled = true;
             document.getElementById('reason').disabled = true;
-            document.getElementById('studentName').placeholder = "Hamma darsda";
+            document.getElementById('studentName').placeholder = lang === 'ru' ? "Все на уроках" : "Hamma darsda";
         } else {
             document.getElementById('studentName').disabled = false;
             document.getElementById('reason').disabled = false;
-            document.getElementById('studentName').placeholder = "Имена через запятую";
+            document.getElementById('studentName').placeholder = lang === 'ru' ? "Имена через запятую" : "Ismlarni vergul bilan yozing";
         }
     });
 </script>
