@@ -25,7 +25,8 @@ const translations = {
         no_records: "На сегодня записей нет",
         confirm_del: "Удалить запись: ",
         prompt_edit: "Изменить имя ученика:",
-        err_server: "Сервер недоступен"
+        err_server: "Сервер недоступен",
+        support: "Поддержка: @imamaliev_11"
     },
     uz: {
         teacher_prefix: "O'qituvchi: ",
@@ -49,7 +50,8 @@ const translations = {
         no_records: "Bugun uchun yozuvlar yo'q",
         confirm_del: "O'chirilsinmi: ",
         prompt_edit: "Ismni tahrirlash:",
-        err_server: "Server bilan aloqa yo'q"
+        err_server: "Server bilan aloqa yo'q",
+        support: "Yordam: @imamaliev_11
     }
 };
 
@@ -192,4 +194,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateList();
 });
+
 
