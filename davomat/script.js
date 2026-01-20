@@ -4,14 +4,16 @@ const translations = {
     login_label: "Логин",
     password_label: "Пароль",
     login_btn: "Войти",
-    login_error: "Неверный логин или пароль"
+    login_error: "Неверный логин или пароль",
+    ​help_text: "Забыли пароль или нужна помощь?"
   },
   uz: {
     login_title: "Kirish",
     login_label: "Login",
     password_label: "Parol",
     login_btn: "Kirish",
-    login_error: "Login yoki parol noto'g'ri"
+    login_error: "Login yoki parol noto'g'ri",
+    ​help_text: "Parolni unutdingizmi yoki yordam kerakmi?"
   }
 };
 
@@ -78,3 +80,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
