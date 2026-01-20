@@ -5,7 +5,7 @@ const translations = {
     password_label: "Пароль",
     login_btn: "Войти",
     login_error: "Неверный логин или пароль",
-    ​help_text: "Забыли пароль или нужна помощь?"
+    help_text: "Забыли пароль или нужна помощь?"
   },
   uz: {
     login_title: "Kirish",
@@ -13,9 +13,10 @@ const translations = {
     password_label: "Parol",
     login_btn: "Kirish",
     login_error: "Login yoki parol noto'g'ri",
-    ​help_text: "Parolni unutdingizmi yoki yordam kerakmi?"
+    help_text: "Parolni unutdingizmi yoki yordam kerakmi?"
   }
 };
+
 
 // Функция смены языка
 window.changeLang = function(lang) {
@@ -80,4 +81,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
 
