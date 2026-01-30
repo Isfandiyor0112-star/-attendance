@@ -9,32 +9,29 @@
     (function() {
         try {
             const user = JSON.parse(localStorage.getItem('teacher'));
-            if (!user) {
-                window.location.replace('index.html');
-            }
-        } catch (e) {
-            window.location.replace('index.html');
-        }
+            if (!user) { window.location.replace('index.html'); }
+        } catch (e) { window.location.replace('index.html'); }
     })();
     </script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-238H9TB40J"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-238H9TB40J');
-</script>
-
 </head>
 <body class="teacher-page">
 
 <div class="container py-5">
+    <button id="newsBtn" class="btn btn-link p-0" onclick="showNews()" 
+            style="position: fixed; left: 15px; top: 15px; z-index: 1050; text-decoration: none; line-height: 1;">
+        <span style="font-size: 2rem;">🔔</span>
+        <span id="newsBadge" class="position-absolute badge rounded-pill bg-danger" 
+              style="display: none; top: 0; right: -5px; font-size: 0.65rem; border: 2px solid #1a1a1a; padding: 0.3em 0.5em;">
+            !
+        </span>
+    </button>
+
     <div class="header-section text-center mb-5">
-        <h2 id="teacherName" class="main-title text-white"></h2>
+        <h2 id="teacherName" class="main-title text-white" style="padding: 0 50px;"></h2>
         <p class="text-white-50" data-i18n="management_desc">Управление посещаемостью класса</p>
     </div>
 
@@ -103,6 +100,22 @@
     </div>
 </div>
 
+<div class="modal fade" id="newsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary shadow-lg">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">📢 Yangiliklar / Новости</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="newsContent" style="white-space: pre-wrap;">
+                </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="language-picker">
     <div class="glass-btn-group" id="langGroup" data-active="ru"> 
         <div class="lang-slider"></div>
@@ -116,24 +129,20 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="teacher.js"></script>
 <script>
     document.getElementById('date').valueAsDate = new Date();
     document.getElementById('count').addEventListener('input', function(e) {
         const lang = localStorage.getItem('lang') || 'ru';
-        if (this.value === "0" || this.value === "") {
+        const isZero = (this.value === "0" || this.value === "");
+        document.getElementById('studentName').disabled = isZero;
+        document.getElementById('reason').disabled = isZero;
+        if (isZero) {
             document.getElementById('studentName').value = "";
             document.getElementById('reason').value = "";
-            document.getElementById('studentName').disabled = true;
-            document.getElementById('reason').disabled = true;
             document.getElementById('studentName').placeholder = lang === 'ru' ? "Все на уроках" : "Hamma darsda";
-        } else {
-            document.getElementById('studentName').disabled = false;
-            document.getElementById('reason').disabled = false;
-            document.getElementById('studentName').placeholder = lang === 'ru' ? "Имена через запятую" : "Ismlarni vergul bilan yozing";
         }
     });
 </script>
-<script src="teacher.js"></script>
 </body>
 </html>
-
