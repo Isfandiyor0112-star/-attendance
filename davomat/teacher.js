@@ -115,6 +115,47 @@ window.deleteEntry = async (id, name) => {
     }
 };
 
+// Проверка новостей при загрузке страницы
+async function checkNewsIndicator() {
+    try {
+        const res = await fetch('https://attendancesrv.vercel.app/api/latest-news');
+        const data = await res.json();
+        
+        // Если в базе есть текст и он не дефолтный — зажигаем уведомление
+        const badge = document.getElementById('newsBadge');
+        if (data && data.text && data.text !== "Новостей пока нет") {
+            if (badge) badge.style.display = 'block';
+            
+            // Сохраняем текст в атрибут кнопки, чтобы не качать заново при клике
+            document.getElementById('newsBtn').setAttribute('data-last-news', data.text);
+        }
+    } catch (e) {
+        console.error("Ошибка проверки новостей:", e);
+    }
+}
+
+// Показ новости в модальном окне
+window.showNews = () => {
+    const lang = localStorage.getItem('lang') || 'ru';
+    const newsText = document.getElementById('newsBtn').getAttribute('data-last-news');
+    const content = document.getElementById('newsContent');
+    
+    if (newsText) {
+        content.innerHTML = `<div class="p-2">${newsText}</div>`;
+    } else {
+        content.textContent = lang === 'ru' ? "Новых сообщений нет" : "Yangi xabarlar yo'q";
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('newsModal'));
+    modal.show();
+
+    // Скрываем красный кружок, так как новость прочитана
+    const badge = document.getElementById('newsBadge');
+    if (badge) badge.style.display = 'none';
+};
+
+// Запускаем проверку при старте
+checkNewsIndicator();
 // --- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ---
 
 document.addEventListener('DOMContentLoaded', function() {
