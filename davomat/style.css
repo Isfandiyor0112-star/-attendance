@@ -172,3 +172,61 @@ option {
 .btn-danger-custom:active {
     transform: translateY(0);
 }
+
+/* --- 9. ГЛАССМОРФИЗМ ДЛЯ МОДАЛКИ НОВОСТЕЙ --- */
+#newsModal .modal-content {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 30px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    color: #fff !important;
+}
+
+#newsModal .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 25px;
+}
+
+#newsModal .modal-title {
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #3b82f6 !important; /* Твой основной синий из .text-primary */
+}
+
+#newsModal .modal-body {
+    padding: 25px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    /* Чтобы текст не сливался с логотипом на фоне */
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+#newsModal .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 25px;
+}
+
+/* Кнопка закрытия в модалке */
+#newsModal .btn-close {
+    filter: invert(1) brightness(200%); /* Делаем крестик белым */
+    opacity: 0.8;
+}
+
+/* Стилизация кнопки OK внутри модалки (в стиле твоих кастомных кнопок) */
+#newsModal .btn-ok {
+    background: rgba(59, 130, 246, 0.2) !important;
+    border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    color: #fff !important;
+    border-radius: 12px !important;
+    padding: 8px 25px !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease;
+}
+
+#newsModal .btn-ok:hover {
+    background: #0d6efd !important;
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+}
