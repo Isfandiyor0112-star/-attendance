@@ -23,7 +23,7 @@
 <div class="container py-5">
     <button id="newsBtn" class="btn btn-link p-0" onclick="showNews()" 
             style="position: fixed; left: 15px; top: 15px; z-index: 1050; text-decoration: none; line-height: 1;">
-        <span style="font-size: 2rem;">🔔</span>
+        <span style="font-size: 2.2rem;">🔔</span>
         <span id="newsBadge" class="position-absolute badge rounded-pill bg-danger" 
               style="display: none; top: 0; right: -5px; font-size: 0.65rem; border: 2px solid #1a1a1a; padding: 0.3em 0.5em;">
             !
@@ -102,15 +102,14 @@
 
 <div class="modal fade" id="newsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark text-white border-secondary shadow-lg">
-            <div class="modal-header border-secondary">
+        <div class="modal-content"> <div class="modal-header">
                 <h5 class="modal-title">📢 Yangiliklar / Новости</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="newsContent" style="white-space: pre-wrap;">
                 </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">OK</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ok" data-bs-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
@@ -132,6 +131,12 @@
 <script src="teacher.js"></script>
 <script>
     document.getElementById('date').valueAsDate = new Date();
+    
+    // Запускаем проверку индикатора новостей при загрузке
+    if (typeof checkNewsIndicator === 'function') {
+        checkNewsIndicator();
+    }
+
     document.getElementById('count').addEventListener('input', function(e) {
         const lang = localStorage.getItem('lang') || 'ru';
         const isZero = (this.value === "0" || this.value === "");
