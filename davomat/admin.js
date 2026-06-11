@@ -1,6 +1,6 @@
 
 const API_URL = 'https://attendancesrv.vercel.app/api/absents';
-const API_USERS = 'https://attendancesrv.vercel.app/api/users?key=22_secret_admin_key'; 
+const API_USERS = 'https://attendancesrv.vercel.app/api/users?key=22_seecret_addmin_keey'; 
 
 let absentsData = [];
 let allTeachers = []; 
